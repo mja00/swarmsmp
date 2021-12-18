@@ -1,0 +1,6 @@
+{
+  "commands.charm.effect.success": "The charm %1$s has been sent to %2$s",
+  "commands.charm.effect.too_many": "You cannot target more than %1$s player(s) at once",
+  "commands.charm.effect.receive": "You've been charmed with %1$s",
+  "commands.charm.effect.receive_subtitle": "You've been charmed by %1$s"
+}
