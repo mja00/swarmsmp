@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @Mod("swarmsmp-s2")
 public class SSMPS2 {
 
+    public static final String MOD_ID = "swarmsmp-s2";
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();
 

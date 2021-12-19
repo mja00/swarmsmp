@@ -56,6 +56,8 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
+            args '--username', 'Bozo'
+
             mods {
                 ssmps2 {
                     source sourceSets.main
