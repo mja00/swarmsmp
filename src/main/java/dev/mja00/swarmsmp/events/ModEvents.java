@@ -22,6 +22,7 @@ public class ModEvents {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
+    @SuppressWarnings("InstantiationOfUtilityClass")
     @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {
         new CharmCommand(event.getDispatcher());
