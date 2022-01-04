@@ -37,9 +37,9 @@ public class AdminCommand {
         }
 
         if (targets.size() == 1) {
-            source.sendFeedback(new TranslationTextComponent("commands.admin.set_tag.success.single", targets.iterator().next().getDisplayName()), true);
+            source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.admin.set_tag.success.single", targets.iterator().next().getDisplayName()), true);
         } else {
-            source.sendFeedback(new TranslationTextComponent("commands.admin.set_tag.success.multiple", targets.size()), true);
+            source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.admin.set_tag.success.multiple", targets.size()), true);
         }
         return 1;
     }
@@ -50,9 +50,9 @@ public class AdminCommand {
         }
 
         if (targets.size() == 1) {
-            source.sendFeedback(new TranslationTextComponent("commands.admin.remove_tag.success.single", targets.iterator().next().getDisplayName()), true);
+            source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.admin.remove_tag.success.single", targets.iterator().next().getDisplayName()), true);
         } else {
-            source.sendFeedback(new TranslationTextComponent("commands.admin.remove_tag.success.multiple", targets.size()), true);
+            source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.admin.remove_tag.success.multiple", targets.size()), true);
         }
         return 1;
     }
@@ -60,9 +60,9 @@ public class AdminCommand {
     private int CheckTag(CommandSource source, Collection<ServerPlayerEntity> targets, String tag) {
         for (ServerPlayerEntity target : targets) {
             if (target.getPersistentData().contains(SSMPS2.MOD_ID + ":" + tag)) {
-                source.sendFeedback(new TranslationTextComponent("commands.admin.check_tag.success", target.getDisplayName()), true);
+                source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.admin.check_tag.success", target.getDisplayName()), true);
             } else {
-                source.sendFeedback(new TranslationTextComponent("commands.admin.check_tag.failed", target.getDisplayName()), true);
+                source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.admin.check_tag.failed", target.getDisplayName()), true);
             }
         }
         return 1;

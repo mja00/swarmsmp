@@ -33,7 +33,7 @@ public class CharmCommand {
 
         // Check to make sure there's only one target
         if (targets.size() != 1) {
-            source.sendFeedback(new TranslationTextComponent("commands.charm.effect.too_many", 1), true);
+            source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.charm.effect.too_many", 1), true);
             return -1;
         }
         // Get the first target in the collection
@@ -46,20 +46,20 @@ public class CharmCommand {
         if (is_mer) {
             if (distance <= 16.0D) {
 
-                TranslationTextComponent message = (TranslationTextComponent) new TranslationTextComponent("commands.charm.effect.success", charm, target.getDisplayName()).mergeStyle(TextFormatting.AQUA);
+                TranslationTextComponent message = (TranslationTextComponent) new TranslationTextComponent(SSMPS2.translationKey + "commands.charm.effect.success", charm, target.getDisplayName()).mergeStyle(TextFormatting.AQUA);
                 // Send back a message
                 source.sendFeedback(message, true);
 
                 // Send the target a title and subtitle
-                target.connection.sendPacket(new STitlePacket(STitlePacket.Type.TITLE, new TranslationTextComponent("commands.charm.effect.receive", charm).mergeStyle(TextFormatting.LIGHT_PURPLE), 1, 10, 1));
-                target.connection.sendPacket(new STitlePacket(STitlePacket.Type.SUBTITLE, new TranslationTextComponent("commands.charm.effect.receive_subtitle", player.getDisplayName()).mergeStyle(TextFormatting.AQUA), 1, 10, 1));
+                target.connection.sendPacket(new STitlePacket(STitlePacket.Type.TITLE, new TranslationTextComponent(SSMPS2.translationKey + "commands.charm.effect.receive", charm).mergeStyle(TextFormatting.LIGHT_PURPLE), 1, 10, 1));
+                target.connection.sendPacket(new STitlePacket(STitlePacket.Type.SUBTITLE, new TranslationTextComponent(SSMPS2.translationKey + "commands.charm.effect.receive_subtitle", player.getDisplayName()).mergeStyle(TextFormatting.AQUA), 1, 10, 1));
                 return 1;
             } else {
-                source.sendFeedback(new TranslationTextComponent("commands.charm.effect.too_far").mergeStyle(TextFormatting.RED), true);
+                source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.charm.effect.too_far").mergeStyle(TextFormatting.RED), true);
                 return -1;
             }
         } else {
-            source.sendFeedback(new TranslationTextComponent("commands.charm.effect.not_mer").mergeStyle(TextFormatting.RED), true);
+            source.sendFeedback(new TranslationTextComponent(SSMPS2.translationKey + "commands.charm.effect.not_mer").mergeStyle(TextFormatting.RED), true);
             return -1;
         }
     }

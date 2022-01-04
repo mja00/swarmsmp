@@ -8,9 +8,13 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.command.ConfigCommand;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@Mod.EventBusSubscriber(modid = "swarmsmp-s2")
+@Mod.EventBusSubscriber(modid = SSMPS2.MOD_ID)
 public class ModEvents {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {
@@ -30,5 +34,4 @@ public class ModEvents {
             });
         }
     }
-
 }
