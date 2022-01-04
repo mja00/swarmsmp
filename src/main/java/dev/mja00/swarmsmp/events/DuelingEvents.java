@@ -12,7 +12,7 @@ import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-@Mod.EventBusSubscriber(modid = SSMPS2.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = SSMPS2.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DuelingEvents {
 
     private static final Logger LOGGER = LogManager.getLogger();
