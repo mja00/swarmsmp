@@ -17,7 +17,7 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = SSMPS2.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class DuelingEvents {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    static Logger LOGGER = SSMPS2.LOGGER;
     private static final String translationKey = SSMPS2.MOD_ID + ".";
 
     private static void onDuelLost(PlayerEntity player) {

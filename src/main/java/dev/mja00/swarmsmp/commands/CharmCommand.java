@@ -17,7 +17,7 @@ import java.util.Collection;
 
 public class CharmCommand {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    static Logger LOGGER = SSMPS2.LOGGER;
 
     public CharmCommand(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("charm").then(Commands.literal("effect").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("charm", StringArgumentType.word()).executes((command) -> {

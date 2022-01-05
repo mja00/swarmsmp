@@ -17,7 +17,7 @@ import java.util.Collection;
 
 public class AdminCommand {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    static Logger LOGGER = SSMPS2.LOGGER;
 
     public AdminCommand(CommandDispatcher<CommandSource> dispatcher) {
 

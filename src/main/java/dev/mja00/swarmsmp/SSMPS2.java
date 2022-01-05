@@ -24,7 +24,7 @@ public class SSMPS2 {
 
     public static final String MOD_ID = "swarmsmp-s2";
     // Directly reference a log4j logger.
-    private static final Logger LOGGER = LogManager.getLogger();
+    public static final Logger LOGGER = LogManager.getLogger("SSMPS2");
     public static final String translationKey = MOD_ID + ".";
 
     public SSMPS2() {

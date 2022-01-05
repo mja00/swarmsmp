@@ -14,7 +14,7 @@ import static dev.mja00.swarmsmp.helpers.EntityHelpers.giveTeamAndCreateIfNeeded
 @Mod.EventBusSubscriber(modid = SSMPS2.MOD_ID)
 public class MobSpawnEvents {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    static Logger LOGGER = SSMPS2.LOGGER;
 
     @SubscribeEvent
     public static void setTeamOnMobSpawn(LivingSpawnEvent.SpecialSpawn event) {

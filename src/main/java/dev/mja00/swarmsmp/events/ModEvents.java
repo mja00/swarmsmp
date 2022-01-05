@@ -2,9 +2,15 @@ package dev.mja00.swarmsmp.events;
 
 import dev.mja00.swarmsmp.SSMPS2;
 import dev.mja00.swarmsmp.commands.AdminCommand;
+import dev.mja00.swarmsmp.commands.BetterMessageCommand;
 import dev.mja00.swarmsmp.commands.CharmCommand;
 import dev.mja00.swarmsmp.commands.DuelCommand;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
@@ -12,7 +18,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.command.ConfigCommand;
-import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Iterator;
@@ -20,7 +25,7 @@ import java.util.Iterator;
 @Mod.EventBusSubscriber(modid = SSMPS2.MOD_ID)
 public class ModEvents {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    static Logger LOGGER = SSMPS2.LOGGER;
 
     @SuppressWarnings("InstantiationOfUtilityClass")
     @SubscribeEvent
@@ -28,6 +33,7 @@ public class ModEvents {
         new CharmCommand(event.getDispatcher());
         new AdminCommand(event.getDispatcher());
         new DuelCommand(event.getDispatcher());
+        new BetterMessageCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
@@ -43,6 +49,7 @@ public class ModEvents {
         }
     }
 
+    // Event for dueling
     @SubscribeEvent
     public static void serverTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
@@ -59,11 +66,40 @@ public class ModEvents {
                     ServerPlayerEntity target = request.target;
 
                     if (source != null) {
-                        source.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.timeout", target.getDisplayName()), source.getUniqueID());
+                        source.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.timeout"), source.getUniqueID());
                     }
 
                     if (target != null) {
-                        target.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.timeout", source.getDisplayName()), target.getUniqueID());
+                        target.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.timeout"), target.getUniqueID());
+                    }
+
+                    iterator.remove();
+                }
+            }
+        }
+    }
+
+    // Event for whispering
+    @SubscribeEvent
+    public static void messageServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            long now = System.currentTimeMillis();
+
+            Iterator<BetterMessageCommand.MessageRequest> iterator = BetterMessageCommand.MessageQueue.values().iterator();
+
+            while (iterator.hasNext()) {
+                BetterMessageCommand.MessageRequest request = iterator.next();
+
+                if (now > request.sendTime) {
+                    ServerPlayerEntity sender = request.sender;
+                    ServerPlayerEntity receiver = request.receiver;
+                    ITextComponent message = request.message;
+
+                    if (sender != null && receiver != null) {
+                        receiver.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.message.received", sender.getDisplayName(), message).mergeStyle(TextFormatting.AQUA), receiver.getUniqueID());
+                        // Also play sound when receiving message
+                        BlockPos pos = receiver.getPosition();
+                        receiver.getServerWorld().playSound(null, pos, SoundEvents.ENTITY_VILLAGER_WORK_CARTOGRAPHER, SoundCategory.PLAYERS, 1.0F, 1.0F);
                     }
 
                     iterator.remove();
