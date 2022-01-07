@@ -1,10 +1,7 @@
 package dev.mja00.swarmsmp.events;
 
 import dev.mja00.swarmsmp.SSMPS2;
-import dev.mja00.swarmsmp.commands.AdminCommand;
-import dev.mja00.swarmsmp.commands.BetterMessageCommand;
-import dev.mja00.swarmsmp.commands.CharmCommand;
-import dev.mja00.swarmsmp.commands.DuelCommand;
+import dev.mja00.swarmsmp.commands.*;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
@@ -34,6 +31,8 @@ public class ModEvents {
         new AdminCommand(event.getDispatcher());
         new DuelCommand(event.getDispatcher());
         new BetterMessageCommand(event.getDispatcher());
+        new OOCCommand(event.getDispatcher());
+        new BetterMeCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }

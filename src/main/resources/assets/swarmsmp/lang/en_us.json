@@ -48,6 +48,9 @@
   "swarmsmp-s2.dueling.attack.cancelled": "You're unable to attack non-dueling players while in a duel.",
 
 
+  "swarmsmp-s2.ooc.message": "[OOC] %1$s: %2$s",
+
+
   "swarmsmp-s2.command.disabled": "This command is disabled.",
   "swarmsmp-s2.command.whisper.disabled": "This command is disabled. Please use the /message command instead."
 }
