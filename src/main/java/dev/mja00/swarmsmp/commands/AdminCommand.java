@@ -8,16 +8,19 @@ import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
+import java.util.UUID;
 
 public class AdminCommand {
 
     static Logger LOGGER = SSMPS2.LOGGER;
+    static final UUID DUMMY = Util.DUMMY_UUID;
 
     public AdminCommand(CommandDispatcher<CommandSource> dispatcher) {
 
@@ -64,7 +67,7 @@ public class AdminCommand {
         if (success) {
             // Inform all the players on the server that a duel has started
             for (ServerPlayerEntity player : source.getServer().getPlayerList().getPlayers()) {
-                player.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.admin.start_duel.inform_server", firstPlayer.getDisplayName(), secondPlayer.getDisplayName()).mergeStyle(TextFormatting.AQUA), player.getUniqueID());
+                player.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.admin.start_duel.inform_server", firstPlayer.getDisplayName(), secondPlayer.getDisplayName()).mergeStyle(TextFormatting.AQUA), DUMMY);
             }
         }
 
@@ -141,8 +144,8 @@ public class AdminCommand {
         targetPlayer.setGlowing(true);
 
         // Inform both players the duel has started
-        sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.started", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), sourcePlayer.getUniqueID());
-        targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.started", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), targetPlayer.getUniqueID());
+        sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.started", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), DUMMY);
+        targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.started", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), DUMMY);
 
         return true;
     }

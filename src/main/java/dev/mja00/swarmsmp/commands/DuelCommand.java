@@ -10,6 +10,7 @@ import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
@@ -21,10 +22,12 @@ import org.apache.logging.log4j.Logger;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.UUID;
 
 public class DuelCommand {
 
     static Logger LOGGER = SSMPS2.LOGGER;
+    static final UUID DUMMY = Util.DUMMY_UUID;
 
     public static class DuelRequest {
         public final String id;
@@ -71,19 +74,19 @@ public class DuelCommand {
         ServerPlayerEntity sourcePlayer = source.asPlayer();
         // Make sure target is only one player
         if (target.size() != 1) {
-            sourcePlayer.sendMessage(new TranslationTextComponent("commands.duel.invalid_target"), sourcePlayer.getUniqueID());
+            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.invalid_target"), DUMMY);
         }
 
         ServerPlayerEntity targetPlayer = target.iterator().next();
 
         // Make sure source and target aren't the same player
         if (sourcePlayer.getUniqueID().equals(targetPlayer.getUniqueID())) {
-            sourcePlayer.sendMessage(new TranslationTextComponent("commands.duel.same_player"), sourcePlayer.getUniqueID());
+            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.same_player"), DUMMY);
             return 0;
         }
 
         if (REQUESTS.values().stream().anyMatch(request -> request.source.getUniqueID() == sourcePlayer.getUniqueID() && request.target.getUniqueID() == targetPlayer.getUniqueID())) {
-            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.already_requested", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.RED), sourcePlayer.getUniqueID());
+            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.already_requested", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.RED), DUMMY);
             return 0;
         }
 
@@ -119,7 +122,7 @@ public class DuelCommand {
         targetPlayer.sendMessage(component, targetPlayer.getUniqueID());
         targetPlayer.sendMessage(component2, targetPlayer.getUniqueID());
 
-        sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.sent", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), sourcePlayer.getUniqueID());
+        sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.sent", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), DUMMY);
 
         return 1;
     }
@@ -129,7 +132,7 @@ public class DuelCommand {
         ServerPlayerEntity sourcePlayer = source.asPlayer();
 
         if (request == null) {
-          sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.not_found").mergeStyle(TextFormatting.RED), sourcePlayer.getUniqueID());
+          sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.not_found").mergeStyle(TextFormatting.RED), DUMMY);
           return 0;
         }
 
@@ -142,15 +145,15 @@ public class DuelCommand {
         ServerPlayerEntity targetPlayer = source.getServer().getPlayerList().getPlayerByUUID(request.source.getUniqueID());
         // Make sure targetPlayer is online
         if (targetPlayer == null) {
-            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.target_not_online").mergeStyle(TextFormatting.RED), sourcePlayer.getUniqueID());
+            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.target_not_online").mergeStyle(TextFormatting.RED), DUMMY);
             REQUESTS.remove(request.id);
             return 0;
         }
 
         // Make sure targetPlayer is not already in a duel
         if (isInDuel(targetPlayer)) {
-            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.target_in_duel").mergeStyle(TextFormatting.RED), sourcePlayer.getUniqueID());
-            targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.cancelled", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.RED), targetPlayer.getUniqueID());
+            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.target_in_duel").mergeStyle(TextFormatting.RED), DUMMY);
+            targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.cancelled", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.RED), DUMMY);
             // Remove request
             REQUESTS.remove(request.id);
             return 0;
@@ -158,15 +161,15 @@ public class DuelCommand {
 
         // Make sure sourcePlayer is not already in a duel
         if (isInDuel(sourcePlayer)) {
-            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.source_in_duel").mergeStyle(TextFormatting.RED), sourcePlayer.getUniqueID());
-            targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.cancelled", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.RED), targetPlayer.getUniqueID());
+            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.source_in_duel").mergeStyle(TextFormatting.RED), DUMMY);
+            targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.cancelled", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.RED), DUMMY);
             // Remove request
             REQUESTS.remove(request.id);
             return 0;
         }
 
         // Now we're sure this duel can happen
-        Boolean success = createDuelBetweenPlayers(sourcePlayer, targetPlayer);
+        boolean success = createDuelBetweenPlayers(sourcePlayer, targetPlayer);
 
         if (success) {
             // Remove request
@@ -181,7 +184,7 @@ public class DuelCommand {
         ServerPlayerEntity sourcePlayer = source.asPlayer();
 
         if (request == null) {
-          sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.not_found").mergeStyle(TextFormatting.RED), sourcePlayer.getUniqueID());
+          sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.not_found").mergeStyle(TextFormatting.RED), DUMMY);
           return 0;
         }
 
@@ -194,7 +197,7 @@ public class DuelCommand {
         ServerPlayerEntity targetPlayer = source.getServer().getPlayerList().getPlayerByUUID(request.source.getUniqueID());
         // Make sure targetPlayer is online
         if (targetPlayer == null) {
-            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.target_not_online").mergeStyle(TextFormatting.RED), sourcePlayer.getUniqueID());
+            sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.target_not_online").mergeStyle(TextFormatting.RED), DUMMY);
             REQUESTS.remove(request.id);
             return 0;
         }
@@ -202,9 +205,9 @@ public class DuelCommand {
         // Remove request
         REQUESTS.remove(request.id);
 
-        targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.declined", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.RED), targetPlayer.getUniqueID());
+        targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.declined", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.RED), DUMMY);
         // Confirm it's been declined
-        sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.declined", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.RED), sourcePlayer.getUniqueID());
+        sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.request.declined", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.RED), DUMMY);
 
         return 1;
     }
@@ -242,8 +245,8 @@ public class DuelCommand {
         targetPlayer.setGlowing(true);
 
         // Inform both players the duel has started
-        sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.started", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), sourcePlayer.getUniqueID());
-        targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.started", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), targetPlayer.getUniqueID());
+        sourcePlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.started", targetPlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), DUMMY);
+        targetPlayer.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.duel.started", sourcePlayer.getDisplayName()).mergeStyle(TextFormatting.GREEN), DUMMY);
 
         return true;
     }

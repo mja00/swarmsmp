@@ -7,6 +7,7 @@
   "mixins": [
   ],
   "client": [
+    "RemoveBlockedPlayerCheck"
   ],
   "injectors": {
     "defaultRequire": 1

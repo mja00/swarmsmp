@@ -5,6 +5,7 @@ import dev.mja00.swarmsmp.commands.*;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -18,11 +19,13 @@ import net.minecraftforge.server.command.ConfigCommand;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Iterator;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = SSMPS2.MOD_ID)
 public class ModEvents {
 
     static Logger LOGGER = SSMPS2.LOGGER;
+    static final UUID DUMMY = Util.DUMMY_UUID;
 
     @SuppressWarnings("InstantiationOfUtilityClass")
     @SubscribeEvent
@@ -65,11 +68,11 @@ public class ModEvents {
                     ServerPlayerEntity target = request.target;
 
                     if (source != null) {
-                        source.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.timeout"), source.getUniqueID());
+                        source.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.timeout"), DUMMY);
                     }
 
                     if (target != null) {
-                        target.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.timeout"), target.getUniqueID());
+                        target.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.timeout"), DUMMY);
                     }
 
                     iterator.remove();
@@ -95,7 +98,7 @@ public class ModEvents {
                     ITextComponent message = request.message;
 
                     if (sender != null && receiver != null) {
-                        receiver.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.message.received", sender.getDisplayName(), message).mergeStyle(TextFormatting.AQUA), receiver.getUniqueID());
+                        receiver.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.message.received", sender.getDisplayName(), message).mergeStyle(TextFormatting.AQUA), sender.getUniqueID());
                         // Also play sound when receiving message
                         BlockPos pos = receiver.getPosition();
                         receiver.getServerWorld().playSound(null, pos, SoundEvents.ENTITY_VILLAGER_WORK_CARTOGRAPHER, SoundCategory.PLAYERS, 1.0F, 1.0F);

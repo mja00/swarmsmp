@@ -28,6 +28,7 @@ public class BetterMessageCommand {
 
     static Logger LOGGER = SSMPS2.LOGGER;
     private static final float msPerBlock = 100.0F;
+    static final UUID DUMMY = Util.DUMMY_UUID;
 
     public static class MessageRequest {
         public final String id;
@@ -91,7 +92,7 @@ public class BetterMessageCommand {
                 // Queue the message for sending
                 MessageRequest request = create(sender.getServer(), sender, recipient, message, (long) time);
                 // Send the message to the sender, and for coolness we'll play the bat takeoff sound effect
-                sender.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.message.sent", recipient.getDisplayName(), message).mergeStyle(TextFormatting.GREEN), uuid);
+                sender.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "commands.message.sent", recipient.getDisplayName(), message).mergeStyle(TextFormatting.GREEN), DUMMY);
                 BlockPos pos = sender.getPosition();
                 source.getWorld().playSound(null, pos, SoundEvents.ENTITY_PARROT_FLY, SoundCategory.PLAYERS, 1.0F, 1.0F);
 

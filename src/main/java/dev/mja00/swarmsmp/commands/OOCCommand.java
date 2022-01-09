@@ -40,7 +40,7 @@ public class OOCCommand {
             chatMessage.appendSibling(new StringTextComponent(messageString).mergeStyle(Style.EMPTY
                     .applyFormatting(TextFormatting.WHITE)));
 
-            player.sendMessage(chatMessage, player.getUniqueID());
+            player.sendMessage(chatMessage, source.asPlayer().getUniqueID());
         }
         return 1;
     }
