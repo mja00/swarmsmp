@@ -41,7 +41,7 @@ public class ChatEvents {
                 .applyFormatting(TextFormatting.WHITE)));
 
         // Send the message to the player
-        player.sendMessage(chatMessage, player.getUniqueID());
+        player.sendMessage(chatMessage, sender.getUniqueID());
 
     }
 

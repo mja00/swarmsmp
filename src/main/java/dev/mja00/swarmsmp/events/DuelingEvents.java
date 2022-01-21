@@ -2,6 +2,7 @@ package dev.mja00.swarmsmp.events;
 
 import dev.mja00.swarmsmp.SSMPS2;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.TickEvent;
@@ -18,6 +19,7 @@ public class DuelingEvents {
 
     static Logger LOGGER = SSMPS2.LOGGER;
     private static final String translationKey = SSMPS2.MOD_ID + ".";
+    static final UUID DUMMY = Util.DUMMY_UUID;
 
     private static void onDuelLost(PlayerEntity player) {
         LOGGER.info("Player " + player.getDisplayName().getString() + " has lost the duel");
@@ -32,7 +34,7 @@ public class DuelingEvents {
         player.setGlowing(false);
 
         if (!player.getEntityWorld().isRemote) {
-            player.sendMessage(new TranslationTextComponent(translationKey + "dueling.died").mergeStyle(TextFormatting.RED), player.getUniqueID());
+            player.sendMessage(new TranslationTextComponent(translationKey + "dueling.died").mergeStyle(TextFormatting.RED), DUMMY);
         }
         removeDuelTags(player);
     }
@@ -41,7 +43,7 @@ public class DuelingEvents {
         LOGGER.info("Player " + player.getDisplayName().getString() + " has lost the duel");
         if (player.isGlowing()) {player.setGlowing(false);}
         if (!player.getEntityWorld().isRemote) {
-            player.sendMessage(new TranslationTextComponent(translationKey + "dueling.died.non-player").mergeStyle(TextFormatting.RED), player.getUniqueID());
+            player.sendMessage(new TranslationTextComponent(translationKey + "dueling.died.non-player").mergeStyle(TextFormatting.RED), DUMMY);
         }
         removeDuelTags(player);
     }
@@ -58,7 +60,7 @@ public class DuelingEvents {
         player.setGlowing(false);
 
         if (!player.getEntityWorld().isRemote) {
-            player.sendMessage(new TranslationTextComponent(translationKey + "dueling.won").mergeStyle(TextFormatting.GREEN), player.getUniqueID());
+            player.sendMessage(new TranslationTextComponent(translationKey + "dueling.won").mergeStyle(TextFormatting.GREEN), DUMMY);
         }
         removeDuelTags(player);
     }
@@ -87,7 +89,7 @@ public class DuelingEvents {
         // Check to see if the target is not dueling and the player is dueling cancel the event
         if (!target.getPersistentData().getBoolean(SSMPS2.MOD_ID + ":dueling") && player.getPersistentData().getBoolean(SSMPS2.MOD_ID + ":dueling")) {
             if (!player.getEntityWorld().isRemote) {
-                player.sendMessage(new TranslationTextComponent(translationKey + "dueling.attack.cancelled").mergeStyle(TextFormatting.RED), player.getUniqueID());
+                player.sendMessage(new TranslationTextComponent(translationKey + "dueling.attack.cancelled").mergeStyle(TextFormatting.RED), DUMMY);
             }
             event.setCanceled(true);
         }
@@ -174,7 +176,7 @@ public class DuelingEvents {
                 // Check to see if the player is online
                 if (player != null) {
                     // Send the player a message
-                    player.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.server.finish", player1.getDisplayName(), player2.getDisplayName()).mergeStyle(TextFormatting.GOLD), player.getUniqueID());
+                    player.sendMessage(new TranslationTextComponent(SSMPS2.translationKey + "duel.server.finish", player1.getDisplayName(), player2.getDisplayName()).mergeStyle(TextFormatting.GOLD), DUMMY);
                 }
             }
         }
