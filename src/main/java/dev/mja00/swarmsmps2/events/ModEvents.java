@@ -1,10 +1,7 @@
 package dev.mja00.swarmsmps2.events;
 
 import dev.mja00.swarmsmps2.SwarmsmpS2;
-import dev.mja00.swarmsmps2.commands.AdminCommand;
-import dev.mja00.swarmsmps2.commands.BetterMeCommand;
-import dev.mja00.swarmsmps2.commands.BetterMessageCommand;
-import dev.mja00.swarmsmps2.commands.DuelCommand;
+import dev.mja00.swarmsmps2.commands.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -38,6 +35,7 @@ public class ModEvents {
         new BetterMeCommand(event.getDispatcher());
         new BetterMessageCommand(event.getDispatcher());
         new DuelCommand(event.getDispatcher());
+        new OOCCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
