@@ -2,6 +2,7 @@ package dev.mja00.swarmsmps2.events;
 
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.commands.AdminCommand;
+import dev.mja00.swarmsmps2.commands.BetterMeCommand;
 import net.minecraft.Util;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -22,6 +23,7 @@ public class ModEvents {
     @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {
         new AdminCommand(event.getDispatcher());
+        new BetterMeCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }

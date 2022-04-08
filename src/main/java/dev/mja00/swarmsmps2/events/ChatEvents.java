@@ -20,7 +20,7 @@ import java.util.List;
 @Mod.EventBusSubscriber(modid = SwarmsmpS2.MODID)
 public class ChatEvents {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger("CHAT");
 
     // Gets the player's name and returns it as a string
     public static Component getPlayerName(Player player) {
