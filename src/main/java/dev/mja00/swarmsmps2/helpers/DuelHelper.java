@@ -6,8 +6,11 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public class DuelHelper {
+
+    private static final String MOD_ID = SwarmsmpS2.MODID;
 
     public static boolean createDuelBetweenPlayers(ServerPlayer firstPlayer, ServerPlayer secondPlayer, boolean isServerDuel) {
         // Player's data
@@ -57,5 +60,42 @@ public class DuelHelper {
         secondPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "commands.duel.started", firstPlayer.getDisplayName()).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
 
         return true;
+    }
+
+    public static void endDuelBetweenPlayers(ServerPlayer initiatingPlayer, ServerPlayer secondPlayer) {
+        // Reset stats
+        resetStats(initiatingPlayer);
+        resetStats(secondPlayer);
+
+        // Remove tags
+        removeDuelTags(initiatingPlayer);
+        removeDuelTags(secondPlayer);
+
+        // Inform both players of the duel end
+        initiatingPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "dueling.forfeit").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+        secondPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "dueling.forfeit.opponent", initiatingPlayer.getDisplayName()).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+    }
+
+    private static void removeDuelTags(Player player) {
+        // Get their data
+        CompoundTag persistentData = player.getPersistentData();
+        persistentData.remove(MOD_ID + ":dueling");
+        persistentData.remove(MOD_ID + ":duel_target");
+        persistentData.remove(MOD_ID + ":duel_food");
+        persistentData.remove(MOD_ID + ":duel_health");
+        persistentData.remove(MOD_ID + ":duel_saturation");
+        persistentData.remove(MOD_ID + ":server_duel");
+        if (player.isCurrentlyGlowing()) { player.setGlowingTag(false); }
+    }
+
+    private static void resetStats(Player player) {
+        // Get their previous values
+        CompoundTag persistentData = player.getPersistentData();
+        float prevHealth = persistentData.getFloat(MOD_ID + ":duel_health");
+        int prevFood = persistentData.getInt(MOD_ID + ":duel_food");
+
+        // Set their health and food to their previous values
+        player.setHealth(prevHealth);
+        player.getFoodData().setFoodLevel(prevFood);
     }
 }

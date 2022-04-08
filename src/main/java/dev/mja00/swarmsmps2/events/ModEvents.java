@@ -82,4 +82,34 @@ public class ModEvents {
             }
         }
     }
+
+    // Event for dueling
+    @SubscribeEvent
+    public static void serverTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            long now = System.currentTimeMillis();
+            long timeTillExpire = 1000L * 60;
+
+            Iterator<DuelCommand.DuelRequest> iterator = DuelCommand.REQUESTS.values().iterator();
+
+            while (iterator.hasNext()) {
+                DuelCommand.DuelRequest request = iterator.next();
+
+                if (now > request.created + timeTillExpire) {
+                    ServerPlayer source = request.source;
+                    ServerPlayer target = request.target;
+
+                    if (source != null) {
+                        source.sendMessage(new TranslatableComponent(translationKey + "duel.timeout"), DUMMY);
+                    }
+
+                    if (target != null) {
+                        target.sendMessage(new TranslatableComponent(translationKey + "duel.timeout"), DUMMY);
+                    }
+
+                    iterator.remove();
+                }
+            }
+        }
+    }
 }

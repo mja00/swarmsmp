@@ -31,6 +31,7 @@
   "swarmsmps2.commands.duel.started": "You've started a duel with %1$s.",
   "swarmsmps2.commands.duel.request.declined": "Your duel request with %1$s has been declined.",
   "swarmsmps2.commands.duel.same_player": "You can't duel yourself.",
+  "swarmsmps2.commands.duel.not_in_duel": "You're not in a duel.",
 
   "swarmsmps2.commands.message.players.too_many": "You may only send a message to 1 player.",
   "swarmsmps2.commands.message.players.not_same_dimension": "Your message gets lost in the cosmos.",
@@ -46,6 +47,8 @@
   "swarmsmps2.dueling.won": "You've won the duel.",
   "swarmsmps2.dueling.died.non-player": "You've died due to a non-player during the duel. You've lost the duel.",
   "swarmsmps2.dueling.attack.cancelled": "You're unable to attack non-dueling players while in a duel.",
+  "swarmsmps2.dueling.forfeit": "You've forfeited the duel.",
+  "swarmsmps2.dueling.forfeit.opponent": "%1$s has forfeited the duel.",
 
 
   "swarmsmps2.ooc.message": "[OOC] %1$s: %2$s",

@@ -43,7 +43,7 @@ public class DuelCommand {
     public static DuelRequest create(MinecraftServer server, ServerPlayer source, ServerPlayer target) {
         String key;
         do {
-            key = String.format("%80X", new Random().nextInt());
+            key = String.format("%08X", new Random().nextInt());
         } while (REQUESTS.containsKey(key));
 
         DuelRequest request = new DuelRequest(key);
@@ -62,7 +62,9 @@ public class DuelCommand {
             return duelAccept(command.getSource(), StringArgumentType.getString(command, "duel_id"));
         }))).then(Commands.literal("decline").then(Commands.argument("duel_id", StringArgumentType.word()).executes((command) -> {
             return duelDecline(command.getSource(), StringArgumentType.getString(command, "duel_id"));
-        }))));
+        }))).then(Commands.literal("forfeit").executes((command) -> {
+           return duelForfeit(command.getSource());
+        })));
     }
 
     private int duel(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
@@ -99,7 +101,7 @@ public class DuelCommand {
 
         // Create duel request receive message components
         TextComponent component2 = new TextComponent("Click one: ");
-        component2.append(new TextComponent("Accept \\u2714")
+        component2.append(new TextComponent("Accept \u2714")
                 .setStyle(Style.EMPTY
                         .applyFormat(ChatFormatting.GREEN)
                         .applyFormat(ChatFormatting.BOLD)
@@ -110,7 +112,7 @@ public class DuelCommand {
 
         component2.append(" or ");
 
-        component2.append(new TextComponent("Decline \\u2716")
+        component2.append(new TextComponent("Decline \u2716")
                 .setStyle(Style.EMPTY
                         .applyFormat(ChatFormatting.RED)
                         .applyFormat(ChatFormatting.BOLD)
@@ -206,6 +208,21 @@ public class DuelCommand {
             // Remove request
             REQUESTS.remove(request.id);
         }
+
+        return 1;
+    }
+
+    private int duelForfeit(CommandSourceStack source) throws CommandSyntaxException {
+        ServerPlayer player = source.getPlayerOrException();
+        if (!isInDuel(player)) {
+            player.sendMessage(new TranslatableComponent(translationKey + "commands.duel.not_in_duel").withStyle(ChatFormatting.RED), DUMMY);
+            return 0;
+        }
+
+        UUID duelOpponentUUID = player.getPersistentData().getUUID(MOD_ID + ":duel_target");
+        ServerPlayer duelOpponent = source.getServer().getPlayerList().getPlayer(duelOpponentUUID);
+
+        DuelHelper.endDuelBetweenPlayers(player, duelOpponent);
 
         return 1;
     }
