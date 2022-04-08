@@ -95,13 +95,18 @@ public class BetterMessageCommand {
                 // Inform the sender
                 sender.sendMessage(new TranslatableComponent(translationKey + "commands.message.sent", recipient.getDisplayName(), message).withStyle(ChatFormatting.GREEN), DUMMY);
                 BlockPos pos = sender.getOnPos();
-                source.getLevel().playSound(null, pos, SoundEvents.PARROT_FLY, SoundSource.PLAYERS, 1.0F, 1.0F);
+                sender.getLevel().playSound(null, pos, SoundEvents.PARROT_FLY, SoundSource.PLAYERS, 1.0F, 1.0F);
 
                 logMessages(sender, recipient, messageText);
             } else {
                 source.sendFailure(new TranslatableComponent(translationKey + "commands.message.players.not_same_dimension"));
                 return 0;
             }
+        } else {
+            // This is the console, so we just send messages instantly
+            // No need to log it since it's a whisper
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.message.sent", recipient.getDisplayName(), message), false);
+            recipient.sendMessage(new TranslatableComponent(translationKey + "commands.message.received", source.getDisplayName(), message).withStyle(ChatFormatting.AQUA), DUMMY);
         }
 
         return 1;
