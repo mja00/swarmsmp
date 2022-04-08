@@ -76,7 +76,6 @@ public class BetterMessageCommand {
             return 0;
         }
         ServerPlayer recipient = targets.iterator().next();
-        UUID senderUUID = source.getEntity() == null ? DUMMY : source.getEntity().getUUID();
         Entity entity = source.getEntity();
         TextComponent messageText = (TextComponent) message.plainCopy();
 

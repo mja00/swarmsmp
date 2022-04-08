@@ -4,6 +4,7 @@ import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.commands.AdminCommand;
 import dev.mja00.swarmsmps2.commands.BetterMeCommand;
 import dev.mja00.swarmsmps2.commands.BetterMessageCommand;
+import dev.mja00.swarmsmps2.commands.DuelCommand;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -36,6 +37,7 @@ public class ModEvents {
         new AdminCommand(event.getDispatcher());
         new BetterMeCommand(event.getDispatcher());
         new BetterMessageCommand(event.getDispatcher());
+        new DuelCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
