@@ -141,12 +141,12 @@ public class AdminCommand {
         secondPlayerData.putBoolean(SwarmsmpS2.MODID + ":dueling", true);
 
         // Save both player's health
-        firstPlayerData.putFloat(SwarmsmpS2.MODID + ":health", firstPlayer.getHealth());
-        secondPlayerData.putFloat(SwarmsmpS2.MODID + ":health", secondPlayer.getHealth());
+        firstPlayerData.putFloat(SwarmsmpS2.MODID + ":duel_health", firstPlayer.getHealth());
+        secondPlayerData.putFloat(SwarmsmpS2.MODID + ":duel_health", secondPlayer.getHealth());
 
         // Save both player's current food level
-        firstPlayerData.putInt(SwarmsmpS2.MODID + ":food", firstPlayer.getFoodData().getFoodLevel());
-        secondPlayerData.putInt(SwarmsmpS2.MODID + ":food", secondPlayer.getFoodData().getFoodLevel());
+        firstPlayerData.putInt(SwarmsmpS2.MODID + ":duel_food", firstPlayer.getFoodData().getFoodLevel());
+        secondPlayerData.putInt(SwarmsmpS2.MODID + ":duel_food", secondPlayer.getFoodData().getFoodLevel());
 
         // Save both player's duel targets
         firstPlayerData.putUUID(SwarmsmpS2.MODID + ":duel_target", secondPlayer.getUUID());

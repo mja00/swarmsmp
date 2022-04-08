@@ -28,15 +28,16 @@ public class DuelingEvents {
     private static void onDuelLost(Player player) {
         LOGGER.info("Player " + getPlayerName(player).getString() + " lost the duel");
         resetStats(player);
-        removeDuelTags(player);
         if (!player.getLevel().isClientSide) {
             // Send the player a message
             player.sendMessage(new TranslatableComponent(translationKey + "dueling.died").withStyle(ChatFormatting.RED), DUMMY);
         }
+        removeDuelTags(player);
     }
 
     private static void onDuelLostToNonPlayer(Player player) {
         LOGGER.info("Player " + getPlayerName(player).getString() + " lost the duel to a non-player");
+        resetStats(player);
         if (!player.getLevel().isClientSide) {
             // Send the player a message
             player.sendMessage(new TranslatableComponent(translationKey + "dueling.died.non-player").withStyle(ChatFormatting.RED), DUMMY);
@@ -47,11 +48,11 @@ public class DuelingEvents {
     private static void onDuelWon(Player player) {
         LOGGER.info("Player " + getPlayerName(player).getString() + " won the duel");
         resetStats(player);
-        removeDuelTags(player);
         if (!player.getLevel().isClientSide) {
             // Send the player a message
             player.sendMessage(new TranslatableComponent(translationKey + "dueling.won").withStyle(ChatFormatting.GREEN), DUMMY);
         }
+        removeDuelTags(player);
     }
 
     private static void resetStats(Player player) {
@@ -123,10 +124,10 @@ public class DuelingEvents {
                 // See if the damage would kill the player
                 if (player.getHealth() - event.getAmount() <= 0) {
                     // The player would die from this, so the attacker wins
-                    event.setCanceled(true);
                     onDuelLost(player);
                     onDuelWon(attacker);
                     informServerOfDuelFinish(attacker, player);
+                    event.setCanceled(true);
                 }
             }
 
@@ -165,19 +166,22 @@ public class DuelingEvents {
     private static void informDuelWinnerIfExists(Player player) {
         // Get the player's data
         CompoundTag playerData = player.getPersistentData();
+        if (playerData.contains(MOD_ID + ":duel_target")) {
+            // Get the player's duel target
+            UUID targetUUID = playerData.getUUID(MOD_ID + ":duel_target");
+            // Get the target
+            Player target = player.getLevel().getPlayerByUUID(targetUUID);
 
-        // Get the player's duel target
-        UUID targetUUID = playerData.getUUID(MOD_ID + ":duel_target");
-        // Get the target
-        Player target = player.getLevel().getPlayerByUUID(targetUUID);
-
-        // If the target exists
-        if (target != null) {
-            // Inform the target that they won
-            onDuelWon(target);
+            // If the target exists
+            if (target != null) {
+                // Inform the target that they won
+                onDuelWon(target);
+            } else {
+                // Log that the target doesn't exist
+                LOGGER.warn("{} had a duel target that doesn't exist", player.getName().toString());
+            }
         } else {
-            // Log that the target doesn't exist
-            LOGGER.warn("{} had a duel target that doesn't exist", player.getName().toString());
+            LOGGER.debug("{} had no duel target", player.getName().toString());
         }
     }
 
