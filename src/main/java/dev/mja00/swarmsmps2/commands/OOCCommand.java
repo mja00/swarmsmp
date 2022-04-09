@@ -27,7 +27,7 @@ public class OOCCommand {
         })));
     }
 
-    private static int sendGlobalMessage(CommandSourceStack source, Component message) throws CommandSyntaxException {
+    private int sendGlobalMessage(CommandSourceStack source, Component message) throws CommandSyntaxException {
         TextComponent messageComponent = (TextComponent) message;
         LOGGER.info("[OOC] " + source.getTextName() + ": " + message.getString());
         // Get all players in the server

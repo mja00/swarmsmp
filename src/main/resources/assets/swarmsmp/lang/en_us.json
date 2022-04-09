@@ -39,6 +39,13 @@
   "swarmsmps2.commands.message.sent": "You ➡ %1$s: %2$s",
   "swarmsmps2.commands.message.failed": "Message failed to send.",
 
+  "swarmsmps2.commands.head.no_room": "You do not have room for that head.",
+  "swarmsmps2.commands.admin.head.success": "You've acquired head!",
+  "swarmsmps2.commands.admin.head.success.multiple": "You've acquired %1$s heads!",
+  "swarmsmps2.commands.admin.head.sent_success": "You've given head!",
+  "swarmsmps2.commands.admin.head.sent_success.multiple": "You've given %1$s heads!",
+  "swarmsmps2.commands.admin.head.failure.multiple_heads": "You can only give head to 1 player at a time.",
+
 
   "swarmsmps2.duel.timeout": "The duel request has expired.",
   "swarmsmps2.duel.server.finish": "The duel between %1$s and %2$s has ended. The winner is %1$s.",

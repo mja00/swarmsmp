@@ -2,6 +2,7 @@ package dev.mja00.swarmsmps2.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -28,7 +29,7 @@ import java.util.UUID;
 public class BetterMessageCommand {
 
     static Logger LOGGER = SwarmsmpS2.LOGGER;
-    private static final float msPerBlock = 100.F;
+    private static final float msPerBlock = (float) SSMPS2Config.SERVER.whisperSpeed.get();
     static final UUID DUMMY = Util.NIL_UUID;
     private static final String translationKey = SwarmsmpS2.translationKey;
 

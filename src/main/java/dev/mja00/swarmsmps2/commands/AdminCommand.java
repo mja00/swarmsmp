@@ -2,6 +2,7 @@ package dev.mja00.swarmsmps2.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import net.minecraft.ChatFormatting;
@@ -12,6 +13,8 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collection;
@@ -35,7 +38,86 @@ public class AdminCommand {
             return checkTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"));
         })))).then(Commands.literal("start_duel").then(Commands.argument("first_player", EntityArgument.players()).then(Commands.argument("second_player", EntityArgument.players()).executes((command) -> {
             return startDuel(command.getSource(), EntityArgument.getPlayers(command, "first_player"), EntityArgument.getPlayers(command, "second_player"));
+        })))).then(Commands.literal("get_head").then(Commands.argument("target", EntityArgument.players()).executes((command) -> {
+            return giveHeadOfPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"));
+        }))).then(Commands.literal("give_head").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("head_target", EntityArgument.players()).executes(command -> {
+            return giveHeadOfPlayerToPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"), EntityArgument.getPlayers(command, "head_target"));
         })))));
+    }
+
+    private int giveHeadOfPlayer(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
+        int howMuchHeadTheyGot = 0;
+        for (ServerPlayer target : targets) {
+            CompoundTag headData = new CompoundTag();
+            headData.putString("SkullOwner", target.getName().getString());
+            ItemStack headItem = new ItemStack(Items.PLAYER_HEAD, 1);
+            headItem.setTag(headData);
+
+            boolean success = source.getPlayerOrException().getInventory().add(headItem);
+            if (!success) {
+                source.getPlayerOrException().spawnAtLocation(headItem);
+            }
+            howMuchHeadTheyGot++;
+        }
+        if (howMuchHeadTheyGot == 1) {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.head.success").withStyle(ChatFormatting.AQUA), true);
+        } else {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.head.success.multiple", howMuchHeadTheyGot)
+                    .withStyle(ChatFormatting.AQUA)
+                    .withStyle(ChatFormatting.BOLD)
+                    .withStyle(ChatFormatting.ITALIC)
+                    .withStyle(ChatFormatting.UNDERLINE),
+                    true);
+        }
+        return 1;
+    }
+
+    private int giveHeadOfPlayerToPlayer(CommandSourceStack source, Collection<ServerPlayer> targets, Collection<ServerPlayer> headTargets) throws CommandSyntaxException {
+        int howMuchHeadTheyGot = 0;
+
+        // Make sure headTargets is only one player
+        if (headTargets.size() > 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.head.failure.multiple_heads"));
+            return 0;
+        }
+
+        ServerPlayer headTarget = headTargets.iterator().next();
+
+        for (ServerPlayer target : targets) {
+            ItemStack headItem = createHead(target);
+
+            boolean success = headTarget.getInventory().add(headItem);
+            if (!success) {
+                headTarget.spawnAtLocation(headItem);
+            }
+            howMuchHeadTheyGot++;
+        }
+        if (howMuchHeadTheyGot == 1) {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.head.sent_success").withStyle(ChatFormatting.AQUA), true);
+            headTarget.sendMessage(new TranslatableComponent(translationKey + "commands.admin.head.success").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+        } else {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.head.sent_success.multiple", howMuchHeadTheyGot)
+                            .withStyle(ChatFormatting.AQUA)
+                            .withStyle(ChatFormatting.BOLD)
+                            .withStyle(ChatFormatting.ITALIC)
+                            .withStyle(ChatFormatting.UNDERLINE),
+                    true);
+            headTarget.sendMessage(new TranslatableComponent(translationKey + "commands.admin.head.success.multiple", howMuchHeadTheyGot)
+                            .withStyle(ChatFormatting.AQUA)
+                            .withStyle(ChatFormatting.BOLD)
+                            .withStyle(ChatFormatting.ITALIC)
+                            .withStyle(ChatFormatting.UNDERLINE),
+                    Util.NIL_UUID);
+        }
+        return 1;
+    }
+
+    private ItemStack createHead(ServerPlayer player) {
+        CompoundTag headData = new CompoundTag();
+        headData.putString("SkullOwner", player.getName().getString());
+        ItemStack headItem = new ItemStack(Items.PLAYER_HEAD, 1);
+        headItem.setTag(headData);
+        return headItem;
     }
 
     private int setTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag){

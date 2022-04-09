@@ -12,6 +12,7 @@ public class SSMPS2Config {
 
     public static class Server {
         public final ForgeConfigSpec.IntValue talkRange;
+        public final ForgeConfigSpec.IntValue whisperSpeed;
 
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
@@ -19,6 +20,10 @@ public class SSMPS2Config {
             talkRange = builder
                     .comment("The range at which players can talk to each other")
                     .defineInRange("talkRange", 20, 1, 100);
+
+            whisperSpeed = builder
+                    .comment("The speed at which whispers travel. ms per block")
+                    .defineInRange("whisperSpeed", 100, 10, 1000);
 
             builder.pop();
         }

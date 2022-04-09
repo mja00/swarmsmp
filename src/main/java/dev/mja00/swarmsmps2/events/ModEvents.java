@@ -36,6 +36,7 @@ public class ModEvents {
         new BetterMessageCommand(event.getDispatcher());
         new DuelCommand(event.getDispatcher());
         new OOCCommand(event.getDispatcher());
+        new HeadCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
