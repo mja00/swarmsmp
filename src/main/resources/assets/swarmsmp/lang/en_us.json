@@ -67,7 +67,5 @@
   "swarmsmps2.command.disabled": "This command is disabled.",
   "swarmsmps2.command.whisper.disabled": "This command is disabled. Please use the /message command instead.",
 
-  "swarmsmps2.event.death.player": "You've unfortunately died. You've lost a bit of your backstory.\nUse /backstory to see your current backstory.",
-  "swarmsmps2.general.full_chat": "-----------------------------------------------------",
-  "swarmsmps2.general.memory_loss": "You've also lost the last %1$s minutes of your memory."
+  "swarmsmps2.event.death.player": "-----------------------------------------------------\nYou've unfortunately died. You've lost a bit of your backstory.\nUse /backstory to see your current backstory.\nYou've also lost the last %1$s minutes of your memory.\n-----------------------------------------------------"
 }

@@ -8,6 +8,8 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -70,6 +72,17 @@ public class ServerPlayerEvents {
         player.sendMessage(chatClearer, Util.NIL_UUID);
     }
 
+    private static void giveRespawnEffects(ServerPlayer player) {
+        // Give the player blindness and nausea for memoryLoss * memoryLossMultiplier seconds
+        int duration = (memoryLoss * memoryLossMultiplier) * 20;
+        MobEffectInstance blindness = new MobEffectInstance(MobEffects.BLINDNESS, duration, memoryLossAmplifier, false, false, false);
+        MobEffectInstance nausea = new MobEffectInstance(MobEffects.CONFUSION, duration, memoryLossAmplifier, false, false, false);
+        MobEffectInstance slowness = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, memoryLossAmplifier, false, false, false);
+        player.addEffect(blindness);
+        player.addEffect(nausea);
+        player.addEffect(slowness);
+    }
+
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         // Ignore if they've respawned due to the end being conquered
@@ -82,25 +95,16 @@ public class ServerPlayerEvents {
             clearChat(player);
 
             // Build our message
-            MutableComponent message = new TranslatableComponent(translationKey + "general.full_chat").withStyle(ChatFormatting.RED);
-            message.append(new TextComponent("\n"));
-            message.append(new TranslatableComponent(translationKey + "event.death.player"));
-            message.append(new TextComponent("\n"));
-            message.append(new TranslatableComponent(translationKey + "general.memory_loss", memoryLoss));
-            message.append(new TextComponent("\n"));
-            message.append(new TranslatableComponent(translationKey + "general.full_chat"));
+            MutableComponent message = new TranslatableComponent(translationKey + "event.death.player", memoryLoss).withStyle(ChatFormatting.RED);
 
-            // Give the player blindness and nausea for memoryLoss * memoryLossMultiplier seconds
-            int duration = (memoryLoss * memoryLossMultiplier) * 20;
-            MobEffectInstance blindness = new MobEffectInstance(MobEffects.BLINDNESS, duration, memoryLossAmplifier, false, false, false);
-            MobEffectInstance nausea = new MobEffectInstance(MobEffects.CONFUSION, duration, memoryLossAmplifier, false, false, false);
-            MobEffectInstance slowness = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, memoryLossAmplifier, false, false, false);
-            player.addEffect(blindness);
-            player.addEffect(nausea);
-            player.addEffect(slowness);
+            // Give effects to the player
+            giveRespawnEffects(player);
 
             // Send the message
             player.sendMessage(message, Util.NIL_UUID);
+
+            // Play a scary sound
+            player.getLevel().playSound(null, player.blockPosition(), SoundEvents.AMBIENT_CAVE, SoundSource.MASTER, 1.0f, 0.2f);
         }
     }
 }

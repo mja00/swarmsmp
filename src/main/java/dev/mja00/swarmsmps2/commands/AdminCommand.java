@@ -149,9 +149,9 @@ public class AdminCommand {
     private int checkTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag){
         for (ServerPlayer target : targets) {
             if (target.getPersistentData().contains(SwarmsmpS2.MODID + ":" + tag)) {
-                source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.check_tag.success.single", target.getDisplayName()), true);
+                source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.check_tag.success", target.getDisplayName()), true);
             } else {
-                source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.check_tag.success.none", target.getDisplayName()), true);
+                source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.check_tag.failed", target.getDisplayName()), true);
             }
         }
         return 1;

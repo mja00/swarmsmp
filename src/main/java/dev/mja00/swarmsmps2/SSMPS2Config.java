@@ -39,11 +39,11 @@ public class SSMPS2Config {
 
             memoryLossTimeMultiplier = builder
                     .comment("The multiplier for the memory loss time. Affects potion effect time")
-                    .defineInRange("memoryLossTimeMultiplier", 5, 1, 100);
+                    .defineInRange("memoryLossTimeMultiplier", 2, 1, 100);
 
             memoryLossAmplifier = builder
                     .comment("The amplifier for the memory loss effect. Affects potion effect strength")
-                    .defineInRange("memoryLossAmplifier", 5, 0, 100);
+                    .defineInRange("memoryLossAmplifier", 2, 0, 100);
 
             builder.pop();
         }
