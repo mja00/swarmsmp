@@ -11,8 +11,13 @@ public class SSMPS2Config {
     static final Logger LOGGER = SwarmsmpS2.LOGGER;
 
     public static class Server {
+        // Communication settings
         public final ForgeConfigSpec.IntValue talkRange;
         public final ForgeConfigSpec.IntValue whisperSpeed;
+        // Memory loss settings
+        public final ForgeConfigSpec.IntValue memoryLossTime;
+        public final ForgeConfigSpec.IntValue memoryLossTimeMultiplier;
+        public final ForgeConfigSpec.IntValue memoryLossAmplifier;
 
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
@@ -24,6 +29,21 @@ public class SSMPS2Config {
             whisperSpeed = builder
                     .comment("The speed at which whispers travel. ms per block")
                     .defineInRange("whisperSpeed", 100, 10, 1000);
+
+            builder.pop();
+            builder.comment("Memory Loss Settings").push("memoryLoss");
+
+            memoryLossTime = builder
+                    .comment("The time in minutes that a player's memory is lost")
+                    .defineInRange("memoryLossTime", 5, 1, 60);
+
+            memoryLossTimeMultiplier = builder
+                    .comment("The multiplier for the memory loss time. Affects potion effect time")
+                    .defineInRange("memoryLossTimeMultiplier", 5, 1, 100);
+
+            memoryLossAmplifier = builder
+                    .comment("The amplifier for the memory loss effect. Affects potion effect strength")
+                    .defineInRange("memoryLossAmplifier", 5, 0, 100);
 
             builder.pop();
         }

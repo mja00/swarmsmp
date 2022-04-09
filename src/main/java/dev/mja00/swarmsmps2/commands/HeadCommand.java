@@ -4,7 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.nbt.CompoundTag;
@@ -12,16 +11,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.apache.logging.log4j.Logger;
-
-import java.util.UUID;
 
 public class HeadCommand {
 
-    static Logger LOGGER = SwarmsmpS2.LOGGER;
     private static final String translationKey = SwarmsmpS2.translationKey;
-    static final UUID DUMMY = Util.NIL_UUID;
-    private static final String MOD_ID = SwarmsmpS2.MODID;
 
     public HeadCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("head").executes(context -> {
@@ -42,7 +35,6 @@ public class HeadCommand {
         boolean success = player.getInventory().add(headItem);
         if (!success) {
             player.spawnAtLocation(headItem);
-
         }
         source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.head.success").withStyle(ChatFormatting.AQUA), false);
         return 1;
