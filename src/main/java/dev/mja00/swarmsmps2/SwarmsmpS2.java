@@ -32,7 +32,7 @@ public class SwarmsmpS2 {
 
     public SwarmsmpS2() {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SSMPS2Config.serverSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SSMPS2Config.serverSpec);
         eventBus.register(SSMPS2Config.class);
 
         // Register the setup method for modloading

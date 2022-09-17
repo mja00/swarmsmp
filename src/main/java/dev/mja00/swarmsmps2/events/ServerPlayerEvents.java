@@ -1,9 +1,12 @@
 package dev.mja00.swarmsmps2.events;
 
+import com.google.gson.Gson;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
+import dev.mja00.swarmsmps2.objects.JoinInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -14,15 +17,25 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 @Mod.EventBusSubscriber(modid = SwarmsmpS2.MODID, value = Dist.DEDICATED_SERVER)
 public class ServerPlayerEvents {
@@ -30,9 +43,8 @@ public class ServerPlayerEvents {
     static Logger LOGGER = SwarmsmpS2.LOGGER;
     static final String translationKey = SwarmsmpS2.translationKey;
     static final Random rnd = new Random();
-    static final int memoryLoss = SSMPS2Config.SERVER.memoryLossTime.get();
-    static final int memoryLossMultiplier = SSMPS2Config.SERVER.memoryLossTimeMultiplier.get();
-    static final int memoryLossAmplifier = SSMPS2Config.SERVER.memoryLossAmplifier.get();
+    static final HttpClient client = HttpClient.newBuilder().build();
+
 
     private static String generateRandomString(int length) {
         // Define our characterset
@@ -74,6 +86,10 @@ public class ServerPlayerEvents {
 
     private static void giveRespawnEffects(ServerPlayer player) {
         // Give the player blindness and nausea for memoryLoss * memoryLossMultiplier seconds
+        int memoryLossMultiplier = SSMPS2Config.SERVER.memoryLossTimeMultiplier.get();
+        int memoryLossAmplifier = SSMPS2Config.SERVER.memoryLossAmplifier.get();
+        int memoryLoss = SSMPS2Config.SERVER.memoryLossTime.get();
+
         int duration = (memoryLoss * memoryLossMultiplier) * 20;
         MobEffectInstance blindness = new MobEffectInstance(MobEffects.BLINDNESS, duration, memoryLossAmplifier, false, false, false);
         MobEffectInstance nausea = new MobEffectInstance(MobEffects.CONFUSION, duration, memoryLossAmplifier, false, false, false);
@@ -95,6 +111,7 @@ public class ServerPlayerEvents {
             clearChat(player);
 
             // Build our message
+            int memoryLoss = SSMPS2Config.SERVER.memoryLossTime.get();
             MutableComponent message = new TranslatableComponent(translationKey + "event.death.player", memoryLoss).withStyle(ChatFormatting.RED);
 
             // Give effects to the player
@@ -105,6 +122,41 @@ public class ServerPlayerEvents {
 
             // Play a scary sound
             player.getLevel().playSound(null, player.blockPosition(), SoundEvents.AMBIENT_CAVE, SoundSource.MASTER, 1.0f, 0.2f);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        // Get player
+        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        String endpoint = "minecraft/" + player.getUUID() + "/allow_connection";
+        String getURL = SSMPS2Config.SERVER.apiBaseURL.get() + endpoint;
+
+        // Get the response
+        HttpRequest apiRequest = HttpRequest.newBuilder().GET().uri(URI.create(getURL)).setHeader("User-Agent", "Swarmsmps2").setHeader("Authorization", SSMPS2Config.SERVER.apiKey.get()).build();
+        CompletableFuture<HttpResponse<String>> response = client.sendAsync(apiRequest, HttpResponse.BodyHandlers.ofString());
+        String responseBody;
+
+        try {
+            responseBody = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException e) {
+            LOGGER.error("Error while getting backstory from API", e);
+            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
+            return;
+        }
+
+        // Check the response code
+        if (response.join().statusCode() != 200) {
+            LOGGER.error("Error while getting backstory from API: " + responseBody);
+            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
+            return;
+        }
+
+        final Gson gson = new Gson();
+        JoinInfo joinInfo = gson.fromJson(responseBody, JoinInfo.class);
+        if (!joinInfo.getAllow()) {
+            // Do nothing, they're allowed to join// Disconnect them with the message
+            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMsg()).withStyle(ChatFormatting.AQUA)));
         }
     }
 }

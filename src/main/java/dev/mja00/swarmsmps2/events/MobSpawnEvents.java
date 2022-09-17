@@ -40,6 +40,8 @@ public class MobSpawnEvents {
             giveTeamAndCreateIfNeeded(entity, "undead");
         } else if (EntityType.DROWNED.equals(entityType)) {
             giveTeamAndCreateIfNeeded(entity, "undead");
+        } else if (EntityType.SILVERFISH.equals(entityType)) {
+            giveTeamAndCreateIfNeeded(entity, "bugkin");
         }
     }
 }

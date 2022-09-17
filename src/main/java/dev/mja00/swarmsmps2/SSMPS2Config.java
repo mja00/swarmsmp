@@ -18,6 +18,10 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.IntValue memoryLossTime;
         public final ForgeConfigSpec.IntValue memoryLossTimeMultiplier;
         public final ForgeConfigSpec.IntValue memoryLossAmplifier;
+        // API Settings
+        public final ForgeConfigSpec.BooleanValue enableAPI;
+        public final ForgeConfigSpec.ConfigValue<String> apiKey;
+        public final ForgeConfigSpec.ConfigValue<String> apiBaseURL;
 
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
@@ -44,6 +48,21 @@ public class SSMPS2Config {
             memoryLossAmplifier = builder
                     .comment("The amplifier for the memory loss effect. Affects potion effect strength")
                     .defineInRange("memoryLossAmplifier", 2, 0, 100);
+
+            builder.pop();
+            builder.comment("API Settings").push("api");
+
+            enableAPI = builder
+                    .comment("Enable the API")
+                    .define("enableAPI", true);
+
+            apiKey = builder
+                    .comment("The API key")
+                    .define("apiKey", "YOUR_API_KEY");
+
+            apiBaseURL = builder
+                    .comment("The base URL for the API")
+                    .define("apiBaseURL", "http://localhost:5000/api/");
 
             builder.pop();
         }

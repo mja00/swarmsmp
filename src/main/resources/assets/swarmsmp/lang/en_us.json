@@ -67,5 +67,8 @@
   "swarmsmps2.command.disabled": "This command is disabled.",
   "swarmsmps2.command.whisper.disabled": "This command is disabled. Please use the /message command instead.",
 
-  "swarmsmps2.event.death.player": "-----------------------------------------------------\nYou've unfortunately died. You've lost a bit of your backstory.\nUse /backstory to see your current backstory.\nYou've also lost the last %1$s minutes of your memory.\n-----------------------------------------------------"
+  "swarmsmps2.event.death.player": "-----------------------------------------------------\nYou've unfortunately died. You've lost a bit of your backstory.\nUse /backstory to see your current backstory.\nYou've also lost the last %1$s minutes of your memory.\n-----------------------------------------------------",
+
+  "swarmsmps2.connection.error": "There was an error connecting to the server. Please try again later.",
+  "swarmsmps2.connection.disconnected": "\u00A7cYou've been disconnected for the following reason: \n%1$s"
 }

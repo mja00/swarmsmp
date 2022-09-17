@@ -59,7 +59,7 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
-            args '--username', 'Scionzenos'
+            args '--username', 'mja00', '--uuid', '1043a019-7075-4c06-b02f-fb1dbb3b94b3'
 
             mods {
                 swarmsmps2 {

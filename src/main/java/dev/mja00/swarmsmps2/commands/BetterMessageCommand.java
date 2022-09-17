@@ -29,7 +29,6 @@ import java.util.UUID;
 public class BetterMessageCommand {
 
     static Logger LOGGER = SwarmsmpS2.LOGGER;
-    private static final float msPerBlock = (float) SSMPS2Config.SERVER.whisperSpeed.get();
     static final UUID DUMMY = Util.NIL_UUID;
     private static final String translationKey = SwarmsmpS2.translationKey;
 
@@ -87,6 +86,7 @@ public class BetterMessageCommand {
                 // Get the distance to the recipient
                 double distance = sender.distanceTo(recipient);
                 // Calculate the time
+                float msPerBlock = (float)SSMPS2Config.SERVER.whisperSpeed.get();
                 long time = (long) (distance * msPerBlock);
 
                 // Create the request
