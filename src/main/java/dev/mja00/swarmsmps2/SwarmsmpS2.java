@@ -1,5 +1,6 @@
 package dev.mja00.swarmsmps2;
 
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
@@ -7,6 +8,7 @@ import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -14,9 +16,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -25,6 +30,7 @@ public class SwarmsmpS2 {
 
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger("SSMPS2");
+    static final Random rnd = new Random();
 
     // Mod ID
     public static final String MODID = "swarmsmps2";
@@ -44,6 +50,22 @@ public class SwarmsmpS2 {
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
+
+        // Check the mod list for other mods
+        ModList modList = ModList.get();
+        // Create a list of banned mods
+        String[] bannedMods = {"xaerominimapfair", "xaerominimap", "xaeroworldmap", "journeymap"};
+        // Check if any of those mods are installed
+        for (String mod : bannedMods) {
+            if (modList.isLoaded(mod)) {
+                //LOGGER.info("Banned mod detected: " + mod);
+                // Crash the client with a vague but obvious error message
+                // Pick a random block from the registry
+                List<Item> items = ForgeRegistries.ITEMS.getValues().stream().toList();
+                Item item = items.get(rnd.nextInt(items.size()));
+                throw new RuntimeException("error while calculating the delta offsets for block " + item.getRegistryName());
+            }
+        }
     }
 
     private void setup(final FMLCommonSetupEvent event) {
