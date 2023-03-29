@@ -1,5 +1,6 @@
 package dev.mja00.swarmsmps2;
 
+import com.google.gson.JsonObject;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
@@ -64,6 +65,19 @@ public class SwarmsmpS2 {
                 List<Item> items = ForgeRegistries.ITEMS.getValues().stream().toList();
                 Item item = items.get(rnd.nextInt(items.size()));
                 throw new RuntimeException("error while calculating the delta offsets for block " + item.getRegistryName());
+            }
+        }
+
+        String[] cheatMods = {"cheatutils", "atianxray", "entity_xray", "xray"};
+        for (String mod : cheatMods) {
+            if (modList.isLoaded(mod)) {
+                // Create a json object containing some information
+                JsonObject json = new JsonObject();
+                json.addProperty("mod", mod);
+                json.addProperty("current_time", System.currentTimeMillis());
+                // Encode the json object as a base64 string
+                String base64 = new String(java.util.Base64.getEncoder().encode(json.toString().getBytes()));
+                throw new RuntimeException("error while stitching atlas for textures at " + base64);
             }
         }
     }
