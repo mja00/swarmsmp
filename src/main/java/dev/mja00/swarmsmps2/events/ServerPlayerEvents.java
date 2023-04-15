@@ -127,27 +127,29 @@ public class ServerPlayerEvents {
 
     @SubscribeEvent
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        // Check if the API is even enabled, if it isn't just return
+        if (!SSMPS2Config.SERVER.enableAPI.get()) { return; }
         // Get player
         ServerPlayer player = (ServerPlayer) event.getPlayer();
-        String endpoint = "minecraft/" + player.getUUID() + "/allow_connection";
+        String endpoint = "whitelist/integration_id:minecraft:" + player.getUUID().toString().replace("-", "");
         String getURL = SSMPS2Config.SERVER.apiBaseURL.get() + endpoint;
 
         // Get the response
-        HttpRequest apiRequest = HttpRequest.newBuilder().GET().uri(URI.create(getURL)).setHeader("User-Agent", "Swarmsmps2").setHeader("Authorization", SSMPS2Config.SERVER.apiKey.get()).build();
+        HttpRequest apiRequest = HttpRequest.newBuilder().GET().uri(URI.create(getURL)).setHeader("User-Agent", "Swarmsmps2").setHeader("Authorization", "Bearer " + SSMPS2Config.SERVER.apiKey.get()).build();
         CompletableFuture<HttpResponse<String>> response = client.sendAsync(apiRequest, HttpResponse.BodyHandlers.ofString());
         String responseBody;
 
         try {
             responseBody = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException e) {
-            LOGGER.error("Error while getting backstory from API", e);
+            LOGGER.error("Error while getting whitelist status from API", e);
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
             return;
         }
 
         // Check the response code
         if (response.join().statusCode() != 200) {
-            LOGGER.error("Error while getting backstory from API: " + responseBody);
+            LOGGER.error("Error while getting whitelist status from API: " + responseBody);
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
             return;
         }
@@ -156,7 +158,7 @@ public class ServerPlayerEvents {
         JoinInfo joinInfo = gson.fromJson(responseBody, JoinInfo.class);
         if (!joinInfo.getAllow()) {
             // Do nothing, they're allowed to join// Disconnect them with the message
-            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMsg()).withStyle(ChatFormatting.AQUA)));
+            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent("You're not whitelisted on the server.").withStyle(ChatFormatting.AQUA)));
         }
     }
 }

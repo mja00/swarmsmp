@@ -1,5 +1,6 @@
 package dev.mja00.swarmsmps2.events;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import net.minecraft.ChatFormatting;
@@ -8,6 +9,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.CommandEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -20,6 +22,7 @@ import java.util.List;
 public class ChatEvents {
 
     private static final Logger LOGGER = LogManager.getLogger("CHAT");
+    private static final Logger COMMAND_LOGGER = LogManager.getLogger("CommandSpy");
 
     // Gets the player's name and returns it as a string
     public static Component getPlayerName(Player player) {
@@ -78,5 +81,17 @@ public class ChatEvents {
             }
         }
         event.setCanceled(true);
+    }
+
+    // Detect command usage
+    @SubscribeEvent
+    public static void onCommand(CommandEvent event) {
+        // Log the command
+        // Check if the command is from a player
+        if (event.getParseResults().getContext().getSource().getEntity() instanceof Player player) {
+            COMMAND_LOGGER.info(player.getDisplayName().getString() + " used command: " + event.getParseResults().getReader().getString());
+        } else {
+            COMMAND_LOGGER.info("Console used command: " + event.getParseResults().getReader().getString());
+        }
     }
 }
