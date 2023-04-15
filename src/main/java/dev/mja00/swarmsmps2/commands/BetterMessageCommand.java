@@ -70,6 +70,11 @@ public class BetterMessageCommand {
     }
 
     private int sendPrivateMessage(CommandSourceStack source, Collection<ServerPlayer> targets, Component message) {
+        // This command is disabled
+        if (!SSMPS2Config.SERVER.whisperEnabled.get()) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.message.disabled"));
+            return 0;
+        }
         // Make sure there is only one recipient
         if (targets.size() != 1) {
             source.sendFailure(new TranslatableComponent(translationKey + "commands.message.players.too_many"));

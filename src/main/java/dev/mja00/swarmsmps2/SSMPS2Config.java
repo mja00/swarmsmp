@@ -14,6 +14,7 @@ public class SSMPS2Config {
         // Communication settings
         public final ForgeConfigSpec.IntValue talkRange;
         public final ForgeConfigSpec.IntValue whisperSpeed;
+        public final ForgeConfigSpec.BooleanValue whisperEnabled;
         // Memory loss settings
         public final ForgeConfigSpec.IntValue memoryLossTime;
         public final ForgeConfigSpec.IntValue memoryLossTimeMultiplier;
@@ -33,6 +34,10 @@ public class SSMPS2Config {
             whisperSpeed = builder
                     .comment("The speed at which whispers travel. ms per block")
                     .defineInRange("whisperSpeed", 100, 10, 1000);
+
+            whisperEnabled = builder
+                    .comment("Enable whispers")
+                    .define("whisperEnabled", false);
 
             builder.pop();
             builder.comment("Memory Loss Settings").push("memoryLoss");

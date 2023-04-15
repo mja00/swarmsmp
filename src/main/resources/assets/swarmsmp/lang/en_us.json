@@ -38,6 +38,7 @@
   "swarmsmps2.commands.message.received": "%1$s ➡ You: %2$s",
   "swarmsmps2.commands.message.sent": "You ➡ %1$s: %2$s",
   "swarmsmps2.commands.message.failed": "Message failed to send.",
+  "swarmsmps2.commands.message.disabled": "You're unable to send messages to players.",
 
   "swarmsmps2.commands.head.no_room": "You do not have room for that head.",
   "swarmsmps2.commands.admin.head.success": "You've acquired head!",
