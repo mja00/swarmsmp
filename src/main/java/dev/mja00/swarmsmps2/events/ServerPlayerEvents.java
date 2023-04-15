@@ -158,7 +158,7 @@ public class ServerPlayerEvents {
         JoinInfo joinInfo = gson.fromJson(responseBody, JoinInfo.class);
         if (!joinInfo.getAllow()) {
             // Do nothing, they're allowed to join// Disconnect them with the message
-            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent("You're not whitelisted on the server.").withStyle(ChatFormatting.AQUA)));
+            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
         }
     }
 }
