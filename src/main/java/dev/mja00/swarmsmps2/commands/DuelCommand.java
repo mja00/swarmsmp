@@ -125,6 +125,9 @@ public class DuelCommand {
         targetPlayer.sendMessage(component, sourcePlayer.getUUID());
         targetPlayer.sendMessage(component2, sourcePlayer.getUUID());
 
+        // Inform source player that the request was sent
+        sourcePlayer.sendMessage(new TranslatableComponent(translationKey + "commands.duel.request.sent", targetPlayer.getDisplayName()).withStyle(ChatFormatting.DARK_GREEN), DUMMY);
+
         return 1;
     }
 
