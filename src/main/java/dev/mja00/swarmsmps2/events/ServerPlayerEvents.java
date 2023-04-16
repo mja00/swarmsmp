@@ -1,6 +1,7 @@
 package dev.mja00.swarmsmps2.events;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.objects.JoinInfo;
@@ -31,7 +32,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -43,7 +46,7 @@ public class ServerPlayerEvents {
     static Logger LOGGER = SwarmsmpS2.LOGGER;
     static final String translationKey = SwarmsmpS2.translationKey;
     static final Random rnd = new Random();
-    static final HttpClient client = HttpClient.newBuilder().build();
+    static final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
 
 
     private static String generateRandomString(int length) {
@@ -133,6 +136,7 @@ public class ServerPlayerEvents {
         ServerPlayer player = (ServerPlayer) event.getPlayer();
         String endpoint = "whitelist/integration_id:minecraft:" + player.getUUID().toString().replace("-", "");
         String getURL = SSMPS2Config.SERVER.apiBaseURL.get() + endpoint;
+        LOGGER.info("Getting whitelist status from API: " + getURL);
 
         // Get the response
         HttpRequest apiRequest = HttpRequest.newBuilder().GET().uri(URI.create(getURL)).setHeader("User-Agent", "Swarmsmps2").setHeader("Authorization", "Bearer " + SSMPS2Config.SERVER.apiKey.get()).build();
@@ -140,11 +144,26 @@ public class ServerPlayerEvents {
         String responseBody;
 
         try {
-            responseBody = response.thenApply(HttpResponse::body).get(5, TimeUnit.SECONDS);
+            responseBody = response.thenApply(HttpResponse::body).get(SSMPS2Config.SERVER.firstTimeout.get(), TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException e) {
-            LOGGER.error("Error while getting whitelist status from API", e);
-            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
-            return;
+            // Check if it's a timeout exception
+            if (e instanceof java.util.concurrent.TimeoutException) {
+                // Attempt the request again
+                LOGGER.error("Error while getting whitelist status from API: Request timed out");
+                // Retry it ig lol
+                try {
+                    CompletableFuture<HttpResponse<String>> response2 = client.sendAsync(apiRequest, HttpResponse.BodyHandlers.ofString());
+                    responseBody = response2.thenApply(HttpResponse::body).get(SSMPS2Config.SERVER.secondTimeout.get(), TimeUnit.SECONDS);
+                } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException ex) {
+                    LOGGER.error("Error while getting whitelist status from API: Request timed out");
+                    player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
+                    return;
+                }
+            } else {
+                LOGGER.error("Error while getting whitelist status from API", e);
+                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
+                return;
+            }
         }
 
         // Check the response code
@@ -155,10 +174,20 @@ public class ServerPlayerEvents {
         }
 
         final Gson gson = new Gson();
-        JoinInfo joinInfo = gson.fromJson(responseBody, JoinInfo.class);
-        if (!joinInfo.getAllow()) {
-            // Do nothing, they're allowed to join// Disconnect them with the message
-            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
+        try {
+            JoinInfo joinInfo = gson.fromJson(responseBody, JoinInfo.class);
+            if (!joinInfo.getAllow()) {
+                // Do nothing, they're allowed to join// Disconnect them with the message
+                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
+            }
+            // If their message is "Bypass" then send a message saying they bypassed the whitelist checks
+            if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
+                player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+            }
+        } catch (JsonSyntaxException | IllegalStateException e) {
+            LOGGER.error("Error while parsing whitelist status from API", e);
+            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
         }
+
     }
 }

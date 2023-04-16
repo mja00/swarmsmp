@@ -71,5 +71,6 @@
   "swarmsmps2.event.death.player": "-----------------------------------------------------\nYou've unfortunately died. You've lost the last %1$s minutes of your memory.\n-----------------------------------------------------",
 
   "swarmsmps2.connection.error": "There was an error connecting to the server. Please try again later.",
-  "swarmsmps2.connection.disconnected": "\u00A7cYou've been disconnected for the following reason: \n%1$s"
+  "swarmsmps2.connection.disconnected": "\u00A7cYou've been disconnected for the following reason: \n%1$s",
+  "swarmsmps2.connection.bypassed": "You've bypassed the connection whitelist check."
 }

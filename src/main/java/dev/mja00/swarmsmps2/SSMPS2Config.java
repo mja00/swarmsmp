@@ -23,6 +23,8 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.BooleanValue enableAPI;
         public final ForgeConfigSpec.ConfigValue<String> apiKey;
         public final ForgeConfigSpec.ConfigValue<String> apiBaseURL;
+        public final ForgeConfigSpec.IntValue firstTimeout;
+        public final ForgeConfigSpec.IntValue secondTimeout;
 
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
@@ -68,6 +70,14 @@ public class SSMPS2Config {
             apiBaseURL = builder
                     .comment("The base URL for the API")
                     .define("apiBaseURL", "http://localhost:5000/api/");
+
+            firstTimeout = builder
+                    .comment("The first timeout for the API")
+                    .defineInRange("firstTimeout", 3, 1, 10);
+
+            secondTimeout = builder
+                    .comment("The second timeout for the API")
+                    .defineInRange("secondTimeout", 30, 1, 30);
 
             builder.pop();
         }

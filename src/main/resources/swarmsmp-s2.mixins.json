@@ -3,10 +3,13 @@
   "minVersion": "0.8",
   "package": "dev.mja00.swarmsmps2.mixin",
   "compatibilityLevel": "JAVA_8",
-  "refmap": "swarmsmps2.refmap.json",
+  "refmap": "swarmsmp-s2.refmap.json",
   "mixins": [
   ],
   "client": [
+    "MixinDownloadingTexture",
+    "MixinPlayerRenderer",
+    "MixinSkinProcessor"
   ],
   "injectors": {
     "defaultRequire": 1
