@@ -89,7 +89,13 @@ public class ChatEvents {
         // Log the command
         // Check if the command is from a player
         if (event.getParseResults().getContext().getSource().getEntity() instanceof Player player) {
-            COMMAND_LOGGER.info(player.getDisplayName().getString() + " used command: " + event.getParseResults().getReader().getString());
+            String commandUsed = event.getParseResults().getReader().getString();
+            // Check against a list of not cared about commands
+            String commandBeforeSpace = commandUsed.split(" ")[0];
+            if (SSMPS2Config.SERVER.ignoredCommands.get().contains(commandBeforeSpace)) {
+                return;
+            }
+            COMMAND_LOGGER.info(player.getDisplayName().getString() + " used command: " + commandUsed);
         } else {
             COMMAND_LOGGER.info("Console used command: " + event.getParseResults().getReader().getString());
         }

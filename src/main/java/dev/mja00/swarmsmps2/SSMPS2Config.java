@@ -6,6 +6,8 @@ import net.minecraftforge.fml.event.config.ModConfigEvent;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 
+import java.util.List;
+
 public class SSMPS2Config {
 
     static final Logger LOGGER = SwarmsmpS2.LOGGER;
@@ -25,6 +27,8 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.ConfigValue<String> apiBaseURL;
         public final ForgeConfigSpec.IntValue firstTimeout;
         public final ForgeConfigSpec.IntValue secondTimeout;
+
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
 
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
@@ -80,6 +84,10 @@ public class SSMPS2Config {
                     .defineInRange("secondTimeout", 30, 1, 30);
 
             builder.pop();
+
+            ignoredCommands = builder
+                    .comment("Commands that will not be sent to the API")
+                    .defineList("ignoredCommands", List.of("/help", "/gamemode", "/ooc"), o -> o instanceof String);
         }
     }
 
