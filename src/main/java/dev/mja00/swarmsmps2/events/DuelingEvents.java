@@ -1,5 +1,6 @@
 package dev.mja00.swarmsmps2.events;
 
+import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -89,6 +90,8 @@ public class DuelingEvents {
 
     @SubscribeEvent
     public static void onPlayerAttack(AttackEntityEvent event) {
+        // If we allow dueling players to attack non-dueling we'll just return early on this
+        if (SSMPS2Config.SERVER.allowDuelingPlayerToAttackNonDueling.get() || !SSMPS2Config.SERVER.enableDuels.get()) { return; }
         // Check if the player is attacking anything but a player
         if (!(event.getTarget() instanceof Player target)) { return; }
         Player player = event.getPlayer();
@@ -110,6 +113,8 @@ public class DuelingEvents {
 
     @SubscribeEvent
     public static void onPlayerDeath(LivingHurtEvent event) {
+        // If dueling isn't enabled, return early
+        if (!SSMPS2Config.SERVER.enableDuels.get()) { return; }
         // Make sure the event is caused by a player
         if (event.getEntityLiving() instanceof Player player && event.getSource().getEntity() instanceof Player attacker) {
             // Get the player's data

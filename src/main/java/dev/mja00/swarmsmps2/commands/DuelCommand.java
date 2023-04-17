@@ -3,6 +3,7 @@ package dev.mja00.swarmsmps2.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import net.minecraft.ChatFormatting;
@@ -68,6 +69,10 @@ public class DuelCommand {
     }
 
     private int duel(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
+        if (!SSMPS2Config.SERVER.enableDuels.get()) {
+            source.sendFailure(new TranslatableComponent(translationKey + "command.disabled"));
+            return 0;
+        }
         ServerPlayer sourcePlayer = source.getPlayerOrException();
 
         if (targets.size() != 1) {
@@ -132,6 +137,10 @@ public class DuelCommand {
     }
 
     private int duelDecline(CommandSourceStack source, String duelId) throws CommandSyntaxException {
+        if (!SSMPS2Config.SERVER.enableDuels.get()) {
+            source.sendFailure(new TranslatableComponent(translationKey + "command.disabled"));
+            return 0;
+        }
         DuelRequest request = REQUESTS.get(duelId);
         ServerPlayer sourcePlayer = source.getPlayerOrException();
 
@@ -164,6 +173,10 @@ public class DuelCommand {
     }
 
     private int duelAccept(CommandSourceStack source, String duelId) throws CommandSyntaxException {
+        if (!SSMPS2Config.SERVER.enableDuels.get()) {
+            source.sendFailure(new TranslatableComponent(translationKey + "command.disabled"));
+            return 0;
+        }
         DuelRequest request = REQUESTS.get(duelId);
         ServerPlayer sourcePlayer = source.getPlayerOrException();
 
@@ -216,6 +229,10 @@ public class DuelCommand {
     }
 
     private int duelForfeit(CommandSourceStack source) throws CommandSyntaxException {
+        if (!SSMPS2Config.SERVER.enableDuels.get()) {
+            source.sendFailure(new TranslatableComponent(translationKey + "command.disabled"));
+            return 0;
+        }
         ServerPlayer player = source.getPlayerOrException();
         if (!isInDuel(player)) {
             player.sendMessage(new TranslatableComponent(translationKey + "commands.duel.not_in_duel").withStyle(ChatFormatting.RED), DUMMY);

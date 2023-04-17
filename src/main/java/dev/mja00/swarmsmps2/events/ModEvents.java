@@ -1,5 +1,6 @@
 package dev.mja00.swarmsmps2.events;
 
+import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.commands.*;
 import net.minecraft.ChatFormatting;

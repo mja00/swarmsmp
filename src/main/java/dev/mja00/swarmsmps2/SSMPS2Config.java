@@ -28,6 +28,10 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.IntValue firstTimeout;
         public final ForgeConfigSpec.IntValue secondTimeout;
 
+        // Duel Settings
+        public final ForgeConfigSpec.BooleanValue enableDuels;
+        public final ForgeConfigSpec.BooleanValue allowDuelingPlayerToAttackNonDueling;
+
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
 
         Server(ForgeConfigSpec.Builder builder) {
@@ -84,10 +88,24 @@ public class SSMPS2Config {
                     .defineInRange("secondTimeout", 30, 1, 30);
 
             builder.pop();
+            builder.comment("Duel Settings").push("duel");
+
+            enableDuels = builder
+                    .comment("Enable duels")
+                    .define("enableDuels", true);
+
+            allowDuelingPlayerToAttackNonDueling = builder
+                    .comment("Allow dueling player to attack non-dueling player")
+                    .define("allowDuelingPlayerToAttackNonDueling", false);
+
+            builder.pop();
+            builder.comment("Other Settings").push("other");
 
             ignoredCommands = builder
                     .comment("Commands that will not be sent to the API")
                     .defineList("ignoredCommands", List.of("/help", "/gamemode", "/ooc"), o -> o instanceof String);
+
+            builder.pop();
         }
     }
 
