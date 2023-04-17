@@ -2,6 +2,7 @@ package dev.mja00.swarmsmps2.events;
 
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
+import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +35,7 @@ public class DuelingEvents {
             // Send the player a message
             player.sendMessage(new TranslatableComponent(translationKey + "dueling.died").withStyle(ChatFormatting.RED), DUMMY);
         }
-        removeDuelTags(player);
+        DuelHelper.removeDuelTags(player);
     }
 
     private static void onDuelLostToNonPlayer(Player player) {
@@ -43,7 +45,7 @@ public class DuelingEvents {
             // Send the player a message
             player.sendMessage(new TranslatableComponent(translationKey + "dueling.died.non-player").withStyle(ChatFormatting.RED), DUMMY);
         }
-        removeDuelTags(player);
+        DuelHelper.removeDuelTags(player);
     }
 
     private static void onDuelWon(Player player) {
@@ -53,7 +55,7 @@ public class DuelingEvents {
             // Send the player a message
             player.sendMessage(new TranslatableComponent(translationKey + "dueling.won").withStyle(ChatFormatting.GREEN), DUMMY);
         }
-        removeDuelTags(player);
+        DuelHelper.removeDuelTags(player);
     }
 
     private static void resetStats(Player player) {
@@ -65,18 +67,6 @@ public class DuelingEvents {
         // Set their health and food to their previous values
         player.setHealth(prevHealth);
         player.getFoodData().setFoodLevel(prevFood);
-    }
-
-    private static void removeDuelTags(Player player) {
-        // Get their data
-        CompoundTag persistentData = player.getPersistentData();
-        persistentData.remove(MOD_ID + ":dueling");
-        persistentData.remove(MOD_ID + ":duel_target");
-        persistentData.remove(MOD_ID + ":duel_food");
-        persistentData.remove(MOD_ID + ":duel_health");
-        persistentData.remove(MOD_ID + ":duel_saturation");
-        persistentData.remove(MOD_ID + ":server_duel");
-        if (player.isCurrentlyGlowing()) { player.setGlowingTag(false); }
     }
 
     @SubscribeEvent
@@ -206,5 +196,38 @@ public class DuelingEvents {
             }
         }
 
+    }
+
+    // Listen to the player logout event, and if they are dueling, cancel the duel
+    @SubscribeEvent
+    public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
+        // If dueling isn't enabled we don't care
+        if (!SSMPS2Config.SERVER.enableDuels.get()) { return; }
+
+        // Get the player's data
+        CompoundTag playerData = event.getPlayer().getPersistentData();
+        // Check if the player is dueling
+        boolean isDueling = playerData.getBoolean(MOD_ID + ":dueling");
+        if (!isDueling) { return; }
+        LOGGER.info("Player {} logged out during a duel!", event.getPlayer().getName().getString());
+
+        // Player is dueling so we'll cancel the duel
+        // Get the player's duel target
+        UUID targetUUID = playerData.getUUID(MOD_ID + ":duel_target");
+        // Get the target
+        Player target = event.getPlayer().getLevel().getPlayerByUUID(targetUUID);
+        // If the target exists cancel the duel on their end
+        if (target != null) {
+            onDuelWon(target);
+        } else {
+            // Log that the target doesn't exist
+            LOGGER.warn("{} had a duel target that doesn't exist", event.getPlayer().getName().toString());
+        }
+    }
+
+    // Listen to the join event too as we'll clear any dueling data
+    @SubscribeEvent
+    public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
+        DuelHelper.removeDuelTags(event.getPlayer());
     }
 }

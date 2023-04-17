@@ -62,21 +62,28 @@ public class DuelHelper {
         return true;
     }
 
-    public static void endDuelBetweenPlayers(ServerPlayer initiatingPlayer, ServerPlayer secondPlayer) {
+    public static void endDuelBetweenPlayers(ServerPlayer initiatingPlayer, ServerPlayer secondPlayer, boolean adminEnded) {
+        boolean secondPlayerLeft = secondPlayer == null;
         // Reset stats
         resetStats(initiatingPlayer);
-        resetStats(secondPlayer);
+        if (!secondPlayerLeft) resetStats(secondPlayer);
 
         // Remove tags
         removeDuelTags(initiatingPlayer);
-        removeDuelTags(secondPlayer);
+        if (!secondPlayerLeft) removeDuelTags(secondPlayer);
 
         // Inform both players of the duel end
-        initiatingPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "dueling.forfeit").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
-        secondPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "dueling.forfeit.opponent", initiatingPlayer.getDisplayName()).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+        if (!adminEnded) {
+            initiatingPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "dueling.forfeit").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+            if (!secondPlayerLeft) secondPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "dueling.forfeit.opponent", initiatingPlayer.getDisplayName()).withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+        } else {
+            // Send both players a message informing them an admin ended the duel prematurely
+            initiatingPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "dueling.admin_ended").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+            if (!secondPlayerLeft) secondPlayer.sendMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "dueling.admin_ended").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
+        }
     }
 
-    private static void removeDuelTags(Player player) {
+    public static void removeDuelTags(Player player) {
         // Get their data
         CompoundTag persistentData = player.getPersistentData();
         persistentData.remove(MOD_ID + ":dueling");

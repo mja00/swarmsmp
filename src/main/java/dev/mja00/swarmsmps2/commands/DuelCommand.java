@@ -242,7 +242,7 @@ public class DuelCommand {
         UUID duelOpponentUUID = player.getPersistentData().getUUID(MOD_ID + ":duel_target");
         ServerPlayer duelOpponent = source.getServer().getPlayerList().getPlayer(duelOpponentUUID);
 
-        DuelHelper.endDuelBetweenPlayers(player, duelOpponent);
+        DuelHelper.endDuelBetweenPlayers(player, duelOpponent, false);
 
         return 1;
     }

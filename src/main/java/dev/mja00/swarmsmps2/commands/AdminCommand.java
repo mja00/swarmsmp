@@ -42,7 +42,9 @@ public class AdminCommand {
             return giveHeadOfPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"));
         }))).then(Commands.literal("give_head").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("head_target", EntityArgument.players()).executes(command -> {
             return giveHeadOfPlayerToPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"), EntityArgument.getPlayers(command, "head_target"));
-        })))));
+        })))).then(Commands.literal("end_duel").then(Commands.argument("player", EntityArgument.players()).executes((command) -> {
+            return endDuel(command.getSource(), EntityArgument.getPlayers(command, "player"));
+        }))));
     }
 
     private int giveHeadOfPlayer(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
@@ -160,7 +162,7 @@ public class AdminCommand {
     private int startDuel(CommandSourceStack source, Collection<ServerPlayer> firstPlayers, Collection<ServerPlayer> secondPlayers){
         // Make sure both collections are only 1 player
         if (firstPlayers.size() != 1 || secondPlayers.size() != 1) {
-            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.start_duel.error.players"));
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.error.players"));
             return 0;
         }
 
@@ -198,6 +200,31 @@ public class AdminCommand {
                ).withStyle(ChatFormatting.AQUA), DUMMY);
             });
         }
+
+        return 1;
+    }
+
+    private int endDuel(CommandSourceStack source, Collection<ServerPlayer> player) {
+        // Ensure the collection is just 1 player
+        if (player.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.error.players"));
+            return 0;
+        }
+        // Check if they're in a duel
+        ServerPlayer playerInDuel = player.iterator().next();
+        boolean isInDuel = playerInDuel.getPersistentData().contains(SwarmsmpS2.MODID + ":dueling");
+        if (!isInDuel) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.end_duel.error.not_in_duel"));
+            return 0;
+        }
+
+        // Player must be in a duel so we have our first player
+        // We'll need to check their "duel_target" persistent data to get the second player
+        UUID secondPlayerUUID = playerInDuel.getPersistentData().getUUID(SwarmsmpS2.MODID + ":duel_target");
+        // Get a player from this UUID
+        ServerPlayer secondPlayer = source.getServer().getPlayerList().getPlayer(secondPlayerUUID);
+        // End the duel
+        DuelHelper.endDuelBetweenPlayers(playerInDuel, secondPlayer, true);
 
         return 1;
     }
