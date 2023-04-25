@@ -38,6 +38,7 @@ public class ModEvents {
         new DuelCommand(event.getDispatcher());
         new OOCCommand(event.getDispatcher());
         new HeadCommand(event.getDispatcher());
+        new JoinCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }

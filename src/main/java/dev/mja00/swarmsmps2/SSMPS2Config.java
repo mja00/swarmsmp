@@ -32,6 +32,14 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.BooleanValue enableDuels;
         public final ForgeConfigSpec.BooleanValue allowDuelingPlayerToAttackNonDueling;
 
+        // Join command settings
+        public final ForgeConfigSpec.BooleanValue enableJoinCommand;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> swarmCommands;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> constructCommands;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> undeadCommands;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> naturebornCommands;
+
+
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
 
         Server(ForgeConfigSpec.Builder builder) {
@@ -97,6 +105,29 @@ public class SSMPS2Config {
             allowDuelingPlayerToAttackNonDueling = builder
                     .comment("Allow dueling player to attack non-dueling player")
                     .define("allowDuelingPlayerToAttackNonDueling", false);
+
+            builder.pop();
+            builder.comment("Join Settings").push("join");
+
+            enableJoinCommand = builder
+                    .comment("Enable the join command")
+                    .define("enableJoinCommand", true);
+
+            swarmCommands = builder
+                    .comment("Commands to run when a new Swarm character joins for the first time")
+                    .defineList("swarmCommands", List.of("/say swarm"), o -> o instanceof String);
+
+            constructCommands = builder
+                    .comment("Commands to run when a new Construct character joins for the first time")
+                    .defineList("constructCommands", List.of("/say construct"), o -> o instanceof String);
+
+            undeadCommands = builder
+                    .comment("Commands to run when a new Undead character joins for the first time")
+                    .defineList("undeadCommands", List.of("/say undead"), o -> o instanceof String);
+
+            naturebornCommands = builder
+                    .comment("Commands to run when a new Natureborn character joins for the first time")
+                    .defineList("naturebornCommands", List.of("/say natureborn"), o -> o instanceof String);
 
             builder.pop();
             builder.comment("Other Settings").push("other");
