@@ -108,6 +108,10 @@ public class ServerPlayerEvents {
         if (!event.isEndConquered()) {
             ServerPlayer player = (ServerPlayer) event.getPlayer();
             if (player.getPersistentData().contains(SwarmsmpS2.MODID + ":memory_loss_immune")) { return; }
+            // Increment their death count
+            // Check if they have one already
+            int deathCount = player.getPersistentData().getInt(SwarmsmpS2.MODID + ":death_count");
+            player.getPersistentData().putInt(SwarmsmpS2.MODID + ":death_count", deathCount + 1);
             LOGGER.info("Player " + player.getDisplayName().getString() + " has respawned");
 
             // Clear the player's chat

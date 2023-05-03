@@ -1,6 +1,7 @@
 package dev.mja00.swarmsmps2.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
@@ -28,23 +29,29 @@ public class AdminCommand {
     static final String translationKey = SwarmsmpS2.translationKey;
 
     public AdminCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("admin").requires((command) -> {
-            return command.hasPermission(2);
-        }).then(Commands.literal("set_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word()).executes((command) -> {
-            return setTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"));
-        })))).then(Commands.literal("remove_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word()).executes((command) -> {
-            return removeTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"));
-        })))).then(Commands.literal("check_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word()).executes((command) -> {
-            return checkTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"));
-        })))).then(Commands.literal("start_duel").then(Commands.argument("first_player", EntityArgument.players()).then(Commands.argument("second_player", EntityArgument.players()).executes((command) -> {
-            return startDuel(command.getSource(), EntityArgument.getPlayers(command, "first_player"), EntityArgument.getPlayers(command, "second_player"));
-        })))).then(Commands.literal("get_head").then(Commands.argument("target", EntityArgument.players()).executes((command) -> {
-            return giveHeadOfPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"));
-        }))).then(Commands.literal("give_head").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("head_target", EntityArgument.players()).executes(command -> {
-            return giveHeadOfPlayerToPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"), EntityArgument.getPlayers(command, "head_target"));
-        })))).then(Commands.literal("end_duel").then(Commands.argument("player", EntityArgument.players()).executes((command) -> {
-            return endDuel(command.getSource(), EntityArgument.getPlayers(command, "player"));
-        }))));
+        dispatcher.register(Commands.literal("admin")
+                .requires((command) -> command.hasPermission(2))
+                .then(Commands.literal("set_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
+                        .executes((command) -> setTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))))
+                .then(Commands.literal("remove_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
+                        .executes((command) -> removeTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))))
+                .then(Commands.literal("check_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
+                        .executes((command) -> checkTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))))
+                .then(Commands.literal("start_duel").then(Commands.argument("first_player", EntityArgument.players()).then(Commands.argument("second_player", EntityArgument.players())
+                        .executes((command) -> startDuel(command.getSource(), EntityArgument.getPlayers(command, "first_player"), EntityArgument.getPlayers(command, "second_player"))))))
+                .then(Commands.literal("get_head").then(Commands.argument("target", EntityArgument.players())
+                        .executes((command) -> giveHeadOfPlayer(command.getSource(), EntityArgument.getPlayers(command, "target")))))
+                .then(Commands.literal("give_head").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("head_target", EntityArgument.players())
+                        .executes(command -> giveHeadOfPlayerToPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"), EntityArgument.getPlayers(command, "head_target"))))))
+                .then(Commands.literal("end_duel").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> endDuel(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                .then(Commands.literal("deaths")
+                        .then(Commands.literal("get").then(Commands.argument("player", EntityArgument.players())
+                                .executes((command) -> getPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                        .then(Commands.literal("set").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("count", IntegerArgumentType.integer())
+                                .executes((command) -> setPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "count"))))))
+                        .then(Commands.literal("reset").then(Commands.argument("player", EntityArgument.players())
+                                .executes((command) -> resetPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player")))))));
     }
 
     private int giveHeadOfPlayer(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
@@ -226,6 +233,68 @@ public class AdminCommand {
         // End the duel
         DuelHelper.endDuelBetweenPlayers(playerInDuel, secondPlayer, true);
 
+        return 1;
+    }
+
+    private int getPlayerDeathCount(CommandSourceStack source, Collection<ServerPlayer> players) {
+        LOGGER.debug("Command init");
+        if (players.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.error.players"));
+            return 0;
+        }
+
+        ServerPlayer playerToCheck = players.iterator().next();
+        LOGGER.debug("Checking death count for " + playerToCheck.getDisplayName().getString());
+        // Get their persistent data
+        CompoundTag playerData = playerToCheck.getPersistentData();
+        LOGGER.debug("Got persistent data");
+        // Get their death count
+        int deathCount = playerData.getInt(SwarmsmpS2.MODID + ":death_count");
+        LOGGER.debug("Death count for " + playerToCheck.getDisplayName().getString() + " is " + deathCount);
+
+        // Tell the initiator of the command the death count
+        if (deathCount == 0 ) {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.get_deaths.none", playerToCheck.getDisplayName()), false);
+        } else if (deathCount == 1) {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.get_deaths", playerToCheck.getDisplayName(), deathCount), false);
+        } else {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.get_deaths.multiple", playerToCheck.getDisplayName(), deathCount), false);
+        }
+
+        return 1;
+    }
+
+    private int setPlayerDeathCount(CommandSourceStack source, Collection<ServerPlayer> players, int deathCount) {
+        if (players.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.error.players"));
+            return 0;
+        }
+
+        ServerPlayer playerToSet = players.iterator().next();
+        // Get their persistent data
+        CompoundTag playerData = playerToSet.getPersistentData();
+        // Set their death count
+        playerData.putInt(SwarmsmpS2.MODID + ":death_count", deathCount);
+
+        // Tell the initiator of the command the death count
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.set_deaths", playerToSet.getDisplayName(), deathCount), false);
+        return 1;
+    }
+
+    private int resetPlayerDeathCount(CommandSourceStack source, Collection<ServerPlayer> players) {
+        if (players.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.error.players"));
+            return 0;
+        }
+
+        ServerPlayer playerToReset = players.iterator().next();
+        // Get their persistent data
+        CompoundTag playerData = playerToReset.getPersistentData();
+        // Reset their death count
+        playerData.putInt(SwarmsmpS2.MODID + ":death_count", 0);
+
+        // Tell the initiator
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.reset_deaths", playerToReset.getDisplayName()), false);
         return 1;
     }
 }

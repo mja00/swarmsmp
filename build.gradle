@@ -18,7 +18,7 @@ apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'org.spongepowered.mixin'
 
 group = 'dev.mja00'
-version = '1.5-1.18.2'
+version = '1.6-1.18.2'
 
 java {
     archivesBaseName = 'swarmsmps2'
@@ -185,3 +185,5 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
+
+apply from: "https://moddingtutorials.org/applesilicon.gradle"

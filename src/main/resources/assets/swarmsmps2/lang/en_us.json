@@ -19,6 +19,11 @@
   "swarmsmps2.commands.admin.start_duel.inform_server": "A duel has been started between %1$s and %2$s!",
   "swarmsmps2.commands.admin.error.players": "You may only specify 1 player per argument.",
   "swarmsmps2.commands.admin.end_duel.error.not_in_duel": "This player is not in a duel.",
+  "swarmsmps2.commands.admin.get_deaths":  "%1$s has died %2$s time.",
+  "swarmsmps2.commands.admin.get_deaths.multiple":  "%1$s has died %2$s times.",
+  "swarmsmps2.commands.admin.get_deaths.none":  "%1$s has not died.",
+  "swarmsmps2.commands.admin.set_deaths": "You've set the deaths of %1$s to %2$s.",
+  "swarmsmps2.commands.admin.reset_deaths": "You've reset the deaths of %1$s.",
 
 
   "swarmsmps2.commands.duel.already_requested": "You've already requested a duel with %1$s.",
