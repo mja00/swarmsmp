@@ -39,6 +39,7 @@ public class ModEvents {
         new OOCCommand(event.getDispatcher());
         new HeadCommand(event.getDispatcher());
         new JoinCommand(event.getDispatcher());
+        new VerifyCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }

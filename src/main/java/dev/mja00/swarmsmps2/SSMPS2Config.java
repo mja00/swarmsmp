@@ -39,6 +39,11 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> undeadCommands;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> naturebornCommands;
 
+        // NamelessMC API Settings
+        public final ForgeConfigSpec.BooleanValue enableVerifyCommand;
+        public final ForgeConfigSpec.ConfigValue<String> namelessAPIKey;
+        public final ForgeConfigSpec.ConfigValue<String> namelessAPIBaseURL;
+
 
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
 
@@ -137,6 +142,19 @@ public class SSMPS2Config {
                     .defineList("ignoredCommands", List.of("/help", "/gamemode", "/ooc"), o -> o instanceof String);
 
             builder.pop();
+            builder.comment("NamelessMC API Settings").push("nameless");
+
+            enableVerifyCommand = builder
+                    .comment("Enable the verify command")
+                    .define("enableVerifyCommand", true);
+
+            namelessAPIKey = builder
+                    .comment("The API key")
+                    .define("namelessAPIKEY", "YOUR_API_KEY");
+
+            namelessAPIBaseURL = builder
+                    .comment("The base URL for the API")
+                    .define("namelessAPIBaseURL", "http://localhost:5000/api/");
         }
     }
 
