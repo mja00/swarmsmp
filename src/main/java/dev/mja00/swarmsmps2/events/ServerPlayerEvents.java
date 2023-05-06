@@ -8,9 +8,7 @@ import dev.mja00.swarmsmps2.objects.JoinInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -187,6 +185,18 @@ public class ServerPlayerEvents {
             // If their message is "Bypass" then send a message saying they bypassed the whitelist checks
             if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
                 player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+            }
+            // Check if it's MC-Verify and send a message
+            if (Objects.equals(joinInfo.getMessage(), "MC-Verify")) {
+                player.sendMessage(new TranslatableComponent(translationKey + "connection.mcverify").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+                // Compile a message that the user can clicky to open a link to the forum post explaining how to do it
+                MutableComponent message = new TextComponent("Click here to learn how to verify your Minecraft account.")
+                        .setStyle(Style.EMPTY
+                                .applyFormat(ChatFormatting.BLUE)
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, SSMPS2Config.SERVER.verificationFAQURL.get()))
+                        );
+                player.sendMessage(message, Util.NIL_UUID);
+
             }
         } catch (JsonSyntaxException | IllegalStateException e) {
             LOGGER.error("Error while parsing whitelist status from API", e);
