@@ -41,6 +41,7 @@ public class SSMPS2Config {
 
         // NamelessMC API Settings
         public final ForgeConfigSpec.BooleanValue enableVerifyCommand;
+        public final ForgeConfigSpec.ConfigValue<String> verificationFAQURL;
 
 
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
@@ -81,10 +82,6 @@ public class SSMPS2Config {
             enableAPI = builder
                     .comment("Enable the API")
                     .define("enableAPI", true);
-
-            enableVerifyCommand = builder
-                    .comment("Enable the verify command")
-                    .define("enableVerifyCommand", true);
 
             apiKey = builder
                     .comment("The API key")
@@ -144,6 +141,15 @@ public class SSMPS2Config {
                     .defineList("ignoredCommands", List.of("/help", "/gamemode", "/ooc"), o -> o instanceof String);
 
             builder.pop();
+            builder.comment("Verification Settings").push("verification");
+
+            enableVerifyCommand = builder
+                    .comment("Enable the verify command")
+                    .define("enableVerifyCommand", true);
+
+            verificationFAQURL = builder
+                    .comment("The URL for the verification FAQ")
+                    .define("verificationFAQURL", "https://swarmsmp.com/forum/topic/8-how-to-verify-your-minecraft-account/");
         }
     }
 
