@@ -96,8 +96,6 @@ public class ChatEvents {
                 return;
             }
             COMMAND_LOGGER.info(player.getDisplayName().getString() + " used command: " + commandUsed);
-        } else {
-            COMMAND_LOGGER.info("Console used command: " + event.getParseResults().getReader().getString());
         }
     }
 }
