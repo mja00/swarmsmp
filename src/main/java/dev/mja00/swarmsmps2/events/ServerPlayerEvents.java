@@ -188,6 +188,10 @@ public class ServerPlayerEvents {
             if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
                 player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
             }
+            // Check if it's MC-Verify and send a message
+            if (Objects.equals(joinInfo.getMessage(), "MC-Verify")) {
+                player.sendMessage(new TranslatableComponent(translationKey + "connection.mcverify").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+            }
         } catch (JsonSyntaxException | IllegalStateException e) {
             LOGGER.error("Error while parsing whitelist status from API", e);
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
