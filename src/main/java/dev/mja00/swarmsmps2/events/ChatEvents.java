@@ -49,6 +49,9 @@ public class ChatEvents {
 
     @SubscribeEvent
     public static void onChat(ServerChatEvent event) {
+        if (SSMPS2Config.SERVER.fallbackServer.get()) {
+            return;
+        }
         String message = event.getMessage();
         int range = SSMPS2Config.SERVER.talkRange.get();
 

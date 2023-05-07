@@ -20,6 +20,9 @@ public class BetterMeCommand {
     static Logger LOGGER = LogManager.getLogger("CHAT");
 
     public BetterMeCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+        if (SSMPS2Config.SERVER.fallbackServer.get()) {
+            return;
+        }
         dispatcher.register(Commands.literal("me").then(Commands.argument("action", StringArgumentType.greedyString()).executes((command) -> sendAction(command.getSource(), StringArgumentType.getString(command, "action")))));
     }
 

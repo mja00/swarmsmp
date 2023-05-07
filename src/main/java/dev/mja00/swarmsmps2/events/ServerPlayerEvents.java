@@ -102,6 +102,9 @@ public class ServerPlayerEvents {
 
     @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        if (SSMPS2Config.SERVER.fallbackServer.get()) {
+            return;
+        }
         // Ignore if they've respawned due to the end being conquered
         if (!event.isEndConquered()) {
             ServerPlayer player = (ServerPlayer) event.getPlayer();

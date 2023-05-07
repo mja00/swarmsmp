@@ -45,6 +45,7 @@ public class SSMPS2Config {
 
 
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
+        public final ForgeConfigSpec.BooleanValue fallbackServer;
 
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
@@ -139,6 +140,10 @@ public class SSMPS2Config {
             ignoredCommands = builder
                     .comment("Commands that will not be sent to the API")
                     .defineList("ignoredCommands", List.of("/help", "/gamemode", "/ooc"), o -> o instanceof String);
+
+            fallbackServer = builder
+                    .comment("Whether or not this server is a fallback server")
+                    .define("fallbackServer", false);
 
             builder.pop();
             builder.comment("Verification Settings").push("verification");

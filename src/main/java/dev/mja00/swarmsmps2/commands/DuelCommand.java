@@ -69,7 +69,7 @@ public class DuelCommand {
     }
 
     private int duel(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
-        if (!SSMPS2Config.SERVER.enableDuels.get()) {
+        if (!SSMPS2Config.SERVER.enableDuels.get() || SSMPS2Config.SERVER.fallbackServer.get()) {
             source.sendFailure(new TranslatableComponent(translationKey + "command.disabled"));
             return 0;
         }

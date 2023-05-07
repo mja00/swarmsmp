@@ -3,6 +3,7 @@ package dev.mja00.swarmsmps2.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mja00.swarmsmps2.MC2DiscordCompat;
+import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.events.ChatEvents;
 import ml.denisd3d.mc2discord.core.entities.Player;
 import net.minecraft.ChatFormatting;
@@ -25,6 +26,9 @@ public class OOCCommand {
     static Logger LOGGER = LogManager.getLogger("CHAT");
 
     public OOCCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+        if (SSMPS2Config.SERVER.fallbackServer.get()) {
+            return;
+        }
         dispatcher.register(Commands.literal("ooc").then(Commands.argument("message", MessageArgument.message()).executes((command) -> {
             return sendGlobalMessage(command.getSource(), MessageArgument.getMessage(command, "message"));
         })));
