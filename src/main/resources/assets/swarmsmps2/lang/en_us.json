@@ -67,6 +67,8 @@
   "swarmsmps2.dueling.forfeit": "You've forfeited the duel.",
   "swarmsmps2.dueling.forfeit.opponent": "%1$s has forfeited the duel.",
   "swarmsmps2.dueling.admin_ended": "The duel has been ended by an admin.",
+  "swarmsmps2.dueling.external_damage": "You've taken damage from an external source. The duel has been cancelled.",
+  "swarmsmps2.dueling.external_damage.opponent": "%1$s has taken damage from an external source. The duel has been cancelled.",
 
 
   "swarmsmps2.ooc.message": "[OOC] %1$s: %2$s",

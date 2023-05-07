@@ -120,7 +120,7 @@ public class DuelingEvents {
                 if (player.getHealth() - event.getAmount() <= 0) {
                     // The player would die from this, so the attacker wins
                     onDuelLost(player);
-                    onDuelWon(attacker);
+                    informDuelWinnerIfExists(player);
                     informServerOfDuelFinish(attacker, player);
                     event.setCanceled(true);
                 }
@@ -128,15 +128,8 @@ public class DuelingEvents {
 
             // If only the player is dueling, and the attacker is not dueling
             if (is_dueling && !attacker_dueling) {
-                // Would this kill the player?
-                if (player.getHealth() - event.getAmount() <= 0) {
-                    // The player would die from this, however the attacker isn't dueling, so we don't inform the attacker
-                    event.setCanceled(true);
-                    onDuelLost(player);
-
-                    // Checks if the player had a duel target and lets them know they won
-                    informDuelWinnerIfExists(player);
-                }
+                // The player would die from this, however the attacker isn't dueling, so we don't inform the attacker
+                endDuelDueToExternalDamage(player);
             }
         } else if (event.getEntityLiving() instanceof Player player) {
             // This is the player dying from a non-playing entity
@@ -145,17 +138,23 @@ public class DuelingEvents {
 
             // Check if the player is dueling
             if (playerData.getBoolean(MOD_ID + ":dueling")) {
-                // Will this kill the player?
-                if (player.getHealth() - event.getAmount() <= 0) {
-                    // The player would die from this, so the attacker wins
-                    event.setCanceled(true);
-                    onDuelLostToNonPlayer(player);
-
-                    // Checks if the player had a duel target and lets them know they won
-                    informDuelWinnerIfExists(player);
-                }
+                // End the duel since they took damage from not the attacker
+                endDuelDueToExternalDamage(player);
             }
         }
+    }
+
+    private static void endDuelDueToExternalDamage(Player player) {
+        UUID targetUUID = player.getPersistentData().getUUID(MOD_ID + ":duel_target");
+        // Get the target
+        Player target = player.getLevel().getPlayerByUUID(targetUUID);
+        if (target != null) {
+            DuelHelper.removeDuelTags(target);
+            // Inform the target
+            target.sendMessage(new TranslatableComponent(translationKey + "dueling.external_damage.opponent", getPlayerName(player)).withStyle(ChatFormatting.RED), DUMMY);
+        }
+        DuelHelper.removeDuelTags(player);
+        player.sendMessage(new TranslatableComponent(translationKey + "dueling.external_damage").withStyle(ChatFormatting.RED), DUMMY);
     }
 
     private static void informDuelWinnerIfExists(Player player) {
