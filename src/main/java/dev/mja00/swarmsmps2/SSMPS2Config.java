@@ -43,6 +43,13 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.BooleanValue enableVerifyCommand;
         public final ForgeConfigSpec.ConfigValue<String> verificationFAQURL;
 
+        // Faction spawnpoints
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> swarmSpawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> constructSpawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> undeadSpawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> naturebornSpawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> defaultSpawnpoint;
+
 
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
         public final ForgeConfigSpec.BooleanValue fallbackServer;
@@ -155,6 +162,31 @@ public class SSMPS2Config {
             verificationFAQURL = builder
                     .comment("The URL for the verification FAQ")
                     .define("verificationFAQURL", "https://swarmsmp.com/forum/topic/8-how-to-verify-your-minecraft-account/");
+
+            builder.pop();
+            builder.comment("Faction Spawnpoints").push("spawnpoints");
+
+            swarmSpawnpoint = builder
+                    .comment("The Swarm's spawnpoint. Format: [x, y, z]")
+                    .defineList("swarmSpawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            constructSpawnpoint = builder
+                    .comment("The Construct's spawnpoint. Format: [x, y, z]")
+                    .defineList("constructSpawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            undeadSpawnpoint = builder
+                    .comment("The Undead's spawnpoint. Format: [x, y, z]")
+                    .defineList("undeadSpawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            naturebornSpawnpoint = builder
+                    .comment("The Natureborn's spawnpoint. Format: [x, y, z]")
+                    .defineList("naturebornSpawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            defaultSpawnpoint = builder
+                    .comment("The default spawnpoint. Format: [x, y, z]")
+                    .defineList("defaultSpawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            builder.pop();
         }
     }
 

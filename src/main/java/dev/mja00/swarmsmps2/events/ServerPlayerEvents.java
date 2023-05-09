@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
+import dev.mja00.swarmsmps2.helpers.EntityHelpers;
 import dev.mja00.swarmsmps2.objects.JoinInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -16,11 +16,8 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -108,6 +105,8 @@ public class ServerPlayerEvents {
         // Ignore if they've respawned due to the end being conquered
         if (!event.isEndConquered()) {
             ServerPlayer player = (ServerPlayer) event.getPlayer();
+            // Run spawn func
+            EntityHelpers.teleportServerPlayerToFactionSpawn(player);
             if (player.getPersistentData().contains(SwarmsmpS2.MODID + ":memory_loss_immune")) { return; }
             // Increment their death count
             // Check if they have one already
