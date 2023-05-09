@@ -29,9 +29,9 @@ public class MobSpawnEvents {
         } else if (EntityType.SKELETON.equals(entityType)) {
             giveTeamAndCreateIfNeeded(entity, "undead");
         } else if (EntityType.SPIDER.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "bugkin");
+            giveTeamAndCreateIfNeeded(entity, "swarm");
         } else if (EntityType.CAVE_SPIDER.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "bugkin");
+            giveTeamAndCreateIfNeeded(entity, "swarm");
         } else if (EntityType.HUSK.equals(entityType)) {
             giveTeamAndCreateIfNeeded(entity, "undead");
         } else if (EntityType.ZOMBIE_VILLAGER.equals(entityType)) {
@@ -41,7 +41,7 @@ public class MobSpawnEvents {
         } else if (EntityType.DROWNED.equals(entityType)) {
             giveTeamAndCreateIfNeeded(entity, "undead");
         } else if (EntityType.SILVERFISH.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "bugkin");
+            giveTeamAndCreateIfNeeded(entity, "swarm");
         }
     }
 }
