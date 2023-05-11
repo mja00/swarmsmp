@@ -208,4 +208,14 @@ public class SSMPS2Config {
     public static void onReload(final ModConfigEvent.Reloading configEvent) {
         LOGGER.debug("Config has been reloaded: {}", configEvent.getConfig().getFileName());
     }
+
+    public static List<? extends Integer> getSpawnpointForFaction(String faction) {
+        return switch (faction) {
+            case "swarm" -> SSMPS2Config.SERVER.swarmSpawnpoint.get();
+            case "undead" -> SSMPS2Config.SERVER.undeadSpawnpoint.get();
+            case "construct" -> SSMPS2Config.SERVER.constructSpawnpoint.get();
+            case "natureborn" -> SSMPS2Config.SERVER.naturebornSpawnpoint.get();
+            default -> SSMPS2Config.SERVER.defaultSpawnpoint.get();
+        };
+    }
 }

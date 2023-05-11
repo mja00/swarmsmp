@@ -4,12 +4,14 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -18,15 +20,24 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+
+import static dev.mja00.swarmsmps2.SSMPS2Config.getSpawnpointForFaction;
 
 public class AdminCommand {
 
     static Logger LOGGER = SwarmsmpS2.LOGGER;
     static final UUID DUMMY = Util.NIL_UUID;
     static final String translationKey = SwarmsmpS2.translationKey;
+    static final List<String> FACTIONS = Arrays.asList("swarm", "construct", "undead", "natureborn");
+
+    // Our custom suggestions provider for faction names
+    public static final SuggestionProvider<CommandSourceStack> FACTION_SUGGESTIONS = (context, builder) -> {
+        return SharedSuggestionProvider.suggest(FACTIONS.stream(), builder);
+    };
 
     public AdminCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("admin")
@@ -51,7 +62,12 @@ public class AdminCommand {
                         .then(Commands.literal("set").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("count", IntegerArgumentType.integer())
                                 .executes((command) -> setPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "count"))))))
                         .then(Commands.literal("reset").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> resetPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player")))))));
+                                .executes((command) -> resetPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player"))))))
+                .then(Commands.literal("factions")
+                        .then(Commands.literal("spawn").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
+                                .executes((command) -> teleportToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction")))
+                                .then(Commands.argument("player", EntityArgument.players())
+                                    .executes((command) -> teleportPlayersToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction"), EntityArgument.getPlayers(command, "player"))))))));
     }
 
     private int giveHeadOfPlayer(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
@@ -72,10 +88,10 @@ public class AdminCommand {
             source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.head.success").withStyle(ChatFormatting.AQUA), true);
         } else {
             source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.head.success.multiple", howMuchHeadTheyGot)
-                    .withStyle(ChatFormatting.AQUA)
-                    .withStyle(ChatFormatting.BOLD)
-                    .withStyle(ChatFormatting.ITALIC)
-                    .withStyle(ChatFormatting.UNDERLINE),
+                            .withStyle(ChatFormatting.AQUA)
+                            .withStyle(ChatFormatting.BOLD)
+                            .withStyle(ChatFormatting.ITALIC)
+                            .withStyle(ChatFormatting.UNDERLINE),
                     true);
         }
         return 1;
@@ -129,7 +145,7 @@ public class AdminCommand {
         return headItem;
     }
 
-    private int setTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag){
+    private int setTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag) {
         for (ServerPlayer target : targets) {
             target.getPersistentData().putBoolean(SwarmsmpS2.MODID + ":" + tag, true);
         }
@@ -142,7 +158,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int removeTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag){
+    private int removeTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag) {
         for (ServerPlayer target : targets) {
             target.getPersistentData().remove(SwarmsmpS2.MODID + ":" + tag);
         }
@@ -155,7 +171,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int checkTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag){
+    private int checkTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag) {
         for (ServerPlayer target : targets) {
             if (target.getPersistentData().contains(SwarmsmpS2.MODID + ":" + tag)) {
                 source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.check_tag.success", target.getDisplayName()), true);
@@ -166,7 +182,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int startDuel(CommandSourceStack source, Collection<ServerPlayer> firstPlayers, Collection<ServerPlayer> secondPlayers){
+    private int startDuel(CommandSourceStack source, Collection<ServerPlayer> firstPlayers, Collection<ServerPlayer> secondPlayers) {
         // Make sure both collections are only 1 player
         if (firstPlayers.size() != 1 || secondPlayers.size() != 1) {
             source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.error.players"));
@@ -200,11 +216,11 @@ public class AdminCommand {
             // Inform all players of the duel
             List<ServerPlayer> players = source.getServer().getPlayerList().getPlayers();
             players.forEach(player -> {
-               player.sendMessage(new TranslatableComponent(
-                       translationKey + "commands.admin.start_duel.inform_server",
-                       firstPlayer.getDisplayName(),
-                       secondPlayer.getDisplayName()
-               ).withStyle(ChatFormatting.AQUA), DUMMY);
+                player.sendMessage(new TranslatableComponent(
+                        translationKey + "commands.admin.start_duel.inform_server",
+                        firstPlayer.getDisplayName(),
+                        secondPlayer.getDisplayName()
+                ).withStyle(ChatFormatting.AQUA), DUMMY);
             });
         }
 
@@ -253,7 +269,7 @@ public class AdminCommand {
         LOGGER.debug("Death count for " + playerToCheck.getDisplayName().getString() + " is " + deathCount);
 
         // Tell the initiator of the command the death count
-        if (deathCount == 0 ) {
+        if (deathCount == 0) {
             source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.get_deaths.none", playerToCheck.getDisplayName()), false);
         } else if (deathCount == 1) {
             source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.get_deaths", playerToCheck.getDisplayName(), deathCount), false);
@@ -295,6 +311,43 @@ public class AdminCommand {
 
         // Tell the initiator
         source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.reset_deaths", playerToReset.getDisplayName()), false);
+        return 1;
+    }
+
+    private int teleportToFactionSpawn(CommandSourceStack source, String faction) throws CommandSyntaxException {
+        // Check if the faction is in the valid list
+        if (!FACTIONS.contains(faction)) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn.error.invalid_faction", faction));
+            return 0;
+        }
+        // Get the invoking player
+        ServerPlayer player = source.getPlayerOrException();
+        List<? extends Integer> spawnPoint = getSpawnpointForFaction(faction);
+
+        // Now we just teleport them to the spawn point
+        player.teleportTo(spawnPoint.get(0), spawnPoint.get(1), spawnPoint.get(2));
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn", player.getDisplayName(), faction), true);
+        return 1;
+    }
+
+    private int teleportPlayersToFactionSpawn(CommandSourceStack source, String faction, Collection<ServerPlayer> players) {
+        // Check if the faction is in the valid list
+        if (!FACTIONS.contains(faction)) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn.error.invalid_faction", faction));
+            return 0;
+        }
+        // Get the spawn point for the faction
+        List<? extends Integer> spawnPoint = getSpawnpointForFaction(faction);
+        // Loop through the players and teleport them
+        players.forEach(player -> {
+            player.teleportTo(spawnPoint.get(0), spawnPoint.get(1), spawnPoint.get(2));
+        });
+
+        if (players.size() == 1) {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn", players.iterator().next().getDisplayName(), faction), true);
+        } else {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn.multiple", players.size(), faction), true);
+        }
         return 1;
     }
 }

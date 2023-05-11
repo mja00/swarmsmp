@@ -43,14 +43,7 @@ public class EntityHelpers {
             return;
         }
 
-        // They have a team so we'll want to switch on its name
-        List<? extends Integer> spawnPoint = switch (playerTeam.getName()) {
-            case "swarm" -> SSMPS2Config.SERVER.swarmSpawnpoint.get();
-            case "undead" -> SSMPS2Config.SERVER.undeadSpawnpoint.get();
-            case "construct" -> SSMPS2Config.SERVER.constructSpawnpoint.get();
-            case "natureborn" -> SSMPS2Config.SERVER.naturebornSpawnpoint.get();
-            default -> defaultSpawnpoint;
-        };
+        List<? extends Integer> spawnPoint = SSMPS2Config.getSpawnpointForFaction(playerTeam.getName());
 
         // Sanity check that spawnPoint is 3 elements long
         if (spawnPoint.size() != 3) {
