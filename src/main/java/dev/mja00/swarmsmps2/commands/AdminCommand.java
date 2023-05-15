@@ -1,5 +1,6 @@
 package dev.mja00.swarmsmps2.commands;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -16,6 +17,8 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +27,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static dev.mja00.swarmsmps2.SSMPS2Config.getSpawnpointForFaction;
 
@@ -67,7 +72,41 @@ public class AdminCommand {
                         .then(Commands.literal("spawn").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
                                 .executes((command) -> teleportToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction")))
                                 .then(Commands.argument("player", EntityArgument.players())
-                                    .executes((command) -> teleportPlayersToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction"), EntityArgument.getPlayers(command, "player"))))))));
+                                    .executes((command) -> teleportPlayersToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction"), EntityArgument.getPlayers(command, "player")))))))
+                .then(Commands.literal("items")
+                        .then(Commands.literal("get_tags")
+                                .executes((command) -> getTagsForItem(command.getSource())))));
+    }
+
+    private int getTagsForItem(CommandSourceStack source) throws CommandSyntaxException {
+        // Get the player
+        ServerPlayer player = source.getPlayerOrException();
+        // Get the item in the player's main hand
+        ItemStack item = player.getMainHandItem();
+        // Check if their hand is empty
+        if (item.isEmpty()) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.items.get_tags.empty_hand").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        // Get the tags for the item they're holding
+        Stream<TagKey<Item>> tags = item.getTags();
+        // Convert the tags to a list
+        List<TagKey<Item>> tagList = tags.toList();
+        // Check if the item has any tags
+        if (tagList.isEmpty()) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.items.get_tags.no_tags").withStyle(ChatFormatting.RED));
+            return 0;
+        }
+        // Send the tags in a list to the player
+        StringBuilder tagsToSend = new StringBuilder();
+        for (TagKey<Item> tag : tagList) {
+            tagsToSend.append(tag.location()).append(", ");
+        }
+        // Remove the last comma and space
+        tagsToSend.delete(tagsToSend.length() - 2, tagsToSend.length());
+        // Send it to the player
+        player.sendMessage(new TranslatableComponent(translationKey + "commands.admin.items.get_tags.success", tagsToSend.toString()).withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+        return 1;
     }
 
     private int giveHeadOfPlayer(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {

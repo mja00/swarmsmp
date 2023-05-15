@@ -27,6 +27,9 @@
   "swarmsmps2.commands.admin.teleport_to_spawn": "Teleported %1$s to %2$s faction spawn.",
   "swarmsmps2.commands.admin.teleport_to_spawn.error.invalid_faction": "You must specify a valid faction.",
   "swarmsmps2.commands.admin.teleport_to_spawn.multiple": "Teleported %1$s players to %2$s faction spawn.",
+  "swarmsmps2.commands.admin.items.get_tags.empty_hand": "You must be holding an item.",
+  "swarmsmps2.commands.admin.items.get_tags.no_tags": "That item has no tags.",
+  "swarmsmps2.commands.admin.items.get_tags.success": "Tags: %1$s",
 
 
   "swarmsmps2.commands.duel.already_requested": "You've already requested a duel with %1$s.",
