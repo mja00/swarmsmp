@@ -1,13 +1,17 @@
 package dev.mja00.swarmsmps2;
 
 import com.google.gson.JsonObject;
+import dev.mja00.swarmsmps2.events.PlayerEvents;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -37,9 +41,20 @@ public class SwarmsmpS2 {
     public static final String MODID = "swarmsmps2";
     public static final String translationKey = MODID + ".";
 
+    static {
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            PlayerEvents.expectedTime = SSMPS2Config.getTimeEstimates();
+        });
+    }
+
     public SwarmsmpS2() {
         IEventBus eventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SSMPS2Config.serverSpec);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+            PlayerEvents.trueFullscreen = Minecraft.getInstance().options.fullscreen;
+            Minecraft.getInstance().options.fullscreen = false;
+        });
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SSMPS2Config.clientSpec);
         eventBus.register(SSMPS2Config.class);
 
         // Register the setup method for modloading
@@ -120,4 +135,6 @@ public class SwarmsmpS2 {
             LOGGER.info("HELLO from Register Block");
         }
     }
+
+
 }

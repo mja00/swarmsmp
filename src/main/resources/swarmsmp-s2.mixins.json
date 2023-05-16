@@ -9,7 +9,8 @@
   "client": [
     "MixinDownloadingTexture",
     "MixinPlayerRenderer",
-    "MixinSkinProcessor"
+    "MixinSkinProcessor",
+    "MixinTitleScreen"
   ],
   "injectors": {
     "defaultRequire": 1
