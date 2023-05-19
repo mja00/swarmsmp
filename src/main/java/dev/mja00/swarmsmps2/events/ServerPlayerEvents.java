@@ -1,10 +1,11 @@
 package dev.mja00.swarmsmps2.events;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.EntityHelpers;
+import dev.mja00.swarmsmps2.helpers.SiteAPIHelper;
+import dev.mja00.swarmsmps2.objects.CommandInfo;
+import dev.mja00.swarmsmps2.objects.Commands;
 import dev.mja00.swarmsmps2.objects.JoinInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -23,17 +24,11 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.Logger;
 
-import java.net.URI;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 @Mod.EventBusSubscriber(modid = SwarmsmpS2.MODID, value = Dist.DEDICATED_SERVER)
 public class ServerPlayerEvents {
@@ -138,71 +133,56 @@ public class ServerPlayerEvents {
         if (!SSMPS2Config.SERVER.enableAPI.get()) { return; }
         // Get player
         ServerPlayer player = (ServerPlayer) event.getPlayer();
-        String endpoint = "whitelist/integration_id:minecraft:" + player.getUUID().toString().replace("-", "");
-        String getURL = SSMPS2Config.SERVER.apiBaseURL.get() + endpoint;
-        LOGGER.info("Getting whitelist status from API: " + getURL);
-
-        // Get the response
-        HttpRequest apiRequest = HttpRequest.newBuilder().GET().uri(URI.create(getURL)).setHeader("User-Agent", "Swarmsmps2").setHeader("Authorization", "Bearer " + SSMPS2Config.SERVER.apiKey.get()).build();
-        CompletableFuture<HttpResponse<String>> response = client.sendAsync(apiRequest, HttpResponse.BodyHandlers.ofString());
-        String responseBody;
-
+        SiteAPIHelper apiHelper = new SiteAPIHelper(SSMPS2Config.SERVER.apiKey.get(), SSMPS2Config.SERVER.apiBaseURL.get());
+        JoinInfo joinInfo;
         try {
-            responseBody = response.thenApply(HttpResponse::body).get(SSMPS2Config.SERVER.firstTimeout.get(), TimeUnit.SECONDS);
-        } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException e) {
-            // Check if it's a timeout exception
-            if (e instanceof java.util.concurrent.TimeoutException) {
-                // Attempt the request again
-                LOGGER.error("Error while getting whitelist status from API: Request timed out");
-                // Retry it ig lol
-                try {
-                    CompletableFuture<HttpResponse<String>> response2 = client.sendAsync(apiRequest, HttpResponse.BodyHandlers.ofString());
-                    responseBody = response2.thenApply(HttpResponse::body).get(SSMPS2Config.SERVER.secondTimeout.get(), TimeUnit.SECONDS);
-                } catch (InterruptedException | ExecutionException | java.util.concurrent.TimeoutException ex) {
-                    LOGGER.error("Error while getting whitelist status from API: Request timed out");
-                    player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
-                    return;
-                }
-            } else {
-                LOGGER.error("Error while getting whitelist status from API", e);
-                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
-                return;
-            }
+            joinInfo = apiHelper.getJoinInfo(player.getUUID().toString().replace("-", ""));
+        } catch (SiteAPIHelper.APIRequestFailedException e) {
+            LOGGER.error("Failed to get join info for player " + player.getDisplayName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
+            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
+            return;
+        }
+        if (!joinInfo.getAllow()) {
+            // Do nothing, they're allowed to join// Disconnect them with the message
+            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
+        }
+        // If their message is "Bypass" then send a message saying they bypassed the whitelist checks
+        if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
+            player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+        }
+        // Check if it's MC-Verify and send a message
+        if (Objects.equals(joinInfo.getMessage(), "MC-Verify")) {
+            player.sendMessage(new TranslatableComponent(translationKey + "connection.mcverify").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+            // Compile a message that the user can clicky to open a link to the forum post explaining how to do it
+            MutableComponent message = new TextComponent("Click here to learn how to verify your Minecraft account.")
+                    .setStyle(Style.EMPTY
+                            .applyFormat(ChatFormatting.BLUE)
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, SSMPS2Config.SERVER.verificationFAQURL.get()))
+                    );
+            player.sendMessage(message, Util.NIL_UUID);
+
         }
 
-        // Check the response code
-        if (response.join().statusCode() != 200) {
-            LOGGER.error("Error while getting whitelist status from API: " + responseBody);
+        // Do a check for commands on join
+        Commands commandInfo;
+        try {
+            commandInfo = apiHelper.getCommandInfo(player.getUUID().toString().replace("-", ""));
+        } catch (SiteAPIHelper.APIRequestFailedException e) {
+            LOGGER.error("Failed to get command info for player " + player.getDisplayName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
             return;
         }
 
-        final Gson gson = new Gson();
-        try {
-            JoinInfo joinInfo = gson.fromJson(responseBody, JoinInfo.class);
-            if (!joinInfo.getAllow()) {
-                // Do nothing, they're allowed to join// Disconnect them with the message
-                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
+        // Loop through the commands and execute them
+        for (CommandInfo command : commandInfo.getCommands()) {
+            String parsedCommand = command.getCommand().replace("%player%", player.getDisplayName().getString());
+            // Run each command
+            player.getLevel().getServer().getCommands().performCommand(player.getLevel().getServer().createCommandSourceStack(), parsedCommand);
+            try {
+                apiHelper.deleteCommand(command.getId());
+            } catch (SiteAPIHelper.APIRequestFailedException e) {
+                LOGGER.error("Failed to delete command with ID " + command.getId() + " with error " + e.getMessage());
             }
-            // If their message is "Bypass" then send a message saying they bypassed the whitelist checks
-            if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
-                player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
-            }
-            // Check if it's MC-Verify and send a message
-            if (Objects.equals(joinInfo.getMessage(), "MC-Verify")) {
-                player.sendMessage(new TranslatableComponent(translationKey + "connection.mcverify").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
-                // Compile a message that the user can clicky to open a link to the forum post explaining how to do it
-                MutableComponent message = new TextComponent("Click here to learn how to verify your Minecraft account.")
-                        .setStyle(Style.EMPTY
-                                .applyFormat(ChatFormatting.BLUE)
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, SSMPS2Config.SERVER.verificationFAQURL.get()))
-                        );
-                player.sendMessage(message, Util.NIL_UUID);
-
-            }
-        } catch (JsonSyntaxException | IllegalStateException e) {
-            LOGGER.error("Error while parsing whitelist status from API", e);
-            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
         }
 
     }
