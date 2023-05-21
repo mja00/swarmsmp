@@ -101,7 +101,9 @@ public class ServerPlayerEvents {
         if (!event.isEndConquered()) {
             ServerPlayer player = (ServerPlayer) event.getPlayer();
             // Run spawn func
-            EntityHelpers.teleportServerPlayerToFactionSpawn(player);
+            if (SSMPS2Config.SERVER.enableSpawnpoints.get()) {
+                EntityHelpers.teleportServerPlayerToFactionSpawn(player);
+            }
             if (player.getPersistentData().contains(SwarmsmpS2.MODID + ":memory_loss_immune")) { return; }
             // Increment their death count
             // Check if they have one already

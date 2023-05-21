@@ -87,6 +87,7 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> undeadSpawnpoint;
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> naturebornSpawnpoint;
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> defaultSpawnpoint;
+        public final ForgeConfigSpec.BooleanValue enableSpawnpoints;
 
 
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
@@ -115,7 +116,7 @@ public class SSMPS2Config {
                     .defineInRange("memoryLossTime", 5, 1, 60);
 
             memoryLossTimeMultiplier = builder
-                    .comment("The multiplier for the memory loss time. Affects potion effect time")
+                    .comment("The multiplier for the memory loss time. Affects potion effect time. Default makes 10s of potion.")
                     .defineInRange("memoryLossTimeMultiplier", 2, 1, 100);
 
             memoryLossAmplifier = builder
@@ -203,6 +204,10 @@ public class SSMPS2Config {
 
             builder.pop();
             builder.comment("Faction Spawnpoints").push("spawnpoints");
+
+            enableSpawnpoints = builder
+                    .comment("Enable faction spawnpoints")
+                    .define("enableSpawnpoints", true);
 
             swarmSpawnpoint = builder
                     .comment("The Swarm's spawnpoint. Format: [x, y, z]")
