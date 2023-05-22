@@ -1,11 +1,11 @@
 package dev.mja00.swarmsmps2.commands;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
+import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import net.minecraft.ChatFormatting;
@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dev.mja00.swarmsmps2.SSMPS2Config.getSpawnpointForFaction;
@@ -75,7 +74,9 @@ public class AdminCommand {
                                     .executes((command) -> teleportPlayersToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction"), EntityArgument.getPlayers(command, "player")))))))
                 .then(Commands.literal("items")
                         .then(Commands.literal("get_tags")
-                                .executes((command) -> getTagsForItem(command.getSource())))));
+                                .executes((command) -> getTagsForItem(command.getSource()))))
+                .then(Commands.literal("reload")
+                        .executes((command) -> reloadConfigFile(command.getSource()))));
     }
 
     private int getTagsForItem(CommandSourceStack source) throws CommandSyntaxException {
@@ -387,6 +388,13 @@ public class AdminCommand {
         } else {
             source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn.multiple", players.size(), faction), true);
         }
+        return 1;
+    }
+
+    private int reloadConfigFile(CommandSourceStack source) {
+        // Send an OnConfigChangeEvent to the event bus
+        SSMPS2Config.serverSpec.afterReload();
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.reload_config"), true);
         return 1;
     }
 }

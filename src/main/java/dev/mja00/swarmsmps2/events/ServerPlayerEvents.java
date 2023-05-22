@@ -136,8 +136,6 @@ public class ServerPlayerEvents {
         // Get player
         ServerPlayer player = (ServerPlayer) event.getPlayer();
         // Check if their UUID is in the bypassed player list
-        LOGGER.debug(SSMPS2Config.SERVER.bypassedPlayers.get());
-        LOGGER.debug(player.getUUID().toString());
         if (SSMPS2Config.SERVER.bypassedPlayers.get().contains(player.getUUID().toString())) {
             player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
             return;
