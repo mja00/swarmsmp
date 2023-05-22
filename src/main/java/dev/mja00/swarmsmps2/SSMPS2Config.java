@@ -65,6 +65,7 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.ConfigValue<String> apiBaseURL;
         public final ForgeConfigSpec.IntValue firstTimeout;
         public final ForgeConfigSpec.IntValue secondTimeout;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> bypassedPlayers;
 
         // Duel Settings
         public final ForgeConfigSpec.BooleanValue enableDuels;
@@ -127,7 +128,7 @@ public class SSMPS2Config {
             builder.comment("API Settings").push("api");
 
             enableAPI = builder
-                    .comment("Enable the API")
+                    .comment("Enable the API. Disabling the API will turn off the whitelist check.")
                     .define("enableAPI", true);
 
             apiKey = builder
@@ -145,6 +146,10 @@ public class SSMPS2Config {
             secondTimeout = builder
                     .comment("The second timeout for the API")
                     .defineInRange("secondTimeout", 30, 1, 30);
+
+            bypassedPlayers = builder
+                    .comment("A list of player UUIDs that bypass the whitelist check entirely.")
+                    .defineList("bypassedPlayers", List.of(), o -> o instanceof String);
 
             builder.pop();
             builder.comment("Duel Settings").push("duel");
