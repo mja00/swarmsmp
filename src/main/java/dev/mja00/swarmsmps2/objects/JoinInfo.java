@@ -11,6 +11,10 @@ public class JoinInfo {
     }
 
     public Boolean getAllow() {
+        // Null pointer check
+        if (whitelisted == null) {
+            return false;
+        }
         return whitelisted;
     }
 

@@ -152,6 +152,7 @@ public class ServerPlayerEvents {
         if (!joinInfo.getAllow()) {
             // Do nothing, they're allowed to join// Disconnect them with the message
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
+            return;
         }
         // If their message is "Bypass" then send a message saying they bypassed the whitelist checks
         if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
