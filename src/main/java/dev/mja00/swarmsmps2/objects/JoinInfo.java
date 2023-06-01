@@ -19,6 +19,9 @@ public class JoinInfo {
     }
 
     public String getMessage() {
+        if (message == null) {
+            return "You are not signed up on the website.";
+        }
         return message;
     }
 
