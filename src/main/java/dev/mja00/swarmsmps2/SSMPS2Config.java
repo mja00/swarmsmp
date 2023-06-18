@@ -88,6 +88,11 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> undeadSpawnpoint;
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> naturebornSpawnpoint;
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> defaultSpawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debug1Spawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debug2Spawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debug3Spawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debug4Spawnpoint;
+        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> debug5Spawnpoint;
         public final ForgeConfigSpec.BooleanValue enableSpawnpoints;
 
 
@@ -230,6 +235,26 @@ public class SSMPS2Config {
                     .comment("The Natureborn's spawnpoint. Format: [x, y, z]")
                     .defineList("naturebornSpawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
 
+            debug1Spawnpoint = builder
+                    .comment("The debug1's spawnpoint. Format: [x, y, z]")
+                    .defineList("debug1Spawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            debug2Spawnpoint = builder
+                    .comment("The debug2's spawnpoint. Format: [x, y, z]")
+                    .defineList("debug2Spawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            debug3Spawnpoint = builder
+                    .comment("The debug3's spawnpoint. Format: [x, y, z]")
+                    .defineList("debug3Spawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            debug4Spawnpoint = builder
+                    .comment("The debug4's spawnpoint. Format: [x, y, z]")
+                    .defineList("debug4Spawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
+            debug5Spawnpoint = builder
+                    .comment("The debug5's spawnpoint. Format: [x, y, z]")
+                    .defineList("debug5Spawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
+
             defaultSpawnpoint = builder
                     .comment("The default spawnpoint. Format: [x, y, z]")
                     .defineList("defaultSpawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
@@ -270,6 +295,11 @@ public class SSMPS2Config {
             case "undead" -> SSMPS2Config.SERVER.undeadSpawnpoint.get();
             case "construct" -> SSMPS2Config.SERVER.constructSpawnpoint.get();
             case "natureborn" -> SSMPS2Config.SERVER.naturebornSpawnpoint.get();
+            case "debug1" -> SSMPS2Config.SERVER.debug1Spawnpoint.get();
+            case "debug2" -> SSMPS2Config.SERVER.debug2Spawnpoint.get();
+            case "debug3" -> SSMPS2Config.SERVER.debug3Spawnpoint.get();
+            case "debug4" -> SSMPS2Config.SERVER.debug4Spawnpoint.get();
+            case "debug5" -> SSMPS2Config.SERVER.debug5Spawnpoint.get();
             default -> SSMPS2Config.SERVER.defaultSpawnpoint.get();
         };
     }

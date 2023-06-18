@@ -36,7 +36,7 @@ public class AdminCommand {
     static Logger LOGGER = SwarmsmpS2.LOGGER;
     static final UUID DUMMY = Util.NIL_UUID;
     static final String translationKey = SwarmsmpS2.translationKey;
-    static final List<String> FACTIONS = Arrays.asList("swarm", "construct", "undead", "natureborn", "default");
+    static final List<String> FACTIONS = Arrays.asList("swarm", "construct", "undead", "natureborn", "default", "debug1" , "debug2", "debug3", "debug4", "debug5");
 
     // Our custom suggestions provider for faction names
     public static final SuggestionProvider<CommandSourceStack> FACTION_SUGGESTIONS = (context, builder) -> {
