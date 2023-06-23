@@ -304,6 +304,51 @@ public class SSMPS2Config {
         };
     }
 
+    public static void setSpawnpointForFaction(String faction, List<? extends Integer> spawnpoint) {
+        switch (faction) {
+            case "swarm" -> {
+                SSMPS2Config.SERVER.swarmSpawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.swarmSpawnpoint.save();
+            }
+            case "undead" -> {
+                SSMPS2Config.SERVER.undeadSpawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.undeadSpawnpoint.save();
+            }
+            case "construct" -> {
+                SSMPS2Config.SERVER.constructSpawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.constructSpawnpoint.save();
+            }
+            case "natureborn" -> {
+                SSMPS2Config.SERVER.naturebornSpawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.naturebornSpawnpoint.save();
+            }
+            case "debug1" -> {
+                SSMPS2Config.SERVER.debug1Spawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.debug1Spawnpoint.save();
+            }
+            case "debug2" -> {
+                SSMPS2Config.SERVER.debug2Spawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.debug2Spawnpoint.save();
+            }
+            case "debug3" -> {
+                SSMPS2Config.SERVER.debug3Spawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.debug3Spawnpoint.save();
+            }
+            case "debug4" -> {
+                SSMPS2Config.SERVER.debug4Spawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.debug4Spawnpoint.save();
+            }
+            case "debug5" -> {
+                SSMPS2Config.SERVER.debug5Spawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.debug5Spawnpoint.save();
+            }
+            default -> {
+                SSMPS2Config.SERVER.defaultSpawnpoint.set(spawnpoint);
+                SSMPS2Config.SERVER.defaultSpawnpoint.save();
+            }
+        };
+    }
+
     public static long getTimeEstimates() {
         try {
             TIMES_FILE.getParentFile().mkdirs();

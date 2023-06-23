@@ -14,6 +14,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +23,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
@@ -73,16 +76,17 @@ public class AdminCommand {
                         .then(Commands.literal("get_tags")
                                 .executes((command) -> getTagsForItem(command.getSource()))))
                 .then(Commands.literal("config")
-                        .then(Commands.literal("set")
+                        .then(Commands.literal("edit")
                                 .then(Commands.literal("bypass")
                                         .then(Commands.literal("add").then(Commands.argument("uuid", StringArgumentType.word())
                                                 .executes((command) -> addUUIDToBypass(command.getSource(), StringArgumentType.getString(command, "uuid")))))
                                         .then(Commands.literal("remove").then(Commands.argument("uuid", StringArgumentType.word())
                                                 .executes((command) -> removeUUIDFromBypass(command.getSource(), StringArgumentType.getString(command, "uuid"))))))
-                                .then(Commands.literal("spawnpoint").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
-                                        .executes((command) -> 1))))
-                        .then(Commands.literal("get").then(Commands.argument("key", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
-                                .executes((command) -> getSpawnpointFromConfig(command.getSource(), StringArgumentType.getString(command, "key")))))
+                                .then(Commands.literal("spawnpoint")
+                                        .then(Commands.literal("set").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS).then(Commands.argument("location", Vec3Argument.vec3())
+                                                .executes((command) -> setFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction"), Vec3Argument.getCoordinates(command, "location"))))))
+                                        .then(Commands.literal("get").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
+                                                .executes((command) -> getFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction")))))))
                         .then(Commands.literal("reload")
                                 .executes((command) -> reloadConfigFile(command.getSource())))));
     }
@@ -125,7 +129,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int getSpawnpointFromConfig(CommandSourceStack source, String spawnpoint) {
+    private int getFactionSpawnpoint(CommandSourceStack source, String spawnpoint) {
         // Check if the faction is in the valid list
         if (!FACTIONS.contains(spawnpoint)) {
             source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn.error.invalid_faction", spawnpoint));
@@ -134,7 +138,26 @@ public class AdminCommand {
         // Get the spawn point for the faction
         List<? extends Integer> spawnPoint = getSpawnpointForFaction(spawnpoint);
 
-        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.config.get", spawnpoint, spawnPoint.get(0), spawnPoint.get(1), spawnPoint.get(2)), false);
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.config.spawnpoint.get", spawnpoint, spawnPoint.get(0), spawnPoint.get(1), spawnPoint.get(2)), false);
+        return 1;
+    }
+
+    private int setFactionSpawnpoint(CommandSourceStack source, String faction, Coordinates pPosition) throws CommandSyntaxException{
+        // Check if the faction is in the valid list
+        if (!FACTIONS.contains(faction)) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn.error.invalid_faction", faction));
+            return 0;
+        }
+        Vec3 vec3 = pPosition.getPosition(source);
+        // Create a list to store the spawn point
+        List<Integer> spawnPoint = new ArrayList<>();
+        // Add the coordinates to the list
+        spawnPoint.add((int) vec3.x);
+        spawnPoint.add((int) vec3.y);
+        spawnPoint.add((int) vec3.z);
+        SSMPS2Config.setSpawnpointForFaction(faction, spawnPoint);
+        // Inform the user
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.config.spawnpoint.set", faction, spawnPoint.get(0), spawnPoint.get(1), spawnPoint.get(2)), true);
         return 1;
     }
 
