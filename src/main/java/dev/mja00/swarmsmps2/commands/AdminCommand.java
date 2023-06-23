@@ -23,10 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static dev.mja00.swarmsmps2.SSMPS2Config.getSpawnpointForFaction;
@@ -75,8 +72,70 @@ public class AdminCommand {
                 .then(Commands.literal("items")
                         .then(Commands.literal("get_tags")
                                 .executes((command) -> getTagsForItem(command.getSource()))))
-                .then(Commands.literal("reload")
-                        .executes((command) -> reloadConfigFile(command.getSource()))));
+                .then(Commands.literal("config")
+                        .then(Commands.literal("set")
+                                .then(Commands.literal("bypass")
+                                        .then(Commands.literal("add").then(Commands.argument("uuid", StringArgumentType.word())
+                                                .executes((command) -> addUUIDToBypass(command.getSource(), StringArgumentType.getString(command, "uuid")))))
+                                        .then(Commands.literal("remove").then(Commands.argument("uuid", StringArgumentType.word())
+                                                .executes((command) -> removeUUIDFromBypass(command.getSource(), StringArgumentType.getString(command, "uuid"))))))
+                                .then(Commands.literal("spawnpoint").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
+                                        .executes((command) -> 1))))
+                        .then(Commands.literal("get").then(Commands.argument("key", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
+                                .executes((command) -> getSpawnpointFromConfig(command.getSource(), StringArgumentType.getString(command, "key")))))
+                        .then(Commands.literal("reload")
+                                .executes((command) -> reloadConfigFile(command.getSource())))));
+    }
+
+    private int addUUIDToBypass(CommandSourceStack source, String uuid) {
+        // Get our current list of bypassed UUIDs from the config
+        List<? extends String> bypassedUUIDs = SSMPS2Config.SERVER.bypassedPlayers.get();
+        // Check if the UUID is already in the list
+        if (bypassedUUIDs.contains(uuid)) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.config.bypass.error.already_bypassed", uuid));
+            return 0;
+        }
+        // We'll need to make a new list to add the UUID to
+        List<String> newBypassedUUIDs = new ArrayList<>(bypassedUUIDs);
+        newBypassedUUIDs.add(uuid);
+        // Update the config
+        SSMPS2Config.SERVER.bypassedPlayers.set(newBypassedUUIDs);
+        SSMPS2Config.SERVER.bypassedPlayers.save();
+        // Inform the user
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.config.bypass.add", uuid), true);
+        return 1;
+    }
+
+    private int removeUUIDFromBypass(CommandSourceStack source, String uuid) {
+        // Get our current list
+        List<? extends String> bypassedUUIDs = SSMPS2Config.SERVER.bypassedPlayers.get();
+        // Check if the UUID is in the list
+        if (!bypassedUUIDs.contains(uuid)) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.config.bypass.error.not_bypassed", uuid));
+            return 0;
+        }
+        // We'll need to make a new list to remove the UUID from
+        List<String> newBypassedUUIDs = new ArrayList<>(bypassedUUIDs);
+        newBypassedUUIDs.remove(uuid);
+        // Update the config
+        SSMPS2Config.SERVER.bypassedPlayers.set(newBypassedUUIDs);
+        SSMPS2Config.SERVER.bypassedPlayers.save();
+        // Inform the user
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.config.bypass.remove", uuid), true);
+        return 1;
+    }
+
+    private int getSpawnpointFromConfig(CommandSourceStack source, String spawnpoint) {
+        // Check if the faction is in the valid list
+        if (!FACTIONS.contains(spawnpoint)) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn.error.invalid_faction", spawnpoint));
+            return 0;
+        }
+        // Get the spawn point for the faction
+        List<? extends Integer> spawnPoint = getSpawnpointForFaction(spawnpoint);
+
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.config.get", spawnpoint, spawnPoint.get(0), spawnPoint.get(1), spawnPoint.get(2)), false);
+        return 1;
     }
 
     private int getTagsForItem(CommandSourceStack source) throws CommandSyntaxException {

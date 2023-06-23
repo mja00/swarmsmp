@@ -31,6 +31,11 @@
   "swarmsmps2.commands.admin.items.get_tags.no_tags": "That item has no tags.",
   "swarmsmps2.commands.admin.items.get_tags.success": "Tags: %1$s",
   "swarmsmps2.commands.admin.reload_config": "You've reloaded the config.",
+  "swarmsmps2.commands.admin.config.get": "The spawnpoint of %1$s is %2$s, %3$s, %4$s.",
+  "swarmsmps2.commands.admin.config.bypass.error.already_bypassed": "%1$s is already bypassing the whitelist.",
+  "swarmsmps2.commands.admin.config.bypass.add": "You've added %1$s to the whitelist.",
+  "swarmsmps2.commands.admin.config.bypass.error.not_bypassed": "%1$s is not bypassing the whitelist.",
+  "swarmsmps2.commands.admin.config.bypass.remove": "You've removed %1$s from the whitelist.",
 
 
   "swarmsmps2.commands.duel.already_requested": "You've already requested a duel with %1$s.",
