@@ -145,7 +145,7 @@ public class ServerPlayerEvents {
         try {
             joinInfo = apiHelper.getJoinInfo(player.getUUID().toString().replace("-", ""));
         } catch (SiteAPIHelper.APIRequestFailedException e) {
-            LOGGER.error("Failed to get join info for player " + player.getDisplayName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
+            LOGGER.error("Failed to get join info for player " + player.getName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
             return;
         }
@@ -176,14 +176,14 @@ public class ServerPlayerEvents {
         try {
             commandInfo = apiHelper.getCommandInfo(player.getUUID().toString().replace("-", ""));
         } catch (SiteAPIHelper.APIRequestFailedException e) {
-            LOGGER.error("Failed to get command info for player " + player.getDisplayName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
+            LOGGER.error("Failed to get command info for player " + player.getName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
             return;
         }
 
         // Loop through the commands and execute them
         for (CommandInfo command : commandInfo.getCommands()) {
-            String parsedCommand = command.getCommand().replace("%player%", player.getDisplayName().getString());
+            String parsedCommand = command.getCommand().replace("%player%", player.getName().getString());
             // Run each command
             player.getLevel().getServer().getCommands().performCommand(player.getLevel().getServer().createCommandSourceStack(), parsedCommand);
             try {
