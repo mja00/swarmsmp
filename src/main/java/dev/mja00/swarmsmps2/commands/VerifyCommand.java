@@ -12,7 +12,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import org.apache.http.entity.StringEntity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,7 +52,7 @@ public class VerifyCommand {
                 switch (responseCode) {
                     case 200 -> {
                         // Validation was a success
-                        LOGGER.info("Success");
+                        //LOGGER.info("Success");
                         source.sendSuccess(new TranslatableComponent(translationKey + "commands.verify.success").withStyle(ChatFormatting.GREEN), false);
                     }
                     case 400 -> {
