@@ -18,7 +18,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SSMPS2Config {
 
@@ -26,6 +28,7 @@ public class SSMPS2Config {
     // This part is for startup time logging
     public static final File DOT_MINECRAFT = FMLPaths.GAMEDIR.get().resolve(FMLConfig.defaultConfigPath()).toFile().getParentFile();
     public static final File TIMES_FILE = new File(DOT_MINECRAFT, "config/ssmps2/startup_times.json");
+    public static final File TRAITS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/traits.json");
 
     public static class Client {
         // Client config options
@@ -347,6 +350,107 @@ public class SSMPS2Config {
                 SSMPS2Config.SERVER.defaultSpawnpoint.save();
             }
         };
+    }
+
+    public static Map<String, String[]> getTraits() {
+        try {
+            TRAITS_FILE.getParentFile().mkdirs();
+            if (!TRAITS_FILE.exists()) {
+                TRAITS_FILE.createNewFile();
+            }
+
+            JsonReader jr = new JsonReader(new FileReader(TRAITS_FILE));
+            JsonElement jp = JsonParser.parseReader(jr);
+            if (jp.isJsonObject()) {
+                JsonObject jo = jp.getAsJsonObject();
+                // Our json object will be a dict of traits and their commands as an array
+                // Check if we have the dict of traits
+                if (jo.has("traits") && jo.get("traits").isJsonObject()) {
+                    JsonObject traits = jo.get("traits").getAsJsonObject();
+                    // Create a new hashmap that we'll use to store our traits
+                    Map<String, String[]> traitMap = new HashMap<>();
+                    // Iterate over the traits
+                    for (Map.Entry<String, JsonElement> trait : traits.entrySet()) {
+                        // Get the trait name
+                        String traitName = trait.getKey();
+                        // Get the trait commands
+                        JsonArray commands = trait.getValue().getAsJsonArray();
+                        // Create a new array of commands
+                        String[] traitCommands = new String[commands.size()];
+                        // Convert the commands to a string array
+                        for (int i = 0; i < commands.size(); i++) {
+                            traitCommands[i] = commands.get(i).getAsString();
+                        }
+                        // Add the trait to the map
+                        traitMap.put(traitName, traitCommands);
+                    }
+                    // Now just return our map
+                    return traitMap;
+
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return new HashMap<>();
+    }
+
+    public static String[] getTraitByName(String name) {
+        try {
+            TRAITS_FILE.getParentFile().mkdirs();
+            if (!TRAITS_FILE.exists()) {
+                TRAITS_FILE.createNewFile();
+            }
+
+            JsonReader jr = new JsonReader(new FileReader(TRAITS_FILE));
+            JsonElement jp = JsonParser.parseReader(jr);
+            if (jp.isJsonObject()) {
+                JsonObject jo = jp.getAsJsonObject();
+                if (jo.has("traits") && jo.get("traits").isJsonObject()) {
+                    JsonObject traits = jo.get("traits").getAsJsonObject();
+                    if (traits.has(name) && traits.get(name).isJsonArray()) {
+                        JsonArray commands = traits.get(name).getAsJsonArray();
+                        String[] traitCommands = new String[commands.size()];
+                        for (int i = 0; i < commands.size(); i++) {
+                            traitCommands[i] = commands.get(i).getAsString();
+                        }
+                        return traitCommands;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new String[0];
+    }
+
+    public static String[] getTraitNames() {
+        try {
+            TRAITS_FILE.getParentFile().mkdirs();
+            if (!TRAITS_FILE.exists()) {
+                TRAITS_FILE.createNewFile();
+            }
+
+            JsonReader jr = new JsonReader(new FileReader(TRAITS_FILE));
+            JsonElement jp = JsonParser.parseReader(jr);
+            if (jp.isJsonObject()) {
+                JsonObject jo = jp.getAsJsonObject();
+                if (jo.has("traits") && jo.get("traits").isJsonObject()) {
+                    JsonObject traits = jo.get("traits").getAsJsonObject();
+                    String[] traitNames = new String[traits.size()];
+                    int i = 0;
+                    for (Map.Entry<String, JsonElement> trait : traits.entrySet()) {
+                        traitNames[i] = trait.getKey();
+                        i++;
+                    }
+                    return traitNames;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new String[0];
     }
 
     public static long getTimeEstimates() {
