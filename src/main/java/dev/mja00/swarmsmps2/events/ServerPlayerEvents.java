@@ -170,6 +170,10 @@ public class ServerPlayerEvents {
             player.sendMessage(message, Util.NIL_UUID);
 
         }
+        // Now we check to see if we're the fallback server and return early
+        if (SSMPS2Config.SERVER.fallbackServer.get()) {
+            return;
+        }
 
         // Do a check for commands on join
         Commands commandInfo;

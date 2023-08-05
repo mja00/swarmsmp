@@ -1,6 +1,5 @@
 package dev.mja00.swarmsmps2.events;
 
-import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.commands.*;
 import net.minecraft.ChatFormatting;
@@ -11,6 +10,10 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -20,6 +23,7 @@ import net.minecraftforge.server.command.ConfigCommand;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -110,6 +114,50 @@ public class ModEvents {
                     }
 
                     iterator.remove();
+                }
+            }
+        }
+    }
+
+    // Do anvil blocking changes
+    @SubscribeEvent
+    public static void onAnvilChange(AnvilUpdateEvent event) {
+        // We want to get the output and lefthand item
+        ItemStack output = event.getRight();
+        ItemStack left = event.getLeft();
+        LOGGER.info("Anvil event triggered for " + event.getPlayer().getName().getString() + " with output " + output.getDisplayName().getString() + " and left " + left.getDisplayName().getString());
+        // Check if the output has enchants, if not return
+        Map<Enchantment, Integer> outputMap = EnchantmentHelper.getEnchantments(output);
+        if (outputMap.size() == 0) {
+            LOGGER.info("Anvil event allowed as output has no enchants.");
+            return;
+        }
+        // So we've got an item with enchants, let's see if the left item also has enchants
+        Map<Enchantment, Integer> leftMap = EnchantmentHelper.getEnchantments(left);
+        if (leftMap.size() == 0) {
+            // We'll also return since the user isn't combining enchants
+            LOGGER.info("Anvil event allowed as left has no enchants.");
+            return;
+        }
+        // So there's a chance the user is trying to combine enchants to see if they can get a better enchant
+        // We'll want to check if the output has an enchant 1 level higher than the left item, if it does, we cancel the event
+        for (Enchantment enchant : outputMap.keySet()) {
+            // Get the level of the enchant
+            int level = outputMap.get(enchant);
+            LOGGER.info("Output Enchant " + enchant.getRegistryName() + " has level " + level);
+            // Check if the left item has the enchant
+            if (leftMap.containsKey(enchant)) {
+                // Get the level of the left item's enchant
+                int leftLevel = leftMap.get(enchant);
+                LOGGER.info("Left Enchant " + enchant.getRegistryName() + " has level " + leftLevel);
+                // Check if the output's enchant is the same as the left item's enchant
+                if (level == leftLevel) {
+                    // Cancel the event
+                    event.setCanceled(true);
+                    // Inform the user
+                    LOGGER.info("Anvil event cancelled for " + event.getPlayer().getName().getString() + " because they were trying to combine enchants.");
+                    // Return
+                    return;
                 }
             }
         }
