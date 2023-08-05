@@ -125,18 +125,15 @@ public class ModEvents {
         // We want to get the output and lefthand item
         ItemStack output = event.getRight();
         ItemStack left = event.getLeft();
-        LOGGER.info("Anvil event triggered for " + event.getPlayer().getName().getString() + " with output " + output.getDisplayName().getString() + " and left " + left.getDisplayName().getString());
         // Check if the output has enchants, if not return
         Map<Enchantment, Integer> outputMap = EnchantmentHelper.getEnchantments(output);
         if (outputMap.size() == 0) {
-            LOGGER.info("Anvil event allowed as output has no enchants.");
             return;
         }
         // So we've got an item with enchants, let's see if the left item also has enchants
         Map<Enchantment, Integer> leftMap = EnchantmentHelper.getEnchantments(left);
         if (leftMap.size() == 0) {
             // We'll also return since the user isn't combining enchants
-            LOGGER.info("Anvil event allowed as left has no enchants.");
             return;
         }
         // So there's a chance the user is trying to combine enchants to see if they can get a better enchant
@@ -144,12 +141,10 @@ public class ModEvents {
         for (Enchantment enchant : outputMap.keySet()) {
             // Get the level of the enchant
             int level = outputMap.get(enchant);
-            LOGGER.info("Output Enchant " + enchant.getRegistryName() + " has level " + level);
             // Check if the left item has the enchant
             if (leftMap.containsKey(enchant)) {
                 // Get the level of the left item's enchant
                 int leftLevel = leftMap.get(enchant);
-                LOGGER.info("Left Enchant " + enchant.getRegistryName() + " has level " + leftLevel);
                 // Check if the output's enchant is the same as the left item's enchant
                 if (level == leftLevel) {
                     // Cancel the event
