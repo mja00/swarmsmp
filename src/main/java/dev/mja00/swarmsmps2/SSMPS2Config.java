@@ -13,6 +13,7 @@ import net.minecraftforge.fml.loading.FMLConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileReader;
@@ -29,6 +30,7 @@ public class SSMPS2Config {
     public static final File DOT_MINECRAFT = FMLPaths.GAMEDIR.get().resolve(FMLConfig.defaultConfigPath()).toFile().getParentFile();
     public static final File TIMES_FILE = new File(DOT_MINECRAFT, "config/ssmps2/startup_times.json");
     public static final File TRAITS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/traits.json");
+    public static final File ALIAS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/aliases.json");
 
     public static class Client {
         // Client config options
@@ -409,14 +411,7 @@ public class SSMPS2Config {
                 JsonObject jo = jp.getAsJsonObject();
                 if (jo.has("traits") && jo.get("traits").isJsonObject()) {
                     JsonObject traits = jo.get("traits").getAsJsonObject();
-                    if (traits.has(name) && traits.get(name).isJsonArray()) {
-                        JsonArray commands = traits.get(name).getAsJsonArray();
-                        String[] traitCommands = new String[commands.size()];
-                        for (int i = 0; i < commands.size(); i++) {
-                            traitCommands[i] = commands.get(i).getAsString();
-                        }
-                        return traitCommands;
-                    }
+                    return getArrayFromObject(name, traits);
                 }
             }
         } catch (IOException e) {
@@ -438,17 +433,78 @@ public class SSMPS2Config {
                 JsonObject jo = jp.getAsJsonObject();
                 if (jo.has("traits") && jo.get("traits").isJsonObject()) {
                     JsonObject traits = jo.get("traits").getAsJsonObject();
-                    String[] traitNames = new String[traits.size()];
-                    int i = 0;
-                    for (Map.Entry<String, JsonElement> trait : traits.entrySet()) {
-                        traitNames[i] = trait.getKey();
-                        i++;
-                    }
-                    return traitNames;
+                    return getStrings(traits);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return new String[0];
+    }
+    
+    public static String[] getAliasByName(String name) {
+        try {
+            ALIAS_FILE.getParentFile().mkdirs();
+            if (!ALIAS_FILE.exists()) {
+                ALIAS_FILE.createNewFile();
+            }
+            
+            JsonReader jr = new JsonReader(new FileReader(ALIAS_FILE));
+            JsonElement jp = JsonParser.parseReader(jr);
+            if (jp.isJsonObject()) {
+                JsonObject jo = jp.getAsJsonObject();
+                if (jo.has("aliases") && jo.get("aliases").isJsonObject()) {
+                    JsonObject aliases = jo.get("aliases").getAsJsonObject();
+                    return getArrayFromObject(name, aliases);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new String[0];
+    }
+
+    public static String[] getAliasNames() {
+        try {
+            ALIAS_FILE.getParentFile().mkdirs();
+            if (!ALIAS_FILE.exists()) {
+                ALIAS_FILE.createNewFile();
+            }
+
+            JsonReader jr = new JsonReader(new FileReader(ALIAS_FILE));
+            JsonElement jp = JsonParser.parseReader(jr);
+            if (jp.isJsonObject()) {
+                JsonObject jo = jp.getAsJsonObject();
+                if (jo.has("aliases") && jo.get("aliases").isJsonObject()) {
+                    JsonObject aliases = jo.get("aliases").getAsJsonObject();
+                    return getStrings(aliases);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new String[0];
+    }
+
+    @NotNull
+    private static String[] getStrings(JsonObject object) {
+        String[] aliasNames = new String[object.size()];
+        int i = 0;
+        for (Map.Entry<String, JsonElement> alias : object.entrySet()) {
+            aliasNames[i] = alias.getKey();
+            i++;
+        }
+        return aliasNames;
+    }
+
+    private static String[] getArrayFromObject(String name, JsonObject object) {
+        if (object.has(name) && object.get(name).isJsonArray()) {
+            JsonArray commands = object.get(name).getAsJsonArray();
+            String[] aliasCommands = new String[commands.size()];
+            for (int i = 0; i < commands.size(); i++) {
+                aliasCommands[i] = commands.get(i).getAsString();
+            }
+            return aliasCommands;
         }
         return new String[0];
     }
