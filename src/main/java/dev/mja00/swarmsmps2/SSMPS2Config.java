@@ -14,6 +14,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileReader;
@@ -31,6 +32,7 @@ public class SSMPS2Config {
     public static final File TIMES_FILE = new File(DOT_MINECRAFT, "config/ssmps2/startup_times.json");
     public static final File TRAITS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/traits.json");
     public static final File ALIAS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/aliases.json");
+    public static final File GENERIC_FILE = new File(DOT_MINECRAFT, "config/ssmps2/generic.json");
 
     public static class Client {
         // Client config options
@@ -355,133 +357,83 @@ public class SSMPS2Config {
     }
 
     public static Map<String, String[]> getTraits() {
-        try {
-            TRAITS_FILE.getParentFile().mkdirs();
-            if (!TRAITS_FILE.exists()) {
-                TRAITS_FILE.createNewFile();
-            }
-
-            JsonReader jr = new JsonReader(new FileReader(TRAITS_FILE));
-            JsonElement jp = JsonParser.parseReader(jr);
-            if (jp.isJsonObject()) {
-                JsonObject jo = jp.getAsJsonObject();
-                // Our json object will be a dict of traits and their commands as an array
-                // Check if we have the dict of traits
-                if (jo.has("traits") && jo.get("traits").isJsonObject()) {
-                    JsonObject traits = jo.get("traits").getAsJsonObject();
-                    // Create a new hashmap that we'll use to store our traits
-                    Map<String, String[]> traitMap = new HashMap<>();
-                    // Iterate over the traits
-                    for (Map.Entry<String, JsonElement> trait : traits.entrySet()) {
-                        // Get the trait name
-                        String traitName = trait.getKey();
-                        // Get the trait commands
-                        JsonArray commands = trait.getValue().getAsJsonArray();
-                        // Create a new array of commands
-                        String[] traitCommands = new String[commands.size()];
-                        // Convert the commands to a string array
-                        for (int i = 0; i < commands.size(); i++) {
-                            traitCommands[i] = commands.get(i).getAsString();
-                        }
-                        // Add the trait to the map
-                        traitMap.put(traitName, traitCommands);
+        JsonElement jp = getJsonReader(TRAITS_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            // Our json object will be a dict of traits and their commands as an array
+            // Check if we have the dict of traits
+            if (jo.has("traits") && jo.get("traits").isJsonObject()) {
+                JsonObject traits = jo.get("traits").getAsJsonObject();
+                // Create a new hashmap that we'll use to store our traits
+                Map<String, String[]> traitMap = new HashMap<>();
+                // Iterate over the traits
+                for (Map.Entry<String, JsonElement> trait : traits.entrySet()) {
+                    // Get the trait name
+                    String traitName = trait.getKey();
+                    // Get the trait commands
+                    JsonArray commands = trait.getValue().getAsJsonArray();
+                    // Create a new array of commands
+                    String[] traitCommands = new String[commands.size()];
+                    // Convert the commands to a string array
+                    for (int i = 0; i < commands.size(); i++) {
+                        traitCommands[i] = commands.get(i).getAsString();
                     }
-                    // Now just return our map
-                    return traitMap;
-
+                    // Add the trait to the map
+                    traitMap.put(traitName, traitCommands);
                 }
+                // Now just return our map
+                return traitMap;
+
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         return new HashMap<>();
     }
 
     public static String[] getTraitByName(String name) {
-        try {
-            TRAITS_FILE.getParentFile().mkdirs();
-            if (!TRAITS_FILE.exists()) {
-                TRAITS_FILE.createNewFile();
+        JsonElement jp = getJsonReader(TRAITS_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("traits") && jo.get("traits").isJsonObject()) {
+                JsonObject traits = jo.get("traits").getAsJsonObject();
+                return getArrayFromObject(name, traits);
             }
-
-            JsonReader jr = new JsonReader(new FileReader(TRAITS_FILE));
-            JsonElement jp = JsonParser.parseReader(jr);
-            if (jp.isJsonObject()) {
-                JsonObject jo = jp.getAsJsonObject();
-                if (jo.has("traits") && jo.get("traits").isJsonObject()) {
-                    JsonObject traits = jo.get("traits").getAsJsonObject();
-                    return getArrayFromObject(name, traits);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return new String[0];
     }
 
     public static String[] getTraitNames() {
-        try {
-            TRAITS_FILE.getParentFile().mkdirs();
-            if (!TRAITS_FILE.exists()) {
-                TRAITS_FILE.createNewFile();
+        JsonElement jp = getJsonReader(TRAITS_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("traits") && jo.get("traits").isJsonObject()) {
+                JsonObject traits = jo.get("traits").getAsJsonObject();
+                return getStrings(traits);
             }
-
-            JsonReader jr = new JsonReader(new FileReader(TRAITS_FILE));
-            JsonElement jp = JsonParser.parseReader(jr);
-            if (jp.isJsonObject()) {
-                JsonObject jo = jp.getAsJsonObject();
-                if (jo.has("traits") && jo.get("traits").isJsonObject()) {
-                    JsonObject traits = jo.get("traits").getAsJsonObject();
-                    return getStrings(traits);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return new String[0];
     }
     
     public static String[] getAliasByName(String name) {
-        try {
-            ALIAS_FILE.getParentFile().mkdirs();
-            if (!ALIAS_FILE.exists()) {
-                ALIAS_FILE.createNewFile();
+        JsonElement jp = getJsonReader(ALIAS_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("aliases") && jo.get("aliases").isJsonObject()) {
+                JsonObject aliases = jo.get("aliases").getAsJsonObject();
+                return getArrayFromObject(name, aliases);
             }
-            
-            JsonReader jr = new JsonReader(new FileReader(ALIAS_FILE));
-            JsonElement jp = JsonParser.parseReader(jr);
-            if (jp.isJsonObject()) {
-                JsonObject jo = jp.getAsJsonObject();
-                if (jo.has("aliases") && jo.get("aliases").isJsonObject()) {
-                    JsonObject aliases = jo.get("aliases").getAsJsonObject();
-                    return getArrayFromObject(name, aliases);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return new String[0];
     }
 
     public static String[] getAliasNames() {
-        try {
-            ALIAS_FILE.getParentFile().mkdirs();
-            if (!ALIAS_FILE.exists()) {
-                ALIAS_FILE.createNewFile();
+        JsonElement jp = getJsonReader(ALIAS_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("aliases") && jo.get("aliases").isJsonObject()) {
+                JsonObject aliases = jo.get("aliases").getAsJsonObject();
+                return getStrings(aliases);
             }
-
-            JsonReader jr = new JsonReader(new FileReader(ALIAS_FILE));
-            JsonElement jp = JsonParser.parseReader(jr);
-            if (jp.isJsonObject()) {
-                JsonObject jo = jp.getAsJsonObject();
-                if (jo.has("aliases") && jo.get("aliases").isJsonObject()) {
-                    JsonObject aliases = jo.get("aliases").getAsJsonObject();
-                    return getStrings(aliases);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return new String[0];
     }
@@ -510,32 +462,21 @@ public class SSMPS2Config {
     }
 
     public static long getTimeEstimates() {
-        try {
-            TIMES_FILE.getParentFile().mkdirs();
-            if (!TIMES_FILE.exists()) {
-                TIMES_FILE.createNewFile();
-            }
-
-            JsonReader jr = new JsonReader(new FileReader(TIMES_FILE));
-            JsonElement jp = JsonParser.parseReader(jr);
-            if (jp.isJsonObject()) {
-                JsonObject jo = jp.getAsJsonObject();
-                if (jo.has("times") && jo.get("times").isJsonArray()) {
-                    JsonArray ja = jo.get("times").getAsJsonArray();
-                    if (ja.size() > 0) {
-                        long sum = 0;
-                        for (int i = 0; i < ja.size(); i++) {
-                            sum += ja.get(i).getAsLong();
-                        }
-                        sum /= ja.size();
-
-                        return sum;
+        JsonElement jp = getJsonReader(TIMES_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("times") && jo.get("times").isJsonArray()) {
+                JsonArray ja = jo.get("times").getAsJsonArray();
+                if (ja.size() > 0) {
+                    long sum = 0;
+                    for (int i = 0; i < ja.size(); i++) {
+                        sum += ja.get(i).getAsLong();
                     }
+                    sum /= ja.size();
+
+                    return sum;
                 }
             }
-            jr.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
 
         return 0;
@@ -543,16 +484,9 @@ public class SSMPS2Config {
 
     public static void addStartupTime(long startupTime) {
         try {
-            TIMES_FILE.getParentFile().mkdirs();
-            if (!TIMES_FILE.exists()) {
-                TIMES_FILE.createNewFile();
-            }
-
+            JsonElement jp = getJsonReader(TIMES_FILE);
             long[] times = new long[0];
-            JsonReader jr = new JsonReader(new FileReader(TIMES_FILE));
-            JsonElement jp = JsonParser.parseReader(jr);
-
-            if (jp.isJsonObject()) {
+            if (jp != null && jp.isJsonObject()) {
                 JsonObject jo = jp.getAsJsonObject();
                 if (jo.has("times") && jo.get("times").isJsonArray()) {
                     JsonArray ja = jo.get("times").getAsJsonArray();
@@ -563,11 +497,9 @@ public class SSMPS2Config {
                 }
             }
 
-            jr.close();
-
             // Write the times
-            JsonWriter jw = new JsonWriter(new FileWriter(TIMES_FILE));
-            jw.setIndent("  ");
+            JsonWriter jw = getJsonWriter(TIMES_FILE);
+            if (jw == null) return;
             jw.beginObject();
 
             jw.name("times");
@@ -589,6 +521,79 @@ public class SSMPS2Config {
             jw.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Nullable
+    private static JsonElement getJsonReader(File file) {
+        // We want this jsonReader to be auto-closing
+        if (createFileAndDirs(file)) return null;
+        try (JsonReader jr = new JsonReader(new FileReader(file))) {
+            return JsonParser.parseReader(jr);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private static boolean createFileAndDirs(File file) {
+        try {
+            if (!file.getParentFile().mkdirs()) {
+                LOGGER.error("Failed to create parent directories for file: {}", file.getAbsolutePath());
+                return true;
+            }
+            if (!file.exists()) {
+                if (!file.createNewFile()) {
+                    LOGGER.error("Failed to create file: {}", file.getAbsolutePath());
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return true;
+        }
+        return false;
+    }
+
+    @Nullable
+    private static JsonWriter getJsonWriter(File file) {
+        try {
+            if (createFileAndDirs(file)) return null;
+            JsonWriter jw = new JsonWriter(new FileWriter(file));
+            jw.setIndent("  ");
+            return jw;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String getCurrentWeather() {
+        JsonElement jp = getJsonReader(GENERIC_FILE);
+        // We just need to get the "weather" key from the json
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("weather") && jo.get("weather").isJsonPrimitive()) {
+                return jo.get("weather").getAsString();
+            }
+        }
+        // Just return clear if we can't get the weather
+        return "clear";
+    }
+
+    public static void setCurrentWeather(String weather) {
+        // We just write to the "weather" property
+        JsonWriter jw = getJsonWriter(GENERIC_FILE);
+        if (jw != null) {
+            try {
+                jw.beginObject();
+                jw.name("weather");
+                jw.value(weather);
+                jw.endObject();
+                jw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
