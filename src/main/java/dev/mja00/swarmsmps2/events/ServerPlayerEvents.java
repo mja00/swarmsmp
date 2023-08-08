@@ -19,6 +19,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -197,5 +198,10 @@ public class ServerPlayerEvents {
             }
         }
 
+    }
+
+    @SubscribeEvent
+    public static void noPortals(BlockEvent.PortalSpawnEvent event) {
+         event.setCanceled(true);
     }
 }
