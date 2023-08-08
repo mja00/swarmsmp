@@ -106,6 +106,18 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
         public final ForgeConfigSpec.BooleanValue fallbackServer;
 
+        // Weather shit
+        public final ForgeConfigSpec.IntValue clearToRainChance;
+        public final ForgeConfigSpec.IntValue clearToThunderChance;
+        public final ForgeConfigSpec.IntValue rainToThunderChance;
+        public final ForgeConfigSpec.IntValue rainToClearChance;
+        public final ForgeConfigSpec.IntValue thunderToRainChance;
+        public final ForgeConfigSpec.IntValue thunderToClearChance;
+        public final ForgeConfigSpec.IntValue clearToClearChance;
+        public final ForgeConfigSpec.IntValue rainToRainChance;
+        public final ForgeConfigSpec.IntValue thunderToThunderChance;
+        public final ForgeConfigSpec.IntValue weatherCheckTime;
+
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
 
@@ -267,6 +279,54 @@ public class SSMPS2Config {
                     .defineList("defaultSpawnpoint", List.of(0, 0, 0), o -> o instanceof Integer);
 
             builder.pop();
+            builder.comment("Weather Settings").push("weather");
+
+            weatherCheckTime = builder
+                    .comment("How often to roll the dice to pick a new weather in seconds.")
+                    .defineInRange("weatherCheckTime", 600, 1, 3600);
+
+            // Add a comment to say these must all add up to 100
+            builder.comment("These must all add up to 100");
+
+            clearToRainChance = builder
+                    .comment("The chance of clear weather turning to rain. 0-100")
+                    .defineInRange("clearToRainChance", 10, 0, 100);
+
+            clearToThunderChance = builder
+                    .comment("The chance of clear weather turning to thunder. 0-100")
+                    .defineInRange("clearToThunderChance", 5, 0, 100);
+
+            clearToClearChance = builder
+                    .comment("The chance of clear weather turning to clear weather. 0-100")
+                    .defineInRange("clearToClearChance", 85, 0, 100);
+
+            builder.comment("These must all add up to 100");
+
+            rainToThunderChance = builder
+                    .comment("The chance of rain turning to thunder. 0-100")
+                    .defineInRange("rainToThunderChance", 5, 0, 100);
+
+            rainToClearChance = builder
+                    .comment("The chance of rain turning to clear. 0-100")
+                    .defineInRange("raintoClearChance", 10, 0, 100);
+
+            rainToRainChance = builder
+                    .comment("The chance of rain turning to rain. 0-100")
+                    .defineInRange("rainToRainChance", 85, 0, 100);
+
+            builder.comment("These must all add up to 100");
+
+            thunderToRainChance = builder
+                    .comment("The chance of thunder turning to rain. 0-100")
+                    .defineInRange("thunderToRainChance", 5, 0, 100);
+
+            thunderToClearChance = builder
+                    .comment("The chance of thunder turning to clear. 0-100")
+                    .defineInRange("thunderToClearChance", 10, 0, 100);
+
+            thunderToThunderChance = builder
+                    .comment("The chance of thunder turning to thunder. 0-100")
+                    .defineInRange("thunderToThunderChance", 85, 0, 100);
         }
     }
 
@@ -538,10 +598,7 @@ public class SSMPS2Config {
 
     private static boolean createFileAndDirs(File file) {
         try {
-            if (!file.getParentFile().mkdirs()) {
-                LOGGER.error("Failed to create parent directories for file: {}", file.getAbsolutePath());
-                return true;
-            }
+            file.getParentFile().mkdirs();
             if (!file.exists()) {
                 if (!file.createNewFile()) {
                     LOGGER.error("Failed to create file: {}", file.getAbsolutePath());
@@ -589,6 +646,38 @@ public class SSMPS2Config {
                 jw.beginObject();
                 jw.name("weather");
                 jw.value(weather);
+                jw.endObject();
+                jw.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static long getTimeOfWeatherChange() {
+        // We just want the "timeSinceLastWeather" property
+        JsonElement jp = getJsonReader(GENERIC_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("timeOfLastWeatherChange") && jo.get("timeOfLastWeatherChange").isJsonPrimitive()) {
+                return jo.get("timeOfLastWeatherChange").getAsLong();
+            }
+        }
+        // Just return the current time as a unix timestamp
+        long currentTime = System.currentTimeMillis() / 1000L;
+        // We actually want to set the time of the weather change to the current time, so we'll write the file while returning the current time
+        setTimeOfWeatherChange(currentTime);
+        return currentTime;
+    }
+
+    public static void setTimeOfWeatherChange(long time) {
+        // We just write to the "timeSinceLastWeather" property
+        JsonWriter jw = getJsonWriter(GENERIC_FILE);
+        if (jw != null) {
+            try {
+                jw.beginObject();
+                jw.name("timeOfLastWeatherChange");
+                jw.value(time);
                 jw.endObject();
                 jw.close();
             } catch (IOException e) {
