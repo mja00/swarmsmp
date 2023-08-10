@@ -73,6 +73,7 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.IntValue firstTimeout;
         public final ForgeConfigSpec.IntValue secondTimeout;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bypassedPlayers;
+        public final ForgeConfigSpec.IntValue reservedSlots;
 
         // Duel Settings
         public final ForgeConfigSpec.BooleanValue enableDuels;
@@ -174,6 +175,10 @@ public class SSMPS2Config {
             bypassedPlayers = builder
                     .comment("A list of player UUIDs that bypass the whitelist check entirely.")
                     .defineList("bypassedPlayers", List.of(), o -> o instanceof String);
+
+            reservedSlots = builder
+                    .comment("The number of reserved slots for the server")
+                    .defineInRange("reservedSlots", 20, 0, 100);
 
             builder.pop();
             builder.comment("Duel Settings").push("duel");

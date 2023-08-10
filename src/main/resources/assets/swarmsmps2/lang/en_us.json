@@ -96,6 +96,7 @@
   "swarmsmps2.connection.disconnected": "\u00A7cYou've been disconnected for the following reason: \n%1$s",
   "swarmsmps2.connection.bypassed": "You've bypassed the connection whitelist check.",
   "swarmsmps2.connection.mcverify": "Remember to verify your Minecraft account on the forums!",
+  "swarmsmps2.connection.full": "The server is currently full. Please try again later.",
 
   "swarmsmps2.commands.joincommand.error.multiple_targets": "You may only specify 1 player per argument.",
   "swarmsmps2.commands.joincommand.error.no_commands": "You must specify at least 1 command for the given trait. The trait may also not be defined.",

@@ -160,14 +160,27 @@ public class ServerPlayerEvents {
                 }
                 return;
             }
-            // Do nothing, they're allowed to join// Disconnect them with the message
+            // Disconnect them with the message
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
             return;
         }
+        // We've gotten this far, this means they're allowed to join, we do some checks to see if we need to do anything else
         // If their message is "Bypass" then send a message saying they bypassed the whitelist checks
         if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
             player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+        }  else {
+            // If it's not bypass we need to check if we're over the player limit and if we are, disconnect them
+            int reservedSlots = SSMPS2Config.SERVER.reservedSlots.get();
+            int playerCount = Objects.requireNonNull(player.getServer()).getPlayerCount();
+            int maxSlots = Objects.requireNonNull(player.getServer()).getMaxPlayers();
+            if (playerCount >= maxSlots - reservedSlots) {
+                // TODO: Replace this with a redirect back to the fallback server
+                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.full").withStyle(ChatFormatting.AQUA));
+                return;
+            }
+
         }
+        // They didn't have bypass AND the server isn't full by this point, so we can let them in
         // Check if it's MC-Verify and send a message
         if (Objects.equals(joinInfo.getMessage(), "MC-Verify")) {
             player.sendMessage(new TranslatableComponent(translationKey + "connection.mcverify").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
