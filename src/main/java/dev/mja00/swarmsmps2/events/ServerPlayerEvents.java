@@ -151,6 +151,15 @@ public class ServerPlayerEvents {
             return;
         }
         if (!joinInfo.getAllow()) {
+            // Here we also want to do a fallback server check, as we really only care about if they're whitelisted or not, so we'll do some error checking
+            if (SSMPS2Config.SERVER.fallbackServer.get()) {
+                String errorMsg = joinInfo.getMessage();
+                // If it's either "You are not whitelisted." or "You are banned from the server for: " then we want to block their connection, otherwise let them in
+                if (Objects.equals(errorMsg, "You are not whitelisted.") || errorMsg.startsWith("You are banned from the server for: ")) {
+                    player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(errorMsg).withStyle(ChatFormatting.AQUA)));
+                }
+                return;
+            }
             // Do nothing, they're allowed to join// Disconnect them with the message
             player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
             return;
@@ -172,6 +181,7 @@ public class ServerPlayerEvents {
 
         }
         // Now we check to see if we're the fallback server and return early
+        // This check is probably redundant, but we REALLY don't want to run these commands on the fallback server
         if (SSMPS2Config.SERVER.fallbackServer.get()) {
             return;
         }
