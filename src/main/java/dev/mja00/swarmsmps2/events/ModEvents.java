@@ -34,6 +34,7 @@ public class ModEvents {
     static final UUID DUMMY = Util.NIL_UUID;
     private static final String translationKey = SwarmsmpS2.translationKey;
     private static long lastWeatherChangeTime = 0;
+    private static int nextRandomMinute = 0;
     private static Map<String, WeightedWeatherEvent<String>> weatherChances;
     // Create a class wide random
     private static final java.util.Random RANDOM = new java.util.Random();
@@ -190,6 +191,7 @@ public class ModEvents {
     private static void updateWeather(ServerLevel level, String weather) {
         // Update the last weather change time
         lastWeatherChangeTime = System.currentTimeMillis() / 1000L;
+        nextRandomMinute = RANDOM.nextInt(300) - 150;
         switch (weather) {
             case "clear" -> {
                 // We'll want to stop the rain and thunder
@@ -219,7 +221,7 @@ public class ModEvents {
             // First thing is we want to see is if we're 10 seconds past the last weather change, if not, return
             long lastWeatherChange = lastWeatherChangeTime == 0 ? SSMPS2Config.getTimeOfWeatherChange() : lastWeatherChangeTime;
             long now = System.currentTimeMillis() / 1000L;
-            if (now - lastWeatherChange < SSMPS2Config.SERVER.weatherCheckTime.get()) {
+            if (now - lastWeatherChange < SSMPS2Config.SERVER.weatherCheckTime.get() + nextRandomMinute) {
                 return;
             }
             // It's been more than 10 seconds so we'll do a weather change
@@ -233,7 +235,7 @@ public class ModEvents {
             WeightedWeatherEvent<String> selectedChance = isThundering ? chances.get("thunder") : isRaining ? chances.get("rain") : chances.get("clear");
             // Get the new weather
             String newWeather = selectedChance.getRandom();
-            LOGGER.debug("New weather is " + newWeather);
+            LOGGER.info("New weather is " + newWeather);
             // Update the weather
             updateWeather(overworld, newWeather);
         }

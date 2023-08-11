@@ -39,7 +39,7 @@ public class EntityHelpers {
         if (playerTeam == null) {
             // Just teleport them to the default spawn point
             player.teleportTo(spawn.getX(), spawn.getY(), spawn.getZ());
-            LOGGER.info("Teleported player " + player.getName().getString() + " to default spawn point");
+            LOGGER.info("Teleported player " + player.getName().getString() + " to default spawn point due to not having a team!");
             return;
         }
 
@@ -49,12 +49,12 @@ public class EntityHelpers {
         if (spawnPoint.size() != 3) {
             LOGGER.error("Spawn point for team " + playerTeam.getName() + " is not 3 elements long");
             player.teleportTo(spawn.getX(), spawn.getY(), spawn.getZ());
-            LOGGER.info("Teleported player " + player.getName().getString() + " to default spawn point");
+            LOGGER.info("Teleported player " + player.getName().getString() + " to default spawn point due to spawn point not being 3 elements long!");
             return;
         }
 
         // Now we just teleport them to the spawn point
         player.teleportTo(spawnPoint.get(0), spawnPoint.get(1), spawnPoint.get(2));
-        LOGGER.info("Teleported player " + player.getName().getString() + " to " + playerTeam.getName() + " spawn point");
+        LOGGER.info("Teleported player " + player.getName().getString() + " to " + playerTeam.getName() + " spawn point!");
     }
 }
