@@ -50,6 +50,7 @@ public class ModEvents {
         new JoinCommand(event.getDispatcher());
         new VerifyCommand(event.getDispatcher());
         new AliasCommand(event.getDispatcher());
+        new FallbackCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
