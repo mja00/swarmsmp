@@ -14,19 +14,26 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.scores.Team;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static dev.mja00.swarmsmps2.SSMPS2Config.getSpawnpointForFaction;
@@ -75,6 +82,19 @@ public class AdminCommand {
                 .then(Commands.literal("items")
                         .then(Commands.literal("get_tags")
                                 .executes((command) -> getTagsForItem(command.getSource()))))
+                .then(Commands.literal("self")
+                        .then(Commands.literal("coords")
+                                .executes((command) -> getCoords(command.getSource())))
+                        .then(Commands.literal("biome")
+                                .executes((command) -> getBiome(command.getSource()))))
+                .then(Commands.literal("message")
+                        .then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("message", MessageArgument.message())
+                                .executes((command) -> sendMessageToPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), MessageArgument.getMessage(command, "message"))))))
+                .then(Commands.literal("players")
+                        .then(Commands.literal("get_effects").then(Commands.argument("player", EntityArgument.players())
+                                .executes((command) -> getPlayerEffects(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                        .then(Commands.literal("get_team").then(Commands.argument("player", EntityArgument.players())
+                                .executes((command) -> getPlayerTeam(command.getSource(), EntityArgument.getPlayers(command, "player"))))))
                 .then(Commands.literal("config")
                         .then(Commands.literal("edit")
                                 .then(Commands.literal("bypass")
@@ -89,6 +109,68 @@ public class AdminCommand {
                                                 .executes((command) -> getFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction")))))))
                         .then(Commands.literal("reload")
                                 .executes((command) -> reloadConfigFile(command.getSource())))));
+    }
+
+    private int getPlayerEffects(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (targets.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.players.too_many"));
+            return 0;
+        }
+        // Get the player
+        ServerPlayer player = targets.iterator().next();
+        // Get the effects
+        Collection<MobEffectInstance> effects = player.getActiveEffects();
+        // Convert the effects into a comma separated list
+        String effectList = effects.stream().map(effect -> effect.getEffect().getDisplayName().getString()).collect(Collectors.joining(", "));
+        // Send the effects to the player
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.players.effects.list", player.getDisplayName(), effectList), false);
+        return 1;
+    }
+
+    private int getPlayerTeam(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (targets.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.players.too_many"));
+            return 0;
+        }
+        // Get the player
+        ServerPlayer player = targets.iterator().next();
+        // Get the team
+        Team team = player.getTeam();
+        // Send the team to the player
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.players.team.get", player.getDisplayName(), team == null ? "None" : team.getName()), false);
+        return 1;
+    }
+
+    private int sendMessageToPlayer(CommandSourceStack source, Collection<ServerPlayer> targets, Component message) {
+        // Make sure there is only one recipient
+        if (targets.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.message.players.too_many"));
+            return 0;
+        }
+
+        ServerPlayer recipient = targets.iterator().next();
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.message.sent", recipient.getDisplayName(), message), false);
+        recipient.sendMessage(new TranslatableComponent(translationKey + "commands.message.received", source.getDisplayName(), message).withStyle(ChatFormatting.AQUA), DUMMY);
+        return 1;
+    }
+
+    private int getCoords(CommandSourceStack source) throws CommandSyntaxException {
+        // Tell the player their own coordinates
+        ServerPlayer player = source.getPlayerOrException();
+        // Round our coords to 2 decimal places
+        double x = Math.round(player.getX() * 100.0) / 100.0;
+        double y = Math.round(player.getY() * 100.0) / 100.0;
+        double z = Math.round(player.getZ() * 100.0) / 100.0;
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.self.coords", x, y, z), false);
+        return 1;
+    }
+
+    private int getBiome(CommandSourceStack source) throws CommandSyntaxException {
+        // Tell the player the biome they are in, needs to be the resource location name
+        ServerPlayer player = source.getPlayerOrException();
+        Holder<Biome> biome = player.getLevel().getBiome(player.blockPosition());
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.self.biome", biome.value().getRegistryName()), false);
+        return 1;
     }
 
     private int addUUIDToBypass(CommandSourceStack source, String uuid) {

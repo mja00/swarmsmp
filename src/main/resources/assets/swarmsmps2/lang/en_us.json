@@ -108,5 +108,11 @@
   "swarmsmps2.commands.verify.invalid_code": "The code you've entered is invalid.",
   "swarmsmps2.commands.verify.already_verified": "You've already verified your account.",
   "swarmsmps2.commands.verify.success": "You've successfully verified your account.",
-  "swarmsmps2.commands.verify.error": "There was an error verifying your account."
+  "swarmsmps2.commands.verify.error": "There was an error verifying your account.",
+
+  "swarmsmps2.commands.players.too_many": "You may only specify 1 player.",
+  "swarmsmps2.commands.players.effects.list": "%1$s has the following effects: %2$s",
+  "swarmsmps2.commands.players.team.get": "%1$s is on team %2$s.",
+  "swarmsmps2.commands.self.coords": "X: %1$s, Y: %2$s, Z: %3$s",
+  "swarmsmps2.commands.self.biome": "You're in the biome %1$s."
 }
