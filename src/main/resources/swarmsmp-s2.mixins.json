@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "swarmsmp-s2.refmap.json",
   "mixins": [
+    "MixinLivingEntity"
   ],
   "client": [
     "MixinDownloadingTexture",
