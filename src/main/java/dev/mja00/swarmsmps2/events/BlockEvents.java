@@ -11,7 +11,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.Logger;
 
 @Mod.EventBusSubscriber(modid = SwarmsmpS2.MODID)
-public class BlockEvent {
+public class BlockEvents {
 
     static Logger LOGGER = SwarmsmpS2.LOGGER;
 

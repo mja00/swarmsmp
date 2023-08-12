@@ -134,93 +134,95 @@ public class ServerPlayerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         // Check if the API is even enabled, if it isn't just return
         if (!SSMPS2Config.SERVER.enableAPI.get()) { return; }
-        // Get player
-        ServerPlayer player = (ServerPlayer) event.getPlayer();
-        // Check if their UUID is in the bypassed player list
-        if (SSMPS2Config.SERVER.bypassedPlayers.get().contains(player.getUUID().toString())) {
-            player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
-            return;
-        }
-        SiteAPIHelper apiHelper = new SiteAPIHelper(SSMPS2Config.SERVER.apiKey.get(), SSMPS2Config.SERVER.apiBaseURL.get());
-        JoinInfo joinInfo;
-        try {
-            joinInfo = apiHelper.getJoinInfo(player.getUUID().toString().replace("-", ""));
-        } catch (SiteAPIHelper.APIRequestFailedException e) {
-            LOGGER.error("Failed to get join info for player " + player.getName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
-            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
-            return;
-        }
-        if (!joinInfo.getAllow()) {
-            // Here we also want to do a fallback server check, as we really only care about if they're whitelisted or not, so we'll do some error checking
-            if (SSMPS2Config.SERVER.fallbackServer.get()) {
-                String errorMsg = joinInfo.getMessage();
-                // If it's either "You are not whitelisted." or "You are banned from the server for: " then we want to block their connection, otherwise let them in
-                if (Objects.equals(errorMsg, "You are not whitelisted.") || errorMsg.startsWith("You are banned from the server for: ")) {
-                    player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(errorMsg).withStyle(ChatFormatting.AQUA)));
-                }
+        // Start a new thread to do the API request
+        new Thread(() -> {
+            // Get player
+            ServerPlayer player = (ServerPlayer) event.getPlayer();
+            // Check if their UUID is in the bypassed player list
+            if (SSMPS2Config.SERVER.bypassedPlayers.get().contains(player.getUUID().toString())) {
+                player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
                 return;
             }
-            // Disconnect them with the message
-            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
-            return;
-        }
-        // We've gotten this far, this means they're allowed to join, we do some checks to see if we need to do anything else
-        // If their message is "Bypass" then send a message saying they bypassed the whitelist checks
-        if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
-            player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
-        }  else {
-            // If it's not bypass we need to check if we're over the player limit and if we are, disconnect them
-            int reservedSlots = SSMPS2Config.SERVER.reservedSlots.get();
-            int playerCount = Objects.requireNonNull(player.getServer()).getPlayerCount();
-            int maxSlots = Objects.requireNonNull(player.getServer()).getMaxPlayers();
-            if (playerCount >= maxSlots - reservedSlots) {
-                // TODO: Replace this with a redirect back to the fallback server
-                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.full").withStyle(ChatFormatting.AQUA));
-                return;
-            }
-
-        }
-        // They didn't have bypass AND the server isn't full by this point, so we can let them in
-        // Check if it's MC-Verify and send a message
-        if (Objects.equals(joinInfo.getMessage(), "MC-Verify")) {
-            player.sendMessage(new TranslatableComponent(translationKey + "connection.mcverify").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
-            // Compile a message that the user can clicky to open a link to the forum post explaining how to do it
-            MutableComponent message = new TextComponent("Click here to learn how to verify your Minecraft account.")
-                    .setStyle(Style.EMPTY
-                            .applyFormat(ChatFormatting.BLUE)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, SSMPS2Config.SERVER.verificationFAQURL.get()))
-                    );
-            player.sendMessage(message, Util.NIL_UUID);
-
-        }
-        // Now we check to see if we're the fallback server and return early
-        // This check is probably redundant, but we REALLY don't want to run these commands on the fallback server
-        if (SSMPS2Config.SERVER.fallbackServer.get()) {
-            return;
-        }
-
-        // Do a check for commands on join
-        Commands commandInfo;
-        try {
-            commandInfo = apiHelper.getCommandInfo(player.getUUID().toString().replace("-", ""));
-        } catch (SiteAPIHelper.APIRequestFailedException e) {
-            LOGGER.error("Failed to get command info for player " + player.getName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
-            player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
-            return;
-        }
-
-        // Loop through the commands and execute them
-        for (CommandInfo command : commandInfo.getCommands()) {
-            String parsedCommand = command.getCommand().replace("%player%", player.getName().getString());
-            // Run each command
-            player.getLevel().getServer().getCommands().performCommand(player.getLevel().getServer().createCommandSourceStack(), parsedCommand);
+            SiteAPIHelper apiHelper = new SiteAPIHelper(SSMPS2Config.SERVER.apiKey.get(), SSMPS2Config.SERVER.apiBaseURL.get());
+            JoinInfo joinInfo;
             try {
-                apiHelper.deleteCommand(command.getId());
+                joinInfo = apiHelper.getJoinInfo(player.getUUID().toString().replace("-", ""));
             } catch (SiteAPIHelper.APIRequestFailedException e) {
-                LOGGER.error("Failed to delete command with ID " + command.getId() + " with error " + e.getMessage());
+                LOGGER.error("Failed to get join info for player " + player.getName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
+                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
+                return;
             }
-        }
+            if (!joinInfo.getAllow()) {
+                // Here we also want to do a fallback server check, as we really only care about if they're whitelisted or not, so we'll do some error checking
+                if (SSMPS2Config.SERVER.fallbackServer.get()) {
+                    String errorMsg = joinInfo.getMessage();
+                    // If it's either "You are not whitelisted." or "You are banned from the server for: " then we want to block their connection, otherwise let them in
+                    if (Objects.equals(errorMsg, "You are not whitelisted.") || errorMsg.startsWith("You are banned from the server for: ")) {
+                        player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(errorMsg).withStyle(ChatFormatting.AQUA)));
+                    }
+                    return;
+                }
+                // Disconnect them with the message
+                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.disconnected", new TextComponent(joinInfo.getMessage()).withStyle(ChatFormatting.AQUA)));
+                return;
+            }
+            // We've gotten this far, this means they're allowed to join, we do some checks to see if we need to do anything else
+            // If their message is "Bypass" then send a message saying they bypassed the whitelist checks
+            if (Objects.equals(joinInfo.getMessage(), "Bypass")) {
+                player.sendMessage(new TranslatableComponent(translationKey + "connection.bypassed").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+            }  else {
+                // If it's not bypass we need to check if we're over the player limit and if we are, disconnect them
+                int reservedSlots = SSMPS2Config.SERVER.reservedSlots.get();
+                int playerCount = Objects.requireNonNull(player.getServer()).getPlayerCount();
+                int maxSlots = Objects.requireNonNull(player.getServer()).getMaxPlayers();
+                if (playerCount >= maxSlots - reservedSlots) {
+                    // TODO: Replace this with a redirect back to the fallback server
+                    player.connection.disconnect(new TranslatableComponent(translationKey + "connection.full").withStyle(ChatFormatting.AQUA));
+                    return;
+                }
 
+            }
+            // They didn't have bypass AND the server isn't full by this point, so we can let them in
+            // Check if it's MC-Verify and send a message
+            if (Objects.equals(joinInfo.getMessage(), "MC-Verify")) {
+                player.sendMessage(new TranslatableComponent(translationKey + "connection.mcverify").withStyle(ChatFormatting.AQUA), Util.NIL_UUID);
+                // Compile a message that the user can clicky to open a link to the forum post explaining how to do it
+                MutableComponent message = new TextComponent("Click here to learn how to verify your Minecraft account.")
+                        .setStyle(Style.EMPTY
+                                .applyFormat(ChatFormatting.BLUE)
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, SSMPS2Config.SERVER.verificationFAQURL.get()))
+                        );
+                player.sendMessage(message, Util.NIL_UUID);
+
+            }
+            // Now we check to see if we're the fallback server and return early
+            // This check is probably redundant, but we REALLY don't want to run these commands on the fallback server
+            if (SSMPS2Config.SERVER.fallbackServer.get()) {
+                return;
+            }
+
+            // Do a check for commands on join
+            Commands commandInfo;
+            try {
+                commandInfo = apiHelper.getCommandInfo(player.getUUID().toString().replace("-", ""));
+            } catch (SiteAPIHelper.APIRequestFailedException e) {
+                LOGGER.error("Failed to get command info for player " + player.getName().getString() + " with UUID " + player.getUUID() + " with error " + e.getMessage());
+                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
+                return;
+            }
+
+            // Loop through the commands and execute them
+            for (CommandInfo command : commandInfo.getCommands()) {
+                String parsedCommand = command.getCommand().replace("%player%", player.getName().getString());
+                // Run each command
+                player.getLevel().getServer().getCommands().performCommand(player.getLevel().getServer().createCommandSourceStack(), parsedCommand);
+                try {
+                    apiHelper.deleteCommand(command.getId());
+                } catch (SiteAPIHelper.APIRequestFailedException e) {
+                    LOGGER.error("Failed to delete command with ID " + command.getId() + " with error " + e.getMessage());
+                }
+            }
+        }).start();
     }
 
     @SubscribeEvent
