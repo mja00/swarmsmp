@@ -30,6 +30,8 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Mod.EventBusSubscriber(modid = SwarmsmpS2.MODID, value = Dist.DEDICATED_SERVER)
 public class ServerPlayerEvents {
@@ -134,8 +136,10 @@ public class ServerPlayerEvents {
     public static void onPlayerJoin(PlayerEvent.PlayerLoggedInEvent event) {
         // Check if the API is even enabled, if it isn't just return
         if (!SSMPS2Config.SERVER.enableAPI.get()) { return; }
-        // Start a new thread to do the API request
-        new Thread(() -> {
+        // We want to do some thread shit here
+        ExecutorService exe = Executors.newCachedThreadPool();
+        LOGGER.debug("Starting whitelsit check thread");
+        exe.execute(() -> {
             // Get player
             ServerPlayer player = (ServerPlayer) event.getPlayer();
             // Check if their UUID is in the bypassed player list
@@ -195,12 +199,18 @@ public class ServerPlayerEvents {
                 player.sendMessage(message, Util.NIL_UUID);
 
             }
-            // Now we check to see if we're the fallback server and return early
-            // This check is probably redundant, but we REALLY don't want to run these commands on the fallback server
-            if (SSMPS2Config.SERVER.fallbackServer.get()) {
-                return;
-            }
+        });
+        LOGGER.debug("End of thread");
+        // Now we check to see if we're the fallback server and return early
+        // This check is probably redundant, but we REALLY don't want to run these commands on the fallback server
+        if (SSMPS2Config.SERVER.fallbackServer.get()) {
+            return;
+        }
 
+        LOGGER.debug("Starting command check thread");
+        exe.execute(() -> {
+            ServerPlayer player = (ServerPlayer) event.getPlayer();
+            SiteAPIHelper apiHelper = new SiteAPIHelper(SSMPS2Config.SERVER.apiKey.get(), SSMPS2Config.SERVER.apiBaseURL.get());
             // Do a check for commands on join
             Commands commandInfo;
             try {
@@ -222,7 +232,10 @@ public class ServerPlayerEvents {
                     LOGGER.error("Failed to delete command with ID " + command.getId() + " with error " + e.getMessage());
                 }
             }
-        }).start();
+        });
+        LOGGER.debug("End of thread");
+        // Remove the executor
+        exe.shutdown();
     }
 
     @SubscribeEvent

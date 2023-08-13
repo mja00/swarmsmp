@@ -9,7 +9,7 @@ import net.minecraft.commands.Commands;
 public class FallbackCommand {
 
     public FallbackCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("fallbackserver")
+        dispatcher.register(Commands.literal("fbserver")
                 .executes((command) -> fallback(command.getSource())));
     }
 
