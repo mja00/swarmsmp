@@ -94,7 +94,11 @@ public class AdminCommand {
                         .then(Commands.literal("get_effects").then(Commands.argument("player", EntityArgument.players())
                                 .executes((command) -> getPlayerEffects(command.getSource(), EntityArgument.getPlayers(command, "player")))))
                         .then(Commands.literal("get_team").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> getPlayerTeam(command.getSource(), EntityArgument.getPlayers(command, "player"))))))
+                                .executes((command) -> getPlayerTeam(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                        .then(Commands.literal("get_health").then(Commands.argument("player", EntityArgument.players())
+                                .executes((command) -> getPlayerHealth(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                        .then(Commands.literal("set_health").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("health", IntegerArgumentType.integer())
+                                .executes((command) -> setPlayerHealth(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "health")))))))
                 .then(Commands.literal("config")
                         .then(Commands.literal("edit")
                                 .then(Commands.literal("bypass")
@@ -138,6 +142,37 @@ public class AdminCommand {
         Team team = player.getTeam();
         // Send the team to the player
         source.sendSuccess(new TranslatableComponent(translationKey + "commands.players.team.get", player.getDisplayName(), team == null ? "None" : team.getName()), false);
+        return 1;
+    }
+
+    private int getPlayerHealth(CommandSourceStack source, Collection<ServerPlayer> targets) {
+        if (targets.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.players.too_many"));
+            return 0;
+        }
+        // Get the player
+        ServerPlayer player = targets.iterator().next();
+        // Get the health
+        float health = player.getHealth();
+        float hearts = health / 2;
+        // Round hearts to 1 decimal place
+        hearts = Math.round(hearts * 10.0) / 10.0f;
+        // Send the health to the player
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.players.health.get", player.getDisplayName(), health, hearts), false);
+        return 1;
+    }
+
+    private int setPlayerHealth(CommandSourceStack source, Collection<ServerPlayer> targets, int health) {
+        if (targets.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.players.too_many"));
+            return 0;
+        }
+        // Get the player
+        ServerPlayer player = targets.iterator().next();
+        // Set the health
+        player.setHealth(health);
+        // Send the health to the player
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.players.health.set", player.getDisplayName(), health), true);
         return 1;
     }
 

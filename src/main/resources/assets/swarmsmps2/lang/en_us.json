@@ -114,5 +114,7 @@
   "swarmsmps2.commands.players.effects.list": "%1$s has the following effects: %2$s",
   "swarmsmps2.commands.players.team.get": "%1$s is on team %2$s.",
   "swarmsmps2.commands.self.coords": "X: %1$s, Y: %2$s, Z: %3$s",
-  "swarmsmps2.commands.self.biome": "You're in the biome %1$s."
+  "swarmsmps2.commands.self.biome": "You're in the biome %1$s.",
+  "swarmsmps2.commands.players.health.get": "%1$s has %2$s health (%3$s hearts).",
+  "swarmsmps2.commands.players.health.set": "You've set %1$s's health to %2$s."
 }
