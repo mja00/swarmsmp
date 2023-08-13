@@ -40,6 +40,7 @@ public class ServerPlayerEvents {
     static final String translationKey = SwarmsmpS2.translationKey;
     static final Random rnd = new Random();
     static final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(30)).build();
+    static final ExecutorService exe = Executors.newCachedThreadPool();
 
 
     private static String generateRandomString(int length) {
@@ -137,7 +138,6 @@ public class ServerPlayerEvents {
         // Check if the API is even enabled, if it isn't just return
         if (!SSMPS2Config.SERVER.enableAPI.get()) { return; }
         // We want to do some thread shit here
-        ExecutorService exe = Executors.newCachedThreadPool();
         LOGGER.debug("Starting whitelsit check thread");
         exe.execute(() -> {
             // Get player
@@ -232,10 +232,25 @@ public class ServerPlayerEvents {
                     LOGGER.error("Failed to delete command with ID " + command.getId() + " with error " + e.getMessage());
                 }
             }
+            // We'll also run 1 command on them, which is to set their fallback server so if this server dies for some reason they'll be redirected to the fallback server
+            String fallbackCommand = "fallback " + player.getName().getString() + " fallback.swarmsmp.com";
+            player.getLevel().getServer().getCommands().performCommand(player.getLevel().getServer().createCommandSourceStack(), fallbackCommand);
         });
         LOGGER.debug("End of thread");
-        // Remove the executor
-        exe.shutdown();
+        // We'll also do a quick little DB thingy here :)
+        exe.execute(() -> {
+            ServerPlayer player = (ServerPlayer) event.getPlayer();
+            SwarmsmpS2.sqlite.createPlayerEvent("join", player.getName().getString());
+        });
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLeave(PlayerEvent.PlayerLoggedOutEvent event) {
+        // We'll also do a quick little DB thingy here :)
+        exe.execute(() -> {
+            ServerPlayer player = (ServerPlayer) event.getPlayer();
+            SwarmsmpS2.sqlite.createPlayerEvent("leave", player.getName().getString());
+        });
     }
 
     @SubscribeEvent

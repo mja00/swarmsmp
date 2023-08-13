@@ -3,12 +3,14 @@ package dev.mja00.swarmsmps2;
 import com.google.gson.JsonObject;
 import dev.mja00.swarmsmps2.config.HandleServerData;
 import dev.mja00.swarmsmps2.events.PlayerEvents;
+import dev.mja00.swarmsmps2.helpers.SQLiteHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
@@ -25,6 +27,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -40,6 +43,7 @@ public class SwarmsmpS2 {
     // Mod ID
     public static final String MODID = "swarmsmps2";
     public static final String translationKey = MODID + ".";
+    public static SQLiteHelper sqlite;
 
     static {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
@@ -126,6 +130,33 @@ public class SwarmsmpS2 {
     public void onServerStarting(ServerStartingEvent event) {
         // do something when the server starts
         LOGGER.info("Literally only mja00 will see this");
+        // Get the full path of the world we're starting up on
+        String worldName = event.getServer().getWorldData().getLevelName();
+        // We'll want to verify that we have access to our SQLite DB, if not stop the server, as something has gone wrong
+        sqlite = new SQLiteHelper(SSMPS2Config.SERVER.databasePath.get(), "./" + worldName);
+        try {
+            sqlite.connect();
+            LOGGER.info("Database connection established");
+        } catch (SQLException e) {
+            // We've ran into some form of an exception, stop the server
+            LOGGER.error("###########################");
+            LOGGER.error("Error while connecting to SQLite database: " + e.getMessage());
+            LOGGER.error("Shutting down server now!");
+            LOGGER.error("###########################");
+            event.getServer().halt(false);
+        }
+        // So we didn't run into an issue, setup our database
+        sqlite.setup();
+    }
+
+    @SubscribeEvent
+    public void onServerStopping(ServerStoppingEvent event) {
+        // We'll close down our connection to the database here
+        try {
+            sqlite.close();
+        } catch (SQLException e) {
+            LOGGER.error("Error while closing connection to SQLite database: " + e.getMessage());
+        }
     }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD

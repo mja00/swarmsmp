@@ -2,7 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "dev.mja00.swarmsmps2.mixin",
-  "compatibilityLevel": "JAVA_8",
+  "compatibilityLevel": "JAVA_17",
   "refmap": "swarmsmp-s2.refmap.json",
   "mixins": [
     "MixinLivingEntity",

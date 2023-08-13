@@ -8,6 +8,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
+import dev.mja00.swarmsmps2.objects.BlockEventObject;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -17,10 +18,10 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -82,6 +83,21 @@ public class AdminCommand {
                 .then(Commands.literal("items")
                         .then(Commands.literal("get_tags")
                                 .executes((command) -> getTagsForItem(command.getSource()))))
+                .then(Commands.literal("log")
+                        .then(Commands.literal("block").then(Commands.argument("location", Vec3Argument.vec3())
+                                    .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), 0, 10, 0))
+                                .then(Commands.argument("scale", IntegerArgumentType.integer(0, 10))
+                                    .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), 10, 0))
+                                    .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                        .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), 0))
+                                        .then(Commands.argument("offset", IntegerArgumentType.integer())
+                                            .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))))
+                        .then(Commands.literal("player").then(Commands.argument("player", EntityArgument.players())
+                                .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
+                                .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                    .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), 0))
+                                .then(Commands.argument("offset", IntegerArgumentType.integer())
+                                    .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))))
                 .then(Commands.literal("self")
                         .then(Commands.literal("coords")
                                 .executes((command) -> getCoords(command.getSource())))
@@ -113,6 +129,137 @@ public class AdminCommand {
                                                 .executes((command) -> getFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction")))))))
                         .then(Commands.literal("reload")
                                 .executes((command) -> reloadConfigFile(command.getSource())))));
+    }
+
+    private int logPlayer(CommandSourceStack source, Collection<ServerPlayer> targets, int limit, int offset) {
+        if (offset < 0) {
+            offset = 0;
+        }
+        // We want to get the block logs of the player
+        if (targets.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.players.too_many"));
+            return 0;
+        }
+        // Get the player
+        ServerPlayer player = targets.iterator().next();
+        // Get their UUID
+        String playerUUID = player.getStringUUID();
+        String playerName = player.getName().getString();
+        BlockEventObject[] blockEvents = SwarmsmpS2.sqlite.getPlayerWorldEvents(playerUUID, limit, offset);
+        boolean hitEndOfLogs = false;
+        MutableComponent component = new TextComponent("---------------\n").withStyle(ChatFormatting.GOLD);
+        // Iterate the logs
+        for (BlockEventObject blockEvent : blockEvents) {
+            // If we hit a null one just end the for loop as we've reached the end of the logs
+            if (blockEvent == null) {
+                hitEndOfLogs = true;
+                break;
+            }
+            MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.block_logs.get", playerName, blockEvent.getEventPretty(), blockEvent.getActualBlockName(), blockEvent.getX(), blockEvent.getY(), blockEvent.getZ(), blockEvent.humanizeTimestamp()).withStyle(blockEvent.getEventColor());
+            component.append(message);
+        }
+        // We'll create little buttons down here to travel between pages
+        MutableComponent previousButton = new TextComponent("<< ")
+                .setStyle(Style.EMPTY
+                        .applyFormat(offset == 0 ? ChatFormatting.GRAY : ChatFormatting.RED)
+                        .applyFormat(ChatFormatting.BOLD)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log player " + playerName + " " + limit + " " + (offset - limit)))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Previous Page")))
+                );
+        MutableComponent nextButton = new TextComponent(" >>")
+                .setStyle(Style.EMPTY
+                        .applyFormat(hitEndOfLogs ? ChatFormatting.GRAY : ChatFormatting.GREEN)
+                        .applyFormat(ChatFormatting.BOLD)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log player " + playerName + " " + limit + " " + (offset + limit)))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Next Page")))
+                );
+        component.append(previousButton);
+        component.append("-----");
+        component.append(nextButton);
+        source.sendSuccess(component, false);
+        return 1;
+    }
+
+    private int logBlock(CommandSourceStack source, Coordinates pPosition, int scale, int limit, int offset) {
+        // We want to do a scan around the position given to us, our easiest is if we have no scale, then it's just the position
+        // If we have a scale, we'll want to scan around the position
+        Vec3 vec3 = pPosition.getPosition(source);
+        BlockPos bPos = new BlockPos(vec3);
+        BlockEventObject[] blockEvents;
+        if (scale == 0) {
+            blockEvents = SwarmsmpS2.sqlite.getWorldEventsAtBlock(bPos, limit, offset);
+        } else {
+            // We've got a scale so we gotta work with that
+            blockEvents = SwarmsmpS2.sqlite.getWorldEventsAtBlocks(getBlockPositionsAround(bPos, scale), limit, offset);
+        }
+        boolean hitEndOfLogs = false;
+        MutableComponent component = new TextComponent("---------------\n").withStyle(ChatFormatting.GOLD);
+        // Iterate the logs
+        for (BlockEventObject blockEvent : blockEvents) {
+            // If we hit a null one just end the for loop as we've reached the end of the logs
+            if (blockEvent == null) {
+                hitEndOfLogs = true;
+                break;
+            }
+            ServerPlayer player = source.getServer().getPlayerList().getPlayer(blockEvent.getPlayerUUID());
+            String playerName = player != null ? player.getName().getString() : "unknown";
+            MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.block_logs.get", playerName, blockEvent.getEventPretty(), blockEvent.getActualBlockName(), blockEvent.getX(), blockEvent.getY(), blockEvent.getZ(), blockEvent.humanizeTimestamp()).withStyle(blockEvent.getEventColor());
+            component.append(message);
+        }
+        // We'll create little buttons down here to travel between pages
+        MutableComponent previousButton = new TextComponent("<< ")
+                .setStyle(Style.EMPTY
+                        .applyFormat(offset == 0 ? ChatFormatting.GRAY : ChatFormatting.RED)
+                        .applyFormat(ChatFormatting.BOLD)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log block " + bPos.getX() + " " + bPos.getY() + " " + bPos.getZ() + " " + scale + " " + limit + " " + (offset - limit)))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Previous Page")))
+                );
+
+        MutableComponent nextButton = new TextComponent(" >>")
+                .setStyle(Style.EMPTY
+                        .applyFormat(hitEndOfLogs ? ChatFormatting.GRAY : ChatFormatting.GREEN)
+                        .applyFormat(ChatFormatting.BOLD)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log block " + bPos.getX() + " " + bPos.getY() + " " + bPos.getZ() + " " + scale + " " + limit + " " + (offset + limit)))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Next Page")))
+                );
+        component.append(previousButton);
+        component.append("-----");
+        component.append(nextButton);
+        source.sendSuccess(component, false);
+        return 1;
+    }
+
+    private BlockPos[] getBlockPositionsAround(BlockPos bPos, int scale) {
+        // We need to get blocks around the position given to us, the scale is the radius of the cube we want to get
+        // bPos is the center of our cube, so we need to get the blocks around it
+        // We'll start with the bottom left corner, then go to the top right corner
+        // We'll need to get the x, y, and z of the bottom left corner
+        int x = bPos.getX() - scale;
+        int y = bPos.getY() - scale;
+        int z = bPos.getZ() - scale;
+        // We'll need to get the x, y, and z of the top right corner
+        int x2 = bPos.getX() + scale;
+        int y2 = bPos.getY() + scale;
+        int z2 = bPos.getZ() + scale;
+        // We'll need to get the total number of blocks in our cube
+        int totalBlocks = ((x2 - x) + 1) * ((y2 - y) + 1) * ((z2 - z) + 1);
+        // Create our array of BlockPos
+        BlockPos[] blockPositions = new BlockPos[totalBlocks];
+        // Iterate through our cube
+        int i = 0;
+        for (int x3 = x; x3 <= x2; x3++) {
+            for (int y3 = y; y3 <= y2; y3++) {
+                for (int z3 = z; z3 <= z2; z3++) {
+                    // Create our BlockPos
+                    BlockPos blockPos = new BlockPos(x3, y3, z3);
+                    // Add it to our array
+                    blockPositions[i] = blockPos;
+                    i++;
+                }
+            }
+        }
+        // Return our array
+        return blockPositions;
     }
 
     private int getPlayerEffects(CommandSourceStack source, Collection<ServerPlayer> targets) {

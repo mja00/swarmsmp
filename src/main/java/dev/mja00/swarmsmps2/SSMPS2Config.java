@@ -119,6 +119,10 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.IntValue thunderToThunderChance;
         public final ForgeConfigSpec.IntValue weatherCheckTime;
 
+        // Database
+        public final ForgeConfigSpec.ConfigValue<String> databasePath;
+        public final ForgeConfigSpec.BooleanValue logToConsole;
+
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
 
@@ -224,6 +228,14 @@ public class SSMPS2Config {
             fallbackServer = builder
                     .comment("Whether or not this server is a fallback server")
                     .define("fallbackServer", false);
+
+            databasePath = builder
+                    .comment("The path to the database")
+                    .define("databasePath", "swarmsmp.db");
+
+            logToConsole = builder
+                    .comment("Should block events be logged to console?")
+                    .define("logToConsole", false);
 
             builder.pop();
             builder.comment("Verification Settings").push("verification");
