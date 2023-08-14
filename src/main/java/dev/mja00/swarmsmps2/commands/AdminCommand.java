@@ -1,5 +1,6 @@
 package dev.mja00.swarmsmps2.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -23,6 +24,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
@@ -201,8 +203,9 @@ public class AdminCommand {
                 hitEndOfLogs = true;
                 break;
             }
-            ServerPlayer player = source.getServer().getPlayerList().getPlayer(blockEvent.getPlayerUUID());
-            String playerName = player != null ? player.getName().getString() : "unknown";
+            GameProfileCache profileCache = source.getServer().getProfileCache();
+            Optional<GameProfile> profile = profileCache.get(blockEvent.getPlayerUUID());
+            String playerName = profile.isPresent() ? profile.get().getName() : "Unknown";
             MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.block_logs.get", playerName, blockEvent.getEventPretty(), blockEvent.getActualBlockName(), blockEvent.getX(), blockEvent.getY(), blockEvent.getZ(), blockEvent.humanizeTimestamp()).withStyle(blockEvent.getEventColor());
             component.append(message);
         }
