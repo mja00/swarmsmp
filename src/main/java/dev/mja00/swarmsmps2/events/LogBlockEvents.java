@@ -42,6 +42,7 @@ public class LogBlockEvents {
         BlockEventObject blockEvent = new BlockEventObject(player.getStringUUID(), blockRegistryName, "block_break", bPos.getX(), bPos.getY(), bPos.getZ(), 0);
         // Log it
         if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " broke " + blockRegistryName + " at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
+        if (SwarmsmpS2.sqlite == null) { return; }
         SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
     }
 
@@ -66,6 +67,7 @@ public class LogBlockEvents {
         BlockEventObject blockEvent = new BlockEventObject(player.getStringUUID(), blockRegistryName, "block_place", bPos.getX(), bPos.getY(), bPos.getZ(), 0);
         // Log it
         if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " placed " + blockRegistryName + " at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
+        if (SwarmsmpS2.sqlite == null) { return; }
         SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
     }
 
@@ -90,6 +92,7 @@ public class LogBlockEvents {
         BlockEventObject blockEvent = new BlockEventObject(player.getStringUUID(), blockRegistryName, "farmland_trample", bPos.getX(), bPos.getY(), bPos.getZ(), 0);
         // Log it
         if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " trampled farmland at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
+        if (SwarmsmpS2.sqlite == null) { return; }
         SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
     }
 
@@ -117,6 +120,7 @@ public class LogBlockEvents {
         BlockEventObject blockEvent = new BlockEventObject(player.getStringUUID(), bucket.getHoverName().getString(), "bucket_use", bPos.getX(), bPos.getY(), bPos.getZ(), 0);
         // Log it
         if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " used a " + bucket.getHoverName().getString() + " at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
+        if (SwarmsmpS2.sqlite == null) { return; }
         SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
     }
 
@@ -143,6 +147,7 @@ public class LogBlockEvents {
             BlockEventObject blockEvent = new BlockEventObject(player.getStringUUID(), blockRegistryName, "block_right_click", bPos.getX(), bPos.getY(), bPos.getZ(), 0);
             // Log it
             if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " right clicked " + blockRegistryName + " at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
+            if (SwarmsmpS2.sqlite == null) { return; }
             SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
         }
     }

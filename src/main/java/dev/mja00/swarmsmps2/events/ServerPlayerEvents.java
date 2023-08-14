@@ -240,6 +240,7 @@ public class ServerPlayerEvents {
         // We'll also do a quick little DB thingy here :)
         exe.execute(() -> {
             ServerPlayer player = (ServerPlayer) event.getPlayer();
+            if (SwarmsmpS2.sqlite == null) { return; }
             SwarmsmpS2.sqlite.createPlayerEvent("join", player.getName().getString());
         });
     }
@@ -249,6 +250,7 @@ public class ServerPlayerEvents {
         // We'll also do a quick little DB thingy here :)
         exe.execute(() -> {
             ServerPlayer player = (ServerPlayer) event.getPlayer();
+            if (SwarmsmpS2.sqlite == null) { return; }
             SwarmsmpS2.sqlite.createPlayerEvent("leave", player.getName().getString());
         });
     }
