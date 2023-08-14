@@ -39,41 +39,40 @@ public abstract class MixinSkeletonHorse extends AbstractHorse {
     }
 
     @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true)
-    public InteractionResult mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
+    public void mobInteract(Player pPlayer, InteractionHand pHand, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack itemstack = pPlayer.getItemInHand(pHand);
+        // Check if the player is not on the team named "undead"
+        if (pPlayer.getTeam() == null || !pPlayer.getTeam().getName().equals("undead")) {
+            this.makeMad();
+            cir.setReturnValue(InteractionResult.sidedSuccess(this.level.isClientSide));
+            return;
+        }
         if (!this.isTamed()) {
             this.makeMad();
             this.doPlayerRide(pPlayer);
             cir.setReturnValue(InteractionResult.sidedSuccess(this.level.isClientSide));
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
         } else if (this.isBaby()) {
             cir.setReturnValue(super.mobInteract(pPlayer, pHand));
-            return super.mobInteract(pPlayer, pHand);
         } else if (pPlayer.isSecondaryUseActive()) {
             this.openInventory(pPlayer);
             cir.setReturnValue(InteractionResult.sidedSuccess(this.level.isClientSide));
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
         } else if (this.isVehicle()) {
             cir.setReturnValue(super.mobInteract(pPlayer, pHand));
-            return super.mobInteract(pPlayer, pHand);
         } else {
             if (!itemstack.isEmpty()) {
                 if (itemstack.is(Items.SADDLE) && !this.isSaddled()) {
                     this.openInventory(pPlayer);
                     cir.setReturnValue(InteractionResult.sidedSuccess(this.level.isClientSide));
-                    return InteractionResult.sidedSuccess(this.level.isClientSide);
                 }
 
                 InteractionResult interactionresult = itemstack.interactLivingEntity(pPlayer, this, pHand);
                 if (interactionresult.consumesAction()) {
                     cir.setReturnValue(interactionresult);
-                    return interactionresult;
                 }
             }
 
             this.doPlayerRide(pPlayer);
             cir.setReturnValue(InteractionResult.sidedSuccess(this.level.isClientSide));
-            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
     }
 }
