@@ -130,23 +130,25 @@ public class SwarmsmpS2 {
     public void onServerStarting(ServerStartingEvent event) {
         // do something when the server starts
         LOGGER.info("Literally only mja00 will see this");
-        // Get the full path of the world we're starting up on
-        String worldName = event.getServer().getWorldData().getLevelName();
-        // We'll want to verify that we have access to our SQLite DB, if not stop the server, as something has gone wrong
-        sqlite = new SQLiteHelper(SSMPS2Config.SERVER.databasePath.get(), "./" + worldName);
-        try {
-            sqlite.connect();
-            LOGGER.info("Database connection established");
-        } catch (SQLException e) {
-            // We've ran into some form of an exception, stop the server
-            LOGGER.error("###########################");
-            LOGGER.error("Error while connecting to SQLite database: " + e.getMessage());
-            LOGGER.error("Shutting down server now!");
-            LOGGER.error("###########################");
-            event.getServer().halt(false);
-        }
-        // So we didn't run into an issue, setup our database
-        sqlite.setup();
+        DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () -> {
+            // Get the full path of the world we're starting up on
+            String worldName = event.getServer().getWorldData().getLevelName();
+            // We'll want to verify that we have access to our SQLite DB, if not stop the server, as something has gone wrong
+            sqlite = new SQLiteHelper(SSMPS2Config.SERVER.databasePath.get(), "./" + worldName);
+            try {
+                sqlite.connect();
+                LOGGER.info("Database connection established");
+            } catch (SQLException e) {
+                // We've ran into some form of an exception, stop the server
+                LOGGER.error("###########################");
+                LOGGER.error("Error while connecting to SQLite database: " + e.getMessage());
+                LOGGER.error("Shutting down server now!");
+                LOGGER.error("###########################");
+                event.getServer().halt(false);
+            }
+            // So we didn't run into an issue, setup our database
+            sqlite.setup();
+        });
     }
 
     @SubscribeEvent
