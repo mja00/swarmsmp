@@ -154,11 +154,13 @@ public class SwarmsmpS2 {
     @SubscribeEvent
     public void onServerStopping(ServerStoppingEvent event) {
         // We'll close down our connection to the database here
-        try {
-            sqlite.close();
-        } catch (SQLException e) {
-            LOGGER.error("Error while closing connection to SQLite database: " + e.getMessage());
-        }
+        DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () -> {
+            try {
+                sqlite.close();
+            } catch (SQLException e) {
+                LOGGER.error("Error while closing connection to SQLite database: " + e.getMessage());
+            }
+        });
     }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
