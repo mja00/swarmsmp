@@ -233,8 +233,10 @@ public class ServerPlayerEvents {
                 }
             }
             // We'll also run 1 command on them, which is to set their fallback server so if this server dies for some reason they'll be redirected to the fallback server
-            String fallbackCommand = "fallback " + player.getName().getString() + " fallback.swarmsmp.com";
-            player.getLevel().getServer().getCommands().performCommand(player.getLevel().getServer().createCommandSourceStack(), fallbackCommand);
+            if (!SSMPS2Config.SERVER.fallbackServer.get()) {
+                String fallbackCommand = "fallback " + player.getName().getString() + " fallback.swarmsmp.com";
+                player.getLevel().getServer().getCommands().performCommand(player.getLevel().getServer().createCommandSourceStack(), fallbackCommand);
+            }
         });
         LOGGER.debug("End of thread");
         // We'll also do a quick little DB thingy here :)

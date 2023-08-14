@@ -215,8 +215,8 @@ public class ModEvents {
     @SubscribeEvent
     public static void onWeatherTick(TickEvent.WorldTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
-            // Ensure we're server side
-            if (event.side.isClient()) {
+            // Ensure we're server side or not fallback server
+            if (event.side.isClient() || SSMPS2Config.SERVER.fallbackServer.get()) {
                 return;
             }
             // First thing is we want to see is if we're 10 seconds past the last weather change, if not, return

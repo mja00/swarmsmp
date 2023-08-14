@@ -22,10 +22,6 @@ public class MixinPig extends Animal implements ItemSteerable, Saddleable  {
     }
 
     @Shadow
-    public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
-        return null;
-    }
-    @Shadow
     public boolean boost() {
         return false;
     }
@@ -54,5 +50,10 @@ public class MixinPig extends Animal implements ItemSteerable, Saddleable  {
     public void thunderHit(ServerLevel pLevel, LightningBolt pLightning, CallbackInfo ci) {
         super.thunderHit(pLevel, pLightning);
         ci.cancel();
+    }
+
+    @Nullable
+    public AgeableMob getBreedOffspring(ServerLevel p_146743_, AgeableMob p_146744_) {
+        return null;
     }
 }

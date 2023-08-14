@@ -14,8 +14,8 @@ public class SQLiteHelper {
     private Connection connection;
     private static Logger LOGGER = LogManager.getLogger("SQLITEHELPER");
 
-    public SQLiteHelper(String dbPath, String worldPath) {
-        this.dbPath = worldPath + "/" + dbPath;
+    public SQLiteHelper(String dbPath) {
+        this.dbPath = dbPath;
     }
 
     public void connect() throws SQLException {

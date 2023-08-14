@@ -132,9 +132,8 @@ public class SwarmsmpS2 {
         LOGGER.info("Literally only mja00 will see this");
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () -> {
             // Get the full path of the world we're starting up on
-            String worldName = event.getServer().getWorldData().getLevelName();
             // We'll want to verify that we have access to our SQLite DB, if not stop the server, as something has gone wrong
-            sqlite = new SQLiteHelper(SSMPS2Config.SERVER.databasePath.get(), "./" + worldName);
+            sqlite = new SQLiteHelper(SSMPS2Config.SERVER.databasePath.get());
             try {
                 sqlite.connect();
                 LOGGER.info("Database connection established");
@@ -155,6 +154,9 @@ public class SwarmsmpS2 {
     public void onServerStopping(ServerStoppingEvent event) {
         // We'll close down our connection to the database here
         DistExecutor.unsafeRunWhenOn(Dist.DEDICATED_SERVER, () -> () -> {
+            if (sqlite == null) {
+                return;
+            }
             try {
                 sqlite.close();
             } catch (SQLException e) {
