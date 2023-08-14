@@ -1,8 +1,13 @@
 package dev.mja00.swarmsmps2.mixin;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.animal.horse.SkeletonHorse;
@@ -11,11 +16,17 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import javax.annotation.Nullable;
 
 @Mixin(SkeletonHorse.class)
 public abstract class MixinSkeletonHorse extends AbstractHorse {
@@ -74,5 +85,18 @@ public abstract class MixinSkeletonHorse extends AbstractHorse {
             this.doPlayerRide(pPlayer);
             cir.setReturnValue(InteractionResult.sidedSuccess(this.level.isClientSide));
         }
+    }
+
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor pLevel, DifficultyInstance pDifficulty, MobSpawnType pReason, @Nullable SpawnGroupData pSpawnData, @Nullable CompoundTag pDataTag) {
+        // If we're not in a taiga biome, don't spawn
+        // Get the current biome
+        Biome biome = pLevel.getBiome(this.blockPosition()).value();
+        // Check if the biome is a taiga biome
+        if (biome != ForgeRegistries.BIOMES.getValue(Biomes.TAIGA.getRegistryName())) {
+            // Don't spawn, aka kill the FUCK outta it
+            this.actuallyHurt(DamageSource.ANVIL, 10000);
+        }
+        return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
     }
 }

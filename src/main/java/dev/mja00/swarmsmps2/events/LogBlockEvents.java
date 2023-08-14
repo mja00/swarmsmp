@@ -133,6 +133,10 @@ public class LogBlockEvents {
         if (player == null) {
             return;
         }
+        // If the player is in spectator we don't care
+        if (player.isSpectator()) {
+            return;
+        }
         // Get the block right clicked
         BlockPos bPos = event.getPos();
         BlockState bState = event.getWorld().getBlockState(bPos);
