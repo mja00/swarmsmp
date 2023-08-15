@@ -96,6 +96,16 @@ public class ModEvents {
         }
     }
 
+    @SubscribeEvent
+    public static void adminMessageServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            long now = System.currentTimeMillis();
+            long timeTillExpire = 1000L * 60;
+
+            AdminCommand.MESSAGES.values().removeIf(request -> now > request.created + timeTillExpire);
+        }
+    }
+
     // Event for dueling
     @SubscribeEvent
     public static void serverTick(TickEvent.ServerTickEvent event) {

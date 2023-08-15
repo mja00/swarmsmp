@@ -23,6 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.tags.TagKey;
@@ -52,6 +53,33 @@ public class AdminCommand {
     public static final SuggestionProvider<CommandSourceStack> FACTION_SUGGESTIONS = (context, builder) -> {
         return SharedSuggestionProvider.suggest(FACTIONS.stream(), builder);
     };
+
+    public static class AdminMessage {
+        public final String id;
+        public  MinecraftServer server;
+        public ServerPlayer source;
+        public ServerPlayer target;
+        public long created;
+
+        public AdminMessage(String s) { id = s; }
+    }
+
+    public static final HashMap<String, AdminMessage> MESSAGES = new HashMap<>();
+
+    public static AdminMessage createAdminMessage(MinecraftServer server, ServerPlayer source, ServerPlayer target) {
+        String key;
+        do {
+            key = String.format("%08X", new Random().nextInt());
+        } while (MESSAGES.containsKey(key));
+
+        AdminMessage adminMessage = new AdminMessage(key);
+        adminMessage.server = server;
+        adminMessage.source = source;
+        adminMessage.target = target;
+        adminMessage.created = System.currentTimeMillis();
+        MESSAGES.put(key, adminMessage);
+        return adminMessage;
+    }
 
     public AdminCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("admin")
@@ -326,7 +354,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int sendMessageToPlayer(CommandSourceStack source, Collection<ServerPlayer> targets, Component message) {
+    private int sendMessageToPlayer(CommandSourceStack source, Collection<ServerPlayer> targets, Component message) throws CommandSyntaxException {
         // Make sure there is only one recipient
         if (targets.size() != 1) {
             source.sendFailure(new TranslatableComponent(translationKey + "commands.message.players.too_many"));
@@ -334,8 +362,15 @@ public class AdminCommand {
         }
 
         ServerPlayer recipient = targets.iterator().next();
+        AdminMessage adminMessage = createAdminMessage(source.getServer(), source.getPlayerOrException(), recipient);
         source.sendSuccess(new TranslatableComponent(translationKey + "commands.message.sent", recipient.getDisplayName(), message), false);
         recipient.sendMessage(new TranslatableComponent(translationKey + "commands.message.received", source.getDisplayName(), message).withStyle(ChatFormatting.AQUA), DUMMY);
+        MutableComponent textComponent = new TextComponent("Click here to reply").setStyle(Style.EMPTY
+                .applyFormat(ChatFormatting.GOLD)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/reply " + adminMessage.id))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to reply to this message")))
+        );
+        recipient.sendMessage(textComponent, DUMMY);
         return 1;
     }
 
