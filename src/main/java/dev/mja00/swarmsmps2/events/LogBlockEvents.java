@@ -19,10 +19,14 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 @Mod.EventBusSubscriber(modid = SwarmsmpS2.MODID)
 public class LogBlockEvents {
 
     static Logger LOGGER = LogManager.getLogger("LOGBLOCKEVENTS");
+    static final ExecutorService exe = Executors.newCachedThreadPool();
 
     @SubscribeEvent
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
@@ -43,7 +47,9 @@ public class LogBlockEvents {
         // Log it
         if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " broke " + blockRegistryName + " at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
         if (SwarmsmpS2.sqlite == null) { return; }
-        SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+        exe.execute(() -> {
+            SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+        });
     }
 
     @SubscribeEvent
@@ -68,7 +74,9 @@ public class LogBlockEvents {
         // Log it
         if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " placed " + blockRegistryName + " at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
         if (SwarmsmpS2.sqlite == null) { return; }
-        SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+        exe.execute(() -> {
+            SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+        });
     }
 
     @SubscribeEvent
@@ -93,7 +101,9 @@ public class LogBlockEvents {
         // Log it
         if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " trampled farmland at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
         if (SwarmsmpS2.sqlite == null) { return; }
-        SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+        exe.execute(() -> {
+            SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+        });
     }
 
     @SubscribeEvent
@@ -121,7 +131,9 @@ public class LogBlockEvents {
         // Log it
         if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " used a " + bucket.getHoverName().getString() + " at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
         if (SwarmsmpS2.sqlite == null) { return; }
-        SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+        exe.execute(() -> {
+            SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+        });
     }
 
     @SubscribeEvent
@@ -152,7 +164,9 @@ public class LogBlockEvents {
             // Log it
             if (SSMPS2Config.SERVER.logToConsole.get()) { LOGGER.info(player.getName().getString() + " right clicked " + blockRegistryName + " at " + bPos.getX() + ", " + bPos.getY() + ", " + bPos.getZ() + "."); }
             if (SwarmsmpS2.sqlite == null) { return; }
-            SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+            exe.execute(() -> {
+                SwarmsmpS2.sqlite.createWorldEvent(blockEvent);
+            });
         }
     }
 

@@ -158,7 +158,9 @@ public class SwarmsmpS2 {
                 return;
             }
             try {
+                // Close and null sqlite
                 sqlite.close();
+                sqlite = null;
             } catch (SQLException e) {
                 LOGGER.error("Error while closing connection to SQLite database: " + e.getMessage());
             }
