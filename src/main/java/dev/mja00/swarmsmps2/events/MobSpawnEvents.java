@@ -3,6 +3,7 @@ package dev.mja00.swarmsmps2.events;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -42,6 +43,16 @@ public class MobSpawnEvents {
             giveTeamAndCreateIfNeeded(entity, "undead");
         } else if (EntityType.SILVERFISH.equals(entityType)) {
             giveTeamAndCreateIfNeeded(entity, "swarm");
+        } else if (EntityType.BEE.equals(entityType)) {
+            giveTeamAndCreateIfNeeded(entity, "swarm");
+        }
+    }
+
+    @SubscribeEvent
+    public static void onDrownedConversion(LivingConversionEvent.Post event) {
+        EntityType<?> entityType = event.getOutcome().getType();
+        if (EntityType.DROWNED.equals(entityType)) {
+            giveTeamAndCreateIfNeeded(event.getOutcome(), "undead");
         }
     }
 }
