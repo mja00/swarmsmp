@@ -222,33 +222,33 @@ public class ModEvents {
     }
 
     // Event for handling custom weather cycles
-    @SubscribeEvent
-    public static void onWeatherTick(TickEvent.WorldTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            // Ensure we're server side or not fallback server
-            if (event.side.isClient() || SSMPS2Config.SERVER.fallbackServer.get()) {
-                return;
-            }
-            // First thing is we want to see is if we're 10 seconds past the last weather change, if not, return
-            long lastWeatherChange = lastWeatherChangeTime == 0 ? SSMPS2Config.getTimeOfWeatherChange() : lastWeatherChangeTime;
-            long now = System.currentTimeMillis() / 1000L;
-            if (now - lastWeatherChange < SSMPS2Config.SERVER.weatherCheckTime.get() + nextRandomMinute) {
-                return;
-            }
-            // It's been more than 10 seconds so we'll do a weather change
-            // Get the current weather
-            boolean isRaining = event.world.isRaining();
-            boolean isThundering = event.world.isThundering();
-            ServerLevel overworld = (ServerLevel) event.world;
-            // Make a map to hold all our chances, this'll make life less ugly
-            Map<String, WeightedWeatherEvent<String>> chances = weatherChances == null ? getWeatherChances() : weatherChances;
-            // We want to see if it's thundering
-            WeightedWeatherEvent<String> selectedChance = isThundering ? chances.get("thunder") : isRaining ? chances.get("rain") : chances.get("clear");
-            // Get the new weather
-            String newWeather = selectedChance.getRandom();
-            LOGGER.info("New weather is " + newWeather);
-            // Update the weather
-            updateWeather(overworld, newWeather);
-        }
-    }
+//    @SubscribeEvent
+//    public static void onWeatherTick(TickEvent.WorldTickEvent event) {
+//        if (event.phase == TickEvent.Phase.END) {
+//            // Ensure we're server side or not fallback server
+//            if (event.side.isClient() || SSMPS2Config.SERVER.fallbackServer.get()) {
+//                return;
+//            }
+//            // First thing is we want to see is if we're 10 seconds past the last weather change, if not, return
+//            long lastWeatherChange = lastWeatherChangeTime == 0 ? SSMPS2Config.getTimeOfWeatherChange() : lastWeatherChangeTime;
+//            long now = System.currentTimeMillis() / 1000L;
+//            if (now - lastWeatherChange < SSMPS2Config.SERVER.weatherCheckTime.get() + nextRandomMinute) {
+//                return;
+//            }
+//            // It's been more than 10 seconds so we'll do a weather change
+//            // Get the current weather
+//            boolean isRaining = event.world.isRaining();
+//            boolean isThundering = event.world.isThundering();
+//            ServerLevel overworld = (ServerLevel) event.world;
+//            // Make a map to hold all our chances, this'll make life less ugly
+//            Map<String, WeightedWeatherEvent<String>> chances = weatherChances == null ? getWeatherChances() : weatherChances;
+//            // We want to see if it's thundering
+//            WeightedWeatherEvent<String> selectedChance = isThundering ? chances.get("thunder") : isRaining ? chances.get("rain") : chances.get("clear");
+//            // Get the new weather
+//            String newWeather = selectedChance.getRandom();
+//            LOGGER.info("New weather is " + newWeather);
+//            // Update the weather
+//            updateWeather(overworld, newWeather);
+//        }
+//    }
 }
