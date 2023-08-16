@@ -123,6 +123,9 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.ConfigValue<String> databasePath;
         public final ForgeConfigSpec.BooleanValue logToConsole;
 
+        // Mob changes
+        public final ForgeConfigSpec.IntValue chickenFromEggChance;
+
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
 
@@ -344,6 +347,15 @@ public class SSMPS2Config {
             thunderToThunderChance = builder
                     .comment("The chance of thunder turning to thunder. 0-100")
                     .defineInRange("thunderToThunderChance", 85, 0, 100);
+
+            builder.pop();
+            builder.comment("Mob Settings").push("mobs");
+
+            chickenFromEggChance = builder
+                    .comment("The 1/X chance of a chicken spawning from an egg. 0-100")
+                    .defineInRange("chickenFromEggChance", 1, 0, 100);
+
+            builder.pop();
         }
     }
 
