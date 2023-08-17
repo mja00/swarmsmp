@@ -1,6 +1,5 @@
 package dev.mja00.swarmsmps2.events;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import net.minecraft.ChatFormatting;
@@ -29,7 +28,7 @@ public class ChatEvents {
         if (player.hasCustomName()) {
             return player.getCustomName();
         } else {
-            return player.getDisplayName();
+            return player.getName();
         }
     }
 

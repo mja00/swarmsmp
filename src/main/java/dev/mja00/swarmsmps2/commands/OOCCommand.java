@@ -35,22 +35,23 @@ public class OOCCommand {
     }
 
     private int sendGlobalMessage(CommandSourceStack source, Component message) throws CommandSyntaxException {
-        TextComponent messageComponent = (TextComponent) message;
         LOGGER.info("[OOC] " + source.getTextName() + ": " + message.getString());
         // Get all players in the server
         List<ServerPlayer> players = source.getLevel().players();
-        String senderName = ChatEvents.getPlayerName(source.getPlayerOrException()).getString();
+        ServerPlayer sourcePlayer = source.getPlayerOrException();
+        String senderName = ChatEvents.getPlayerName(sourcePlayer).getString();
         String messageString = message.getString();
+        boolean isOp = sourcePlayer.hasPermissions(4);
         // Send message to all players
         for (ServerPlayer player : players) {
             MutableComponent chatMessage = new TextComponent("[OOC] <").withStyle(Style.EMPTY
-                    .applyFormat(ChatFormatting.RED));
+                    .applyFormat(isOp ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.RED));
             chatMessage.append(new TextComponent(senderName).withStyle(Style.EMPTY
-                    .applyFormat(ChatFormatting.RED)));
+                    .applyFormat(isOp ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.RED)));
             chatMessage.append(new TextComponent("> ").withStyle(Style.EMPTY
-                    .applyFormat(ChatFormatting.RED)));
+                    .applyFormat(isOp ? ChatFormatting.LIGHT_PURPLE : ChatFormatting.RED)));
             chatMessage.append(new TextComponent(messageString).withStyle(Style.EMPTY
-                    .applyFormat(ChatFormatting.WHITE)));
+                    .applyFormat(isOp ? ChatFormatting.GOLD : ChatFormatting.WHITE)));
 
             player.sendMessage(chatMessage, source.getPlayerOrException().getUUID());
         }
