@@ -363,8 +363,8 @@ public class AdminCommand {
 
         ServerPlayer recipient = targets.iterator().next();
         AdminMessage adminMessage = createAdminMessage(source.getServer(), source.getPlayerOrException(), recipient);
-        source.sendSuccess(new TranslatableComponent(translationKey + "commands.message.sent", recipient.getDisplayName(), message), false);
-        recipient.sendMessage(new TranslatableComponent(translationKey + "commands.message.received", source.getDisplayName(), message).withStyle(ChatFormatting.AQUA), DUMMY);
+        source.sendSuccess(new TranslatableComponent(translationKey + "commands.message.sent", recipient.getName(), message), false);
+        recipient.sendMessage(new TranslatableComponent(translationKey + "commands.message.received", source.getPlayerOrException().getName(), message).withStyle(ChatFormatting.AQUA), DUMMY);
         MutableComponent textComponent = new TextComponent("Click here to reply").setStyle(Style.EMPTY
                 .applyFormat(ChatFormatting.GOLD)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/reply " + adminMessage.id))
