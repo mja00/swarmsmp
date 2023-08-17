@@ -10,19 +10,23 @@ import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import dev.mja00.swarmsmps2.objects.BlockEventObject;
+import dev.mja00.swarmsmps2.objects.MobKillObject;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.EntitySummonArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
@@ -114,6 +118,8 @@ public class AdminCommand {
                         .then(Commands.literal("get_tags")
                                 .executes((command) -> getTagsForItem(command.getSource()))))
                 .then(Commands.literal("log")
+                        .then(Commands.literal("mob").then(Commands.argument("mob", EntitySummonArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
+                                .executes((command) -> logMob(command.getSource(), EntitySummonArgument.getSummonableEntity(command, "mob"), 10, 0))))
                         .then(Commands.literal("block").then(Commands.argument("location", Vec3Argument.vec3())
                                     .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), 0, 10, 0))
                                 .then(Commands.argument("scale", IntegerArgumentType.integer(0, 10))
@@ -201,6 +207,48 @@ public class AdminCommand {
                         .applyFormat(hitEndOfLogs ? ChatFormatting.GRAY : ChatFormatting.GREEN)
                         .applyFormat(ChatFormatting.BOLD)
                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log player " + playerName + " " + limit + " " + (offset + limit)))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Next Page")))
+                );
+        component.append(previousButton);
+        component.append("-----");
+        component.append(nextButton);
+        source.sendSuccess(component, false);
+        return 1;
+    }
+
+    private int logMob(CommandSourceStack source, ResourceLocation mob, int limit, int offset) {
+        if (offset < 0) {
+            offset = 0;
+        }
+        MobKillObject[] mobKills = SwarmsmpS2.sqlite.getPlayersFromMob(mob.toString(), limit, offset);
+        boolean hitEndOfLogs = false;
+        MutableComponent component = new TextComponent("---------------\n").withStyle(ChatFormatting.GOLD);
+        // Iterate the logs
+        for (MobKillObject killObject : mobKills) {
+            // If we hit a null one just end the for loop as we've reached the end of the logs
+            if (killObject == null) {
+                hitEndOfLogs = true;
+                break;
+            }
+            GameProfileCache profileCache = source.getServer().getProfileCache();
+            Optional<GameProfile> profile = profileCache.get(killObject.getPlayerUUID());
+            String playerName = profile.isPresent() ? profile.get().getName() : "Unknown";
+            MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.mob_logs.get", playerName, killObject.getActualMobName(), killObject.humanizeTimestamp()).withStyle(ChatFormatting.AQUA);
+            component.append(message);
+        }
+        // We'll create little buttons down here to travel between pages
+        MutableComponent previousButton = new TextComponent("<< ")
+                .setStyle(Style.EMPTY
+                        .applyFormat(offset == 0 ? ChatFormatting.GRAY : ChatFormatting.RED)
+                        .applyFormat(ChatFormatting.BOLD)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log mob " + mob.getPath() + " " + limit + " " + (offset - limit)))
+                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Previous Page")))
+                );
+        MutableComponent nextButton = new TextComponent(" >>")
+                .setStyle(Style.EMPTY
+                        .applyFormat(hitEndOfLogs ? ChatFormatting.GRAY : ChatFormatting.GREEN)
+                        .applyFormat(ChatFormatting.BOLD)
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log mob " + mob.getPath() + " " + limit + " " + (offset + limit)))
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Next Page")))
                 );
         component.append(previousButton);

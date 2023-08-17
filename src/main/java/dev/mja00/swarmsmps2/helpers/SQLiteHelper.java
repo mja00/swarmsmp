@@ -1,6 +1,7 @@
 package dev.mja00.swarmsmps2.helpers;
 
 import dev.mja00.swarmsmps2.objects.BlockEventObject;
+import dev.mja00.swarmsmps2.objects.MobKillObject;
 import net.minecraft.core.BlockPos;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,10 +72,19 @@ public class SQLiteHelper {
                 	player text NOT NULL,
                 	event_time integer NOT NULL
                 );""";
-        // Now create our two tables
+        // Mob kills
+        String createPlayerMobKillsTables = """
+                CREATE TABLE IF NOT EXISTS player_mob_kills (
+                    id integer PRIMARY KEY,
+                    player text NOT NULL,
+                    mob_type text NOT NULL,
+                    event_time integer NOT NULL
+                );""";
+        // Now create our tables
         try {
             this.connection.createStatement().execute(createWorldEventsTable);
             this.connection.createStatement().execute(createPlayerEventsTable);
+            this.connection.createStatement().execute(createPlayerMobKillsTables);
         } catch (SQLException e) {
             LOGGER.error("Error while creating tables: " + e.getMessage());
         }
@@ -205,5 +215,78 @@ public class SQLiteHelper {
         } catch (SQLException e) {
             LOGGER.error("Error while creating player event: " + e.getMessage());
         }
+    }
+
+    public void createMobKillEvent(String mob, String playerUUID) {
+        // Create our insert statement
+        String insertStatement = """
+                INSERT INTO player_mob_kills (player, mob_type, event_time)
+                VALUES (?, ?, ?);""";
+        // Create our prepared statement
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(insertStatement);
+            preparedStatement.setString(1, playerUUID);
+            preparedStatement.setString(2, mob);
+            preparedStatement.setLong(3, System.currentTimeMillis());
+            // Execute our statement
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.error("Error while creating mob kill event: " + e.getMessage());
+        }
+    }
+
+    public MobKillObject[] getPlayerMobKills(String player, int limit, int offset) {
+        // Create our select statement
+        String selectStatement = """
+                SELECT * FROM player_mob_kills WHERE player = ? ORDER BY event_time DESC LIMIT ? OFFSET ?;""";
+        // Create our prepared statement
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(selectStatement);
+            preparedStatement.setString(1, player);
+            preparedStatement.setInt(2, limit);
+            preparedStatement.setInt(3, offset);
+            return runMobKillListPrepared(preparedStatement, limit);
+        } catch (SQLException e) {
+            LOGGER.error("Error while getting player mob kills: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public MobKillObject[] getPlayersFromMob(String mob, int limit, int offset) {
+        // Create our select statement
+        String selectStatement = """
+                SELECT * FROM player_mob_kills WHERE mob_type = ? ORDER BY event_time DESC LIMIT ? OFFSET ?;""";
+        // Create our prepared statement
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(selectStatement);
+            preparedStatement.setString(1, mob);
+            preparedStatement.setInt(2, limit);
+            preparedStatement.setInt(3, offset);
+            return runMobKillListPrepared(preparedStatement, limit);
+        } catch (SQLException e) {
+            LOGGER.error("Error while getting players from mob: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private MobKillObject[] runMobKillListPrepared(PreparedStatement preparedStatement, int limit) throws SQLException{
+        ResultSet resultSet = preparedStatement.executeQuery();
+        // Create our array of BlockEventObjects
+        MobKillObject[] mobEvents = new MobKillObject[limit];
+        // Iterate through our result set
+        int i = 0;
+        while (resultSet.next()) {
+            // Get our data
+            String playerUUID = resultSet.getString("player");
+            String mobName = resultSet.getString("mob_type");
+            long timestamp = resultSet.getLong("event_time");
+            // Create our BlockEventObject
+            MobKillObject mobEvent = new MobKillObject(mobName, playerUUID, timestamp);
+            // Add it to our array
+            mobEvents[i] = mobEvent;
+            i++;
+        }
+        // Return our array
+        return mobEvents;
     }
 }

@@ -18,6 +18,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -260,5 +261,16 @@ public class ServerPlayerEvents {
     @SubscribeEvent
     public static void noPortals(BlockEvent.PortalSpawnEvent event) {
          event.setCanceled(true);
+    }
+
+    @SubscribeEvent
+    public static void onPlayerKillMob(LivingDeathEvent event) {
+        // Make sure the killer is a player
+        if (!(event.getSource().getEntity() instanceof ServerPlayer player)) { return; }
+        String mobName = Objects.requireNonNull(event.getEntity().getType().getRegistryName()).toString();
+        exe.execute(() -> {
+            if (SwarmsmpS2.sqlite == null) { return; }
+            SwarmsmpS2.sqlite.createMobKillEvent(mobName, player.getStringUUID());
+        });
     }
 }
