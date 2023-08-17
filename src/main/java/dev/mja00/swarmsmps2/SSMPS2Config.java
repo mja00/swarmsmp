@@ -353,7 +353,7 @@ public class SSMPS2Config {
 
             chickenFromEggChance = builder
                     .comment("The 1/X chance of a chicken spawning from an egg. 0-100")
-                    .defineInRange("chickenFromEggChance", 1, 0, 100);
+                    .defineInRange("chickenFromEggChance", 32, 0, 100);
 
             builder.pop();
         }

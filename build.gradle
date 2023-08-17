@@ -19,7 +19,7 @@ apply plugin: 'org.spongepowered.mixin'
 
 
 group = 'dev.mja00'
-version = '1.39'
+version = '1.40'
 
 java {
     archivesBaseName = 'swarmsmps2'
