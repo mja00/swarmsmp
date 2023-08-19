@@ -17,6 +17,7 @@ public class BlockEventObject {
     private final int y;
     private final int z;
     private final long timestamp;
+    private final int blockCount;
 
     public BlockEventObject(String playerUUID, String blockName, String event, int x, int y, int z, long timestamp) {
         this.playerUUID = playerUUID;
@@ -26,6 +27,17 @@ public class BlockEventObject {
         this.y = y;
         this.z = z;
         this.timestamp = timestamp;
+        this.blockCount = 1;
+    }
+    public BlockEventObject(String playerUUID, String blockName, String event, int x, int y, int z, long timestamp, int blockCount) {
+        this.playerUUID = playerUUID;
+        this.blockName = blockName;
+        this.event = event;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.timestamp = timestamp;
+        this.blockCount = blockCount;
     }
 
     public UUID getPlayerUUID() {
@@ -47,6 +59,9 @@ public class BlockEventObject {
         Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(this.blockName));
         if (block == null) {
             return new TextComponent("unknown");
+        }
+        if (this.blockCount > 1) {
+            return new TextComponent(this.blockCount + " " + block.getName().getString());
         }
         return block.getName();
     }
@@ -71,6 +86,10 @@ public class BlockEventObject {
         return this.timestamp;
     }
 
+    public int getBlockCount() {
+        return this.blockCount;
+    }
+
     public String getEventPretty() {
         return switch (this.event) {
             case "block_break" -> "broke";
@@ -78,6 +97,8 @@ public class BlockEventObject {
             case "farmland_trample" -> "trampled";
             case "bucket_use" -> "used";
             case "block_right_click" -> "opened";
+            case "item_add" -> "added";
+            case "item_remove" -> "removed";
             default -> "did something with";
         };
     }
@@ -89,6 +110,8 @@ public class BlockEventObject {
             case "bucket_use" -> ChatFormatting.DARK_AQUA;
             case "farmland_trample" -> ChatFormatting.YELLOW;
             case "block_right_click" -> ChatFormatting.LIGHT_PURPLE;
+            case "item_add" -> ChatFormatting.DARK_GREEN;
+            case "item_remove" -> ChatFormatting.DARK_RED;
             default -> ChatFormatting.WHITE;
         };
     }

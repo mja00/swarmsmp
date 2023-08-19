@@ -16,6 +16,12 @@
     "MixinSkinProcessor",
     "MixinTitleScreen"
   ],
+  "server": [
+    "BaseContainerBlockEntityMixin",
+    "CompoundContainerMixin",
+    "MixinAbstractContainerMenu",
+    "MixinSlot"
+  ],
   "injectors": {
     "defaultRequire": 1
   }

@@ -12,8 +12,8 @@ public class SwarmSMPPacketHandler {
     public static final SimpleChannel MOD_LIST_CHANNEL = NetworkRegistry.newSimpleChannel(
             new ResourceLocation(SwarmsmpS2.MODID, "mod_list"),
             () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals
+            NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION),
+            NetworkRegistry.acceptMissingOr(PROTOCOL_VERSION)
     );
 
     public static void init() {

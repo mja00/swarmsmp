@@ -191,7 +191,12 @@ public class AdminCommand {
                 hitEndOfLogs = true;
                 break;
             }
-            MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.block_logs.get", playerName, blockEvent.getEventPretty(), blockEvent.getActualBlockName(), blockEvent.getX(), blockEvent.getY(), blockEvent.getZ(), blockEvent.humanizeTimestamp()).withStyle(blockEvent.getEventColor());
+            MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.block_logs.get", playerName, blockEvent.getEventPretty(), blockEvent.getActualBlockName(), blockEvent.getX(), blockEvent.getY(), blockEvent.getZ(), blockEvent.humanizeTimestamp())
+                    .setStyle(Style.EMPTY
+                            .applyFormat(blockEvent.getEventColor())
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport to this location")))
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + blockEvent.getX() + " " + blockEvent.getY() + " " + blockEvent.getZ()))
+                    );
             component.append(message);
         }
         // We'll create little buttons down here to travel between pages
@@ -282,7 +287,12 @@ public class AdminCommand {
             GameProfileCache profileCache = source.getServer().getProfileCache();
             Optional<GameProfile> profile = profileCache.get(blockEvent.getPlayerUUID());
             String playerName = profile.isPresent() ? profile.get().getName() : "Unknown";
-            MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.block_logs.get", playerName, blockEvent.getEventPretty(), blockEvent.getActualBlockName(), blockEvent.getX(), blockEvent.getY(), blockEvent.getZ(), blockEvent.humanizeTimestamp()).withStyle(blockEvent.getEventColor());
+            MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.block_logs.get", playerName, blockEvent.getEventPretty(), blockEvent.getActualBlockName(), blockEvent.getX(), blockEvent.getY(), blockEvent.getZ(), blockEvent.humanizeTimestamp())
+                    .setStyle(Style.EMPTY
+                            .applyFormat(blockEvent.getEventColor())
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport to this player")))
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp " + playerName))
+                    );
             component.append(message);
         }
         // We'll create little buttons down here to travel between pages

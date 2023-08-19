@@ -147,6 +147,7 @@ public class SwarmsmpS2 {
             }
             // So we didn't run into an issue, setup our database
             sqlite.setup();
+            sqlite.migrateData();
         });
     }
 

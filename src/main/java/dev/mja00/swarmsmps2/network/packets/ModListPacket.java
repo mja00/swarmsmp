@@ -40,11 +40,13 @@ public class ModListPacket {
     }
 
     public static void handle(ModListPacket packet, Supplier<NetworkEvent.Context> ctx) {
-        // Make a neat string of the mod list
-        String modList = String.join(", ", packet.modIds);
-        ServerPlayer player = ctx.get().getSender();
-        String name = player != null ? player.getName().getString() : "Unknown";
-        LOGGER.info("Mod list received from " + name + ": " + modList);
+        ctx.get().enqueueWork(() -> {
+            // Make a neat string of the mod list
+            String modList = String.join(", ", packet.modIds);
+            ServerPlayer player = ctx.get().getSender();
+            String name = player != null ? player.getName().getString() : "Unknown";
+            LOGGER.info("Mod list received from " + name + ": " + modList);
+        });
         ctx.get().setPacketHandled(true);
     }
 }

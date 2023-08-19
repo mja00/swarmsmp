@@ -62,6 +62,7 @@ public class SQLiteHelper {
                 	block_y integer NOT NULL,
                 	block_z integer NOT NULL,
                 	block_data text NOT NULL,
+                	block_count integer NOT NULL DEFAULT 1,
                 	event_time integer NOT NULL
                 );""";
         // We'll want a table for all player join/leave events
@@ -90,11 +91,42 @@ public class SQLiteHelper {
         }
     }
 
+    public void migrateData() {
+        // Add block_count to world_events if it's not there
+        String alterWorldEventsTable = """
+                ALTER TABLE world_events ADD COLUMN block_count integer NOT NULL DEFAULT 1;""";
+        try {
+            if (!columnExists("world_events", "block_count")) {
+                this.connection.createStatement().execute(alterWorldEventsTable);
+                LOGGER.info("Added block_count column to world_events table");
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Error while migrating data: " + e.getMessage());
+        }
+    }
+
+    public boolean columnExists(String table, String column) {
+        String statement = """
+                PRAGMA table_info(%s);
+                """;
+        try {
+            ResultSet resultSet = this.connection.createStatement().executeQuery(String.format(statement, table));
+            while (resultSet.next()) {
+                if (resultSet.getString("name").equals(column)) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Error while checking if column exists: " + e.getMessage());
+        }
+        return false;
+    }
+
     public void createWorldEvent(BlockEventObject eventData) {
         // Create our insert statement
         String insertStatement = """
-                INSERT INTO world_events (event_type, player, block_x, block_y, block_z, block_data, event_time)
-                VALUES (?, ?, ?, ?, ?, ?, ?);""";
+                INSERT INTO world_events (event_type, player, block_x, block_y, block_z, block_data, event_time, block_count)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?);""";
         // Create our prepared statement
         try {
             PreparedStatement preparedStatement = this.connection.prepareStatement(insertStatement);
@@ -105,6 +137,7 @@ public class SQLiteHelper {
             preparedStatement.setInt(5, eventData.getZ());
             preparedStatement.setString(6, eventData.getBlockName());
             preparedStatement.setLong(7, System.currentTimeMillis());
+            preparedStatement.setInt(8, eventData.getBlockCount());
             // Execute our statement
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
@@ -189,8 +222,9 @@ public class SQLiteHelper {
             int z = resultSet.getInt("block_z");
             String eventType = resultSet.getString("event_type");
             long timestamp = resultSet.getLong("event_time");
+            int blockCount = resultSet.getInt("block_count");
             // Create our BlockEventObject
-            BlockEventObject blockEvent = new BlockEventObject(playerUUID, blockName, eventType, x, y, z, timestamp);
+            BlockEventObject blockEvent = new BlockEventObject(playerUUID, blockName, eventType, x, y, z, timestamp, blockCount);
             // Add it to our array
             blockEvents[i] = blockEvent;
             i++;
