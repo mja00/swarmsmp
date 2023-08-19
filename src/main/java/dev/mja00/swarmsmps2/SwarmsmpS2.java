@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.mja00.swarmsmps2.config.HandleServerData;
 import dev.mja00.swarmsmps2.events.PlayerEvents;
 import dev.mja00.swarmsmps2.helpers.SQLiteHelper;
+import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
@@ -106,8 +107,7 @@ public class SwarmsmpS2 {
 
     private void setup(final FMLCommonSetupEvent event) {
         // some preinit code
-        LOGGER.info("We're preiniting");
-        LOGGER.info("If you see this post <@124956694768779264> in the ssmp-help-desk channel");
+        SwarmSMPPacketHandler.init();
     }
 
     private void enqueueIMC(final InterModEnqueueEvent event) {
