@@ -17,9 +17,13 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -272,5 +276,28 @@ public class ServerPlayerEvents {
             if (SwarmsmpS2.sqlite == null) { return; }
             SwarmsmpS2.sqlite.createMobKillEvent(mobName, player.getStringUUID());
         });
+    }
+
+    @SubscribeEvent
+    public static void stopBonemealTrees(PlayerInteractEvent.RightClickBlock event) {
+        // Check if the player is holding bonemeal in either hand
+        ItemStack mainHand = event.getPlayer().getMainHandItem();
+        ItemStack offHand = event.getPlayer().getOffhandItem();
+        Item boneMeal = Items.BONE_MEAL;
+        // If neither hand has bonemeal, return
+        if (!mainHand.getItem().equals(boneMeal) && !offHand.getItem().equals(boneMeal)) { return; }
+        // Okay so one hand has bonemeal, we'll get the player's team to see if we need to do anything
+        ServerPlayer player = (ServerPlayer) event.getPlayer();
+        String team = player.getTeam() != null ? player.getTeam().getName() : "none";
+        // If the player isn't on the undead or construct just return
+        if (!team.equals("undead") && !team.equals("construct")) { return; }
+        // If they use bonemeal on moss, cancel the event
+        // Get the block they clicked
+        BlockState bState = event.getWorld().getBlockState(event.getPos());
+        if (bState.getBlock().getRegistryName() == null) { return; }
+        String blockName = bState.getBlock().getRegistryName().toString();
+        if (blockName.equals("minecraft:moss_block")) {
+            event.setCanceled(true);
+        }
     }
 }
