@@ -52,6 +52,7 @@ public class ModEvents {
         new AliasCommand(event.getDispatcher());
         new FallbackCommand(event.getDispatcher());
         new ReplyCommand(event.getDispatcher());
+        new WhosOnlineCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
