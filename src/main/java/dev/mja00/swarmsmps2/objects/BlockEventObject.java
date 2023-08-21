@@ -4,7 +4,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.UUID;
@@ -56,14 +59,32 @@ public class BlockEventObject {
         if (this.blockName.equals("unknown")) {
             return new TextComponent("unknown");
         }
-        Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(this.blockName));
-        if (block == null) {
-            return new TextComponent("unknown");
-        }
+        // If there's more than 1 count we're guaranteed to be working with an item
         if (this.blockCount > 1) {
-            return new TextComponent(this.blockCount + " " + block.getName().getString());
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.blockName));
+            if (item == null) {
+                return new TextComponent("unknown");
+            }
+            return new TextComponent(String.valueOf(this.blockCount)).append(" ").append(new ItemStack(item).getHoverName());
+        } else {
+            // We'll have to do some logic
+            // The BLOCKS registry returns air if the object isn't there, so we'll do a simple comparison
+            Block air = Blocks.AIR;
+            Block block = ForgeRegistries.BLOCKS.getValue(new ResourceLocation(this.blockName));
+            if (block == null) {
+                return new TextComponent("unknown");
+            }
+            if (block.getRegistryName().getPath().equals(air.getRegistryName().getPath())) {
+                // Then we're an item
+                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.blockName));
+                if (item == null) {
+                    return new TextComponent("unknown");
+                }
+                return new TextComponent(String.valueOf(this.blockCount)).append(" ").append(new ItemStack(item).getHoverName());
+            } else {
+                return block.getName();
+            }
         }
-        return block.getName();
     }
 
     public String getEvent() {
