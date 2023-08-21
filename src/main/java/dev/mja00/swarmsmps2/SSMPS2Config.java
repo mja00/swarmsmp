@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import dev.mja00.swarmsmps2.commands.RaidCommand;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -33,6 +35,7 @@ public class SSMPS2Config {
     public static final File TRAITS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/traits.json");
     public static final File ALIAS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/aliases.json");
     public static final File GENERIC_FILE = new File(DOT_MINECRAFT, "config/ssmps2/generic.json");
+    public static final File RAIDS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/raids.json");
 
     public static class Client {
         // Client config options
@@ -711,6 +714,80 @@ public class SSMPS2Config {
                 jw.close();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+        }
+    }
+
+    // All our raid file stuff
+    // Write our current raids to file
+    public static void writeRaidsToFile() {
+        HashMap<String, RaidCommand.Raid> raids = RaidCommand.RAIDS;
+        JsonWriter jw = getJsonWriter(RAIDS_FILE);
+        if (jw != null) {
+            try {
+                jw.beginObject();
+                jw.name("raids");
+                jw.beginArray();
+                for (Map.Entry<String, RaidCommand.Raid> raid : raids.entrySet()) {
+                    jw.beginObject();
+                    jw.name("id");
+                    jw.value(raid.getKey());
+                    jw.name("source");
+                    jw.value(raid.getValue().source);
+                    jw.name("target");
+                    jw.value(raid.getValue().target);
+                    jw.name("created");
+                    jw.value(raid.getValue().created);
+                    jw.name("expires");
+                    jw.value(raid.getValue().expires);
+                    jw.endObject();
+                }
+                jw.endArray();
+                jw.endObject();
+                jw.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void readRaidsFromFile(MinecraftServer server) {
+        // We don't store a MinecraftServer object so we'll need one
+        // We'll also need to clear the raids, since we're reading from file
+        RaidCommand.RAIDS.clear();
+        JsonElement jp = getJsonReader(RAIDS_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("raids") && jo.get("raids").isJsonArray()) {
+                JsonArray ja = jo.get("raids").getAsJsonArray();
+                for (JsonElement raid : ja) {
+                    if (raid.isJsonObject()) {
+                        JsonObject raidObject = raid.getAsJsonObject();
+                        if (raidObject.has("id") && raidObject.get("id").isJsonPrimitive()) {
+                            String id = raidObject.get("id").getAsString();
+                            if (raidObject.has("source") && raidObject.get("source").isJsonPrimitive()) {
+                                String source = raidObject.get("source").getAsString();
+                                if (raidObject.has("target") && raidObject.get("target").isJsonPrimitive()) {
+                                    String target = raidObject.get("target").getAsString();
+                                    if (raidObject.has("created") && raidObject.get("created").isJsonPrimitive()) {
+                                        long created = raidObject.get("created").getAsLong();
+                                        if (raidObject.has("expires") && raidObject.get("expires").isJsonPrimitive()) {
+                                            long expires = raidObject.get("expires").getAsLong();
+                                            RaidCommand.Raid raid1 = new RaidCommand.Raid(id);
+                                            raid1.source = source;
+                                            raid1.target = target;
+                                            raid1.created = created;
+                                            raid1.expires = expires;
+                                            raid1.server = server;
+                                            RaidCommand.RAIDS.put(id, raid1);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

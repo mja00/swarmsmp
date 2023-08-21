@@ -149,6 +149,8 @@ public class SwarmsmpS2 {
             sqlite.setup();
             sqlite.migrateData();
         });
+        // We want to read our raids from file, but need the server!
+        SSMPS2Config.readRaidsFromFile(event.getServer());
     }
 
     @SubscribeEvent
@@ -166,6 +168,8 @@ public class SwarmsmpS2 {
                 LOGGER.error("Error while closing connection to SQLite database: " + e.getMessage());
             }
         });
+        // We also want to write our raids to file
+        SSMPS2Config.writeRaidsToFile();
     }
 
     // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD

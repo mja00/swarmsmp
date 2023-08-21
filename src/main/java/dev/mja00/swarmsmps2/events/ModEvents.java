@@ -53,6 +53,7 @@ public class ModEvents {
         new FallbackCommand(event.getDispatcher());
         new ReplyCommand(event.getDispatcher());
         new WhosOnlineCommand(event.getDispatcher());
+        new RaidCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
@@ -105,6 +106,15 @@ public class ModEvents {
             long timeTillExpire = 1000L * 60;
 
             AdminCommand.MESSAGES.values().removeIf(request -> now > request.created + timeTillExpire);
+        }
+    }
+
+    @SubscribeEvent
+    public static void raidServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            long now = System.currentTimeMillis();
+            // If it's past whatever the request.expires is, remove it from the map
+            RaidCommand.RAIDS.values().removeIf(request -> now > request.expires);
         }
     }
 

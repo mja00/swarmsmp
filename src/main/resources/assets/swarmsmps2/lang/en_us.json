@@ -120,5 +120,13 @@
   "swarmsmps2.commands.players.health.set": "You've set %1$s's health to %2$s.",
 
   "swarmsmps2.commands.admin.block_logs.get": "%1$s %2$s %3$s at %4$s, %5$s, %6$s | %7$s.\n",
-  "swarmsmps2.commands.admin.mob_logs.get": "%1$s killed %2$s | %3$s.\n"
+  "swarmsmps2.commands.admin.mob_logs.get": "%1$s killed %2$s | %3$s.\n",
+
+  "swarmsmps2.commands.raid.no_team": "You're not on a team.",
+  "swarmsmps2.commands.raid.get": "Your raid against %1$s has %2$s remaining.",
+  "swarmsmps2.commands.raid.no_raid": "You're not raiding anyone.",
+  "swarmsmps2.commands.raid.declare": "You've declared a raid against %1$s with %2$s players.",
+  "swarmsmps2.commands.raid.not_enough_players": "There are not enough players on the opposing team to declare a raid.",
+  "swarmsmps2.commands.raid.already_raid": "You're already raiding this faction",
+  "swarmsmps2.commands.raid.raid_own_team": "You cannot raid your own team."
 }
