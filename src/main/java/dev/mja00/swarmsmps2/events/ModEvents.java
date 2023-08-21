@@ -7,12 +7,14 @@ import dev.mja00.swarmsmps2.helpers.WeightedWeatherEvent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -20,6 +22,7 @@ import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.command.ConfigCommand;
@@ -185,6 +188,19 @@ public class ModEvents {
                 }
             }
         }
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onTablistFormat(PlayerEvent.TabListNameFormat event) {
+        // We basically just wanna color the name based on the player's team
+        Player player = event.getPlayer();
+        if (player.getTeam() == null) {
+            return;
+        }
+        ChatFormatting color = player.getTeam().getColor();
+        MutableComponent name = player.getName().copy();
+        name.withStyle(color);
+        event.setDisplayName(name);
     }
 
     private static Map<String, WeightedWeatherEvent<String>> getWeatherChances() {
