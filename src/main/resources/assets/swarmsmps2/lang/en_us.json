@@ -121,6 +121,8 @@
 
   "swarmsmps2.commands.admin.block_logs.get": "%1$s %2$s %3$s at %4$s, %5$s, %6$s | %7$s.\n",
   "swarmsmps2.commands.admin.mob_logs.get": "%1$s killed %2$s | %3$s.\n",
+  "swarmsmps2.commands.admin.death_logs.get": "%1$s died at %2$s, %3$s, %4$s | %5$s.\n",
+  "swarmsmps2.commands.admin.death_logs.no_items": "An error occurred upstream parsing JSON.",
 
   "swarmsmps2.commands.raid.no_team": "You're not on a team.",
   "swarmsmps2.commands.raid.get": "Your raid against %1$s has %2$s remaining.",

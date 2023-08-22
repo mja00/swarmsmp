@@ -10,7 +10,9 @@ import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import dev.mja00.swarmsmps2.objects.BlockEventObject;
+import dev.mja00.swarmsmps2.objects.DeathEventObject;
 import dev.mja00.swarmsmps2.objects.MobKillObject;
+import dev.mja00.swarmsmps2.utility.DeadPlayerInventory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -31,7 +33,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -39,6 +47,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -128,6 +137,14 @@ public class AdminCommand {
                                         .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), 0))
                                         .then(Commands.argument("offset", IntegerArgumentType.integer())
                                             .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))))
+                        .then(Commands.literal("death").then(Commands.argument("player", EntityArgument.players())
+                                .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
+                                .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                        .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), 0))
+                                        .then(Commands.argument("offset", IntegerArgumentType.integer())
+                                                .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset")))
+                                                .then(Commands.argument("id", IntegerArgumentType.integer())
+                                                        .executes((command) -> getSingleDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "id"))))))))
                         .then(Commands.literal("player").then(Commands.argument("player", EntityArgument.players())
                                 .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
                                 .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
@@ -315,6 +332,103 @@ public class AdminCommand {
         component.append("-----");
         component.append(nextButton);
         source.sendSuccess(component, false);
+        return 1;
+    }
+
+    private int logDeath(CommandSourceStack source, Collection<ServerPlayer> targets, int limit, int offset) {
+        if (offset < 0) {
+            offset = 0;
+        }
+        // We want to get the block logs of the player
+        if (targets.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.players.too_many"));
+            return 0;
+        }
+        try {
+            // Get the player
+            ServerPlayer player = targets.iterator().next();
+            // Get their UUID
+            String playerUUID = player.getStringUUID();
+            String playerName = player.getName().getString();
+            DeathEventObject[] deathEventObjects = SwarmsmpS2.sqlite.getPlayerDeaths(playerUUID, limit, offset);
+            boolean hitEndOfLogs = false;
+            MutableComponent component = new TextComponent("---------------\n").withStyle(ChatFormatting.GOLD);
+            // Iterate the logs
+            for (DeathEventObject deathEventObject : deathEventObjects) {
+                // If we hit a null one just end the for loop as we've reached the end of the logs
+                if (deathEventObject == null) {
+                    hitEndOfLogs = true;
+                    break;
+                }
+                if (deathEventObject.getItems().isEmpty()) {
+                    // Something went wrong parsing the JSON upstream, we'll send failure here
+                    source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.death_logs.no_items", playerName));
+                    return 0;
+                }
+                BlockPos deathPos = deathEventObject.getPos();
+                MutableComponent message = new TranslatableComponent(translationKey + "commands.admin.death_logs.get", playerName, deathPos.getX(), deathPos.getY(), deathPos.getZ(), deathEventObject.humanizeTimestamp())
+                        .setStyle(Style.EMPTY
+                                .applyFormat(ChatFormatting.RED)
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to view inventory")))
+                                .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log death " + playerName + " 1 1 " + deathEventObject.getId() ))
+                        );
+                component.append(message);
+            }
+            // We'll create little buttons down here to travel between pages
+            MutableComponent previousButton = new TextComponent("<< ")
+                    .setStyle(Style.EMPTY
+                            .applyFormat(offset == 0 ? ChatFormatting.GRAY : ChatFormatting.RED)
+                            .applyFormat(ChatFormatting.BOLD)
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log death " + playerName + " " + limit + " " + (offset - limit)))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Previous Page")))
+                    );
+            MutableComponent nextButton = new TextComponent(" >>")
+                    .setStyle(Style.EMPTY
+                            .applyFormat(hitEndOfLogs ? ChatFormatting.GRAY : ChatFormatting.GREEN)
+                            .applyFormat(ChatFormatting.BOLD)
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/admin log death " + playerName + " " + limit + " " + (offset + limit)))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Next Page")))
+                    );
+            component.append(previousButton);
+            component.append("-----");
+            component.append(nextButton);
+            source.sendSuccess(component, false);
+        } catch (Exception e) {
+            LOGGER.error("Error getting death logs", e);
+            LOGGER.error(e.fillInStackTrace());
+        }
+        return 1;
+    }
+
+    private int getSingleDeath(CommandSourceStack source, Collection<ServerPlayer> targets, int deathId) throws CommandSyntaxException {
+        // We basically wanna open a gui for the player to see the items for this death
+        if (targets.size() != 1) {
+            source.sendFailure(new TranslatableComponent(translationKey + "commands.players.too_many"));
+            return 0;
+        }
+        // Get the player
+        ServerPlayer player = targets.iterator().next();
+        // Get their UUID
+        String playerUUID = player.getStringUUID();
+        String playerName = player.getName().getString();
+        DeathEventObject deathEventObject = SwarmsmpS2.sqlite.getPlayerDeath(playerUUID, deathId);
+        ServerPlayer sourcePlayer = source.getPlayerOrException();
+        if (deathEventObject == null) {
+            return 0;
+        }
+        BlockPos deathPos = deathEventObject.getPos();
+        sourcePlayer.openMenu(new MenuProvider() {
+            @Override
+            public Component getDisplayName() {
+                return new TextComponent(player.getName().getString() + "'s Death Items");
+            }
+
+            @Nullable
+            @Override
+            public AbstractContainerMenu createMenu(int pContainerId, Inventory pInventory, Player pPlayer) {
+                return new ChestMenu(MenuType.GENERIC_9x5, pContainerId, pInventory, new DeadPlayerInventory(deathEventObject.getItems()), 5);
+            }
+        });
         return 1;
     }
 

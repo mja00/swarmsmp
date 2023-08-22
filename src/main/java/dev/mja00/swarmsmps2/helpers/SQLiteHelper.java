@@ -1,10 +1,12 @@
 package dev.mja00.swarmsmps2.helpers;
 
 import dev.mja00.swarmsmps2.objects.BlockEventObject;
+import dev.mja00.swarmsmps2.objects.DeathEventObject;
 import dev.mja00.swarmsmps2.objects.MobKillObject;
 import net.minecraft.core.BlockPos;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.*;
 
@@ -81,11 +83,24 @@ public class SQLiteHelper {
                     mob_type text NOT NULL,
                     event_time integer NOT NULL
                 );""";
+        // Player deaths
+        String createPlayerDeathsTables = """
+                CREATE TABLE IF NOT EXISTS player_deaths (
+                    id integer PRIMARY KEY,
+                    player text NOT NULL,
+                    event_time integer NOT NULL,
+                    inventory text NOT NULL,
+                    pos_x integer NOT NULL,
+                    pos_y integer NOT NULL,
+                    pos_z integer NOT NULL
+                );
+                """;
         // Now create our tables
         try {
             this.connection.createStatement().execute(createWorldEventsTable);
             this.connection.createStatement().execute(createPlayerEventsTable);
             this.connection.createStatement().execute(createPlayerMobKillsTables);
+            this.connection.createStatement().execute(createPlayerDeathsTables);
         } catch (SQLException e) {
             LOGGER.error("Error while creating tables: " + e.getMessage());
         }
@@ -322,5 +337,95 @@ public class SQLiteHelper {
         }
         // Return our array
         return mobEvents;
+    }
+
+    public void createNewPlayerDeath(DeathEventObject deathEventObject) {
+        // Create our insert statement
+        String insertStatement = """
+                INSERT INTO player_deaths (player, event_time, inventory, pos_x, pos_y, pos_z)
+                VALUES (?, ?, ?, ?, ?, ?);""";
+        // Create our prepared statement
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(insertStatement);
+            preparedStatement.setString(1, deathEventObject.getPlayerUUIDAsString());
+            preparedStatement.setLong(2, deathEventObject.getTimestamp());
+            preparedStatement.setString(3, deathEventObject.getItemsAsJsonString());
+            preparedStatement.setInt(4, deathEventObject.getPos().getX());
+            preparedStatement.setInt(5, deathEventObject.getPos().getY());
+            preparedStatement.setInt(6, deathEventObject.getPos().getZ());
+            // Execute our statement
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            LOGGER.error("Error while creating player death event: " + e.getMessage());
+        }
+    }
+
+    public DeathEventObject[] getPlayerDeaths(String player, int limit, int offset) {
+        // Create our select statement
+        String selectStatement = """
+                SELECT * FROM player_deaths WHERE player = ? ORDER BY event_time DESC LIMIT ? OFFSET ?;""";
+        // Create our prepared statement
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(selectStatement);
+            preparedStatement.setString(1, player);
+            preparedStatement.setInt(2, limit);
+            preparedStatement.setInt(3, offset);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            // Create our array of BlockEventObjects
+            DeathEventObject[] deathEvents = new DeathEventObject[limit];
+            // Iterate through our result set
+            int i = 0;
+            while (resultSet.next()) {
+                // Get our data
+                String playerUUID = resultSet.getString("player");
+                long timestamp = resultSet.getLong("event_time");
+                String inventory = resultSet.getString("inventory");
+                int x = resultSet.getInt("pos_x");
+                int y = resultSet.getInt("pos_y");
+                int z = resultSet.getInt("pos_z");
+                int gottenId = resultSet.getInt("id");
+                // Create our BlockEventObject
+                DeathEventObject deathEvent = new DeathEventObject(playerUUID, new BlockPos(x, y, z), timestamp, inventory, gottenId);
+                // Add it to our array
+                deathEvents[i] = deathEvent;
+                i++;
+            }
+            // Return our array
+            return deathEvents;
+        } catch (SQLException e) {
+            LOGGER.error("Error while getting player deaths: " + e.getMessage());
+            return null;
+        }
+    }
+
+    @Nullable
+    public DeathEventObject getPlayerDeath(String player, int id) {
+        // Create our select statement
+        String selectStatement = """
+                SELECT * FROM player_deaths WHERE player = ? AND id = ?;""";
+        // Create our prepared statement
+        try {
+            PreparedStatement preparedStatement = this.connection.prepareStatement(selectStatement);
+            preparedStatement.setString(1, player);
+            preparedStatement.setInt(2, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            // Iterate through our result set
+            if (resultSet.next()) {
+                // Get our data
+                String playerUUID = resultSet.getString("player");
+                long timestamp = resultSet.getLong("event_time");
+                String inventory = resultSet.getString("inventory");
+                int x = resultSet.getInt("pos_x");
+                int y = resultSet.getInt("pos_y");
+                int z = resultSet.getInt("pos_z");
+                int gottenId = resultSet.getInt("id");
+                // Create our BlockEventObject
+                // Return our object
+                return new DeathEventObject(playerUUID, new BlockPos(x, y, z), timestamp, inventory, gottenId);
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Error while getting player death: " + e.getMessage());
+        }
+        return null;
     }
 }

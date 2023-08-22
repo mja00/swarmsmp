@@ -6,6 +6,7 @@ import dev.mja00.swarmsmps2.helpers.EntityHelpers;
 import dev.mja00.swarmsmps2.helpers.SiteAPIHelper;
 import dev.mja00.swarmsmps2.objects.CommandInfo;
 import dev.mja00.swarmsmps2.objects.Commands;
+import dev.mja00.swarmsmps2.objects.DeathEventObject;
 import dev.mja00.swarmsmps2.objects.JoinInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -276,6 +277,27 @@ public class ServerPlayerEvents {
             if (SwarmsmpS2.sqlite == null) { return; }
             SwarmsmpS2.sqlite.createMobKillEvent(mobName, player.getStringUUID());
         });
+    }
+
+    @SubscribeEvent
+    public static void onPlayerDeath(LivingDeathEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player) {
+            // Get their inventory
+            List<ItemStack> inventory = player.getInventory().items;
+            List<ItemStack> armor = player.getInventory().armor;
+            List<ItemStack> offhand = player.getInventory().offhand;
+            List<ItemStack> items = new java.util.ArrayList<>(List.copyOf(inventory));
+            items.addAll(armor);
+            items.addAll(offhand);
+            LOGGER.debug("Player " + player.getDisplayName().getString() + " has died");
+            LOGGER.debug("Their inventory was: " + items.toString());
+            DeathEventObject deathEventObject = new DeathEventObject(player.getStringUUID(), player.blockPosition(), System.currentTimeMillis(), items);
+            LOGGER.debug("Their death event object is: " + deathEventObject.getItemsAsJsonString());
+            exe.execute(() -> {
+                if (SwarmsmpS2.sqlite == null) { return; }
+                SwarmsmpS2.sqlite.createNewPlayerDeath(deathEventObject);
+            });
+        }
     }
 
     @SubscribeEvent
