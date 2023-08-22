@@ -10,8 +10,10 @@ import dev.mja00.swarmsmps2.objects.DeathEventObject;
 import dev.mja00.swarmsmps2.objects.JoinInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -294,7 +296,28 @@ public class ServerPlayerEvents {
                 if (SwarmsmpS2.sqlite == null) { return; }
                 SwarmsmpS2.sqlite.createNewPlayerDeath(deathEventObject);
             });
-            LOGGER.info("Player " + player.getDisplayName().getString() + " has died at " + player.blockPosition().toString());
+            BlockPos deathPos = player.blockPosition();
+            LOGGER.info(new TranslatableComponent(translationKey + "event.death.player.log", player.getName().getString()).getString(), deathPos.getX(), deathPos.getY(), deathPos.getZ());
+            // Inform any players with the deathlog tag that the player has died
+            if (event.getEntity().getServer() == null) {
+                return;
+            }
+            MutableComponent deathReason = (MutableComponent) event.getSource().getLocalizedDeathMessage(player);
+            MutableComponent message = new TextComponent("[Admin Log] ");
+            message.append(deathReason);
+            message.setStyle(Style.EMPTY
+                    .applyFormat(ChatFormatting.RED)
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent(translationKey + "event.death.hover")))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @s " + deathPos.getX() + " " + deathPos.getY() + " " + deathPos.getZ()))
+            );
+            PlayerList players = event.getEntity().getServer().getPlayerList();
+            for (ServerPlayer lPlayer : players.getPlayers()) {
+                // Get their persistent storage
+                if (lPlayer.getPersistentData().contains(SwarmsmpS2.MODID + ":deathlog")) {
+                    // Send them a message
+                    lPlayer.sendMessage(message, Util.NIL_UUID);
+                }
+            }
         }
     }
 

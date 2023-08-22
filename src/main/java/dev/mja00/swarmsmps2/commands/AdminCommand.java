@@ -21,6 +21,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.EntitySummonArgument;
+import net.minecraft.commands.arguments.ItemEnchantmentArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
@@ -43,6 +44,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
@@ -156,6 +158,10 @@ public class AdminCommand {
                                 .executes((command) -> getCoords(command.getSource())))
                         .then(Commands.literal("biome")
                                 .executes((command) -> getBiome(command.getSource()))))
+                .then(Commands.literal("enchant").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("enchantment", ItemEnchantmentArgument.enchantment())
+                                .executes((command) -> enchantPlayerItem(command.getSource(), EntityArgument.getPlayers(command, "player"), ItemEnchantmentArgument.getEnchantment(command, "enchantment"), 1))
+                                .then(Commands.argument("level", IntegerArgumentType.integer())
+                                        .executes((command) -> enchantPlayerItem(command.getSource(), EntityArgument.getPlayers(command, "player"), ItemEnchantmentArgument.getEnchantment(command, "enchantment"), IntegerArgumentType.getInteger(command, "level")))))))
                 .then(Commands.literal("message")
                         .then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("message", MessageArgument.message())
                                 .executes((command) -> sendMessageToPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), MessageArgument.getMessage(command, "message"))))))
@@ -182,6 +188,19 @@ public class AdminCommand {
                                                 .executes((command) -> getFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction")))))))
                         .then(Commands.literal("reload")
                                 .executes((command) -> reloadConfigFile(command.getSource())))));
+    }
+
+    private int enchantPlayerItem(CommandSourceStack source, Collection<ServerPlayer> targets, Enchantment pEnchantment, int level) {
+        for (ServerPlayer target : targets) {
+            ItemStack itemStack = target.getMainHandItem();
+            itemStack.enchant(pEnchantment, level);
+        }
+        if (targets.size() == 1) {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.enchant.success.single", targets.iterator().next().getDisplayName(), pEnchantment.getFullname(level)), true);
+        } else {
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.enchant.success.multiple", targets.size(), pEnchantment.getFullname(level)), true);
+        }
+        return 1;
     }
 
     private int logPlayer(CommandSourceStack source, Collection<ServerPlayer> targets, int limit, int offset) {
