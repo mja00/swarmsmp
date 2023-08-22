@@ -1,15 +1,22 @@
 package dev.mja00.swarmsmps2.helpers;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class EntityHelpers {
@@ -56,5 +63,47 @@ public class EntityHelpers {
         // Now we just teleport them to the spawn point
         player.teleportTo(spawnPoint.get(0), spawnPoint.get(1), spawnPoint.get(2));
         LOGGER.info("Teleported player " + player.getName().getString() + " to " + playerTeam.getName() + " spawn point!");
+    }
+
+    public static ItemStack getPlayerHead(ServerPlayer player) {
+        // Create a new item stack with the head of the player's skin at the time
+        CompoundTag headData = new CompoundTag();
+        CompoundTag skullOwner = new CompoundTag();
+        CompoundTag properties = new CompoundTag();
+        // Convert the player's UUID into an int array from most to least significant
+        long mostSigBits = player.getUUID().getMostSignificantBits();
+        long leastSigBits = player.getUUID().getLeastSignificantBits();
+        int[] uuidIntArray = new int[] {
+                (int) (mostSigBits >> 32),
+                (int) mostSigBits,
+                (int) (leastSigBits >> 32),
+                (int) leastSigBits
+        };
+        skullOwner.putIntArray("Id", uuidIntArray);
+        HashMap<String, String> textures = new HashMap<>();
+        // We want the texture's value from the player's properties
+        player.getGameProfile().getProperties().get("textures").forEach(property -> {
+            textures.put(property.getName(), property.getValue());
+        });
+        // Now we've got a json object encoded as b64 that we need to pull some stuff from
+        String textureValue = textures.get("textures");
+        String decodedTextureValue = new String(java.util.Base64.getDecoder().decode(textureValue));
+        // Now we've got a json object that we need to pull some stuff from
+        JsonObject obj = JsonParser.parseString(decodedTextureValue).getAsJsonObject();
+        String skinUrl = obj.getAsJsonObject("textures").getAsJsonObject("SKIN").get("url").getAsString();
+        String skinUrlObj = "{textures:{SKIN:{url:\"" + skinUrl + "\"}}}";
+        // Re-encode the json object as b64
+        String encodedSkinUrlObj = java.util.Base64.getEncoder().encodeToString(skinUrlObj.getBytes());
+        // Now we do something kinda gross looking ngl
+        CompoundTag url = new CompoundTag();
+        url.putString("Value", encodedSkinUrlObj);
+        ListTag texturesList = new ListTag();
+        texturesList.add(url);
+        properties.put("textures", texturesList);
+        skullOwner.put("Properties", properties);
+        headData.put("SkullOwner", skullOwner);
+        ItemStack headItem = new ItemStack(Items.PLAYER_HEAD, 1);
+        headItem.setTag(headData);
+        return headItem;
     }
 }

@@ -289,14 +289,12 @@ public class ServerPlayerEvents {
             List<ItemStack> items = new java.util.ArrayList<>(List.copyOf(inventory));
             items.addAll(armor);
             items.addAll(offhand);
-            LOGGER.debug("Player " + player.getDisplayName().getString() + " has died");
-            LOGGER.debug("Their inventory was: " + items.toString());
             DeathEventObject deathEventObject = new DeathEventObject(player.getStringUUID(), player.blockPosition(), System.currentTimeMillis(), items);
-            LOGGER.debug("Their death event object is: " + deathEventObject.getItemsAsJsonString());
             exe.execute(() -> {
                 if (SwarmsmpS2.sqlite == null) { return; }
                 SwarmsmpS2.sqlite.createNewPlayerDeath(deathEventObject);
             });
+            LOGGER.info("Player " + player.getDisplayName().getString() + " has died at " + player.blockPosition().toString());
         }
     }
 

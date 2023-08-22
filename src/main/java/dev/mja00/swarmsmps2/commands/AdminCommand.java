@@ -9,6 +9,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
+import dev.mja00.swarmsmps2.helpers.EntityHelpers;
 import dev.mja00.swarmsmps2.objects.BlockEventObject;
 import dev.mja00.swarmsmps2.objects.DeathEventObject;
 import dev.mja00.swarmsmps2.objects.MobKillObject;
@@ -42,7 +43,6 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
@@ -669,10 +669,7 @@ public class AdminCommand {
     private int giveHeadOfPlayer(CommandSourceStack source, Collection<ServerPlayer> targets) throws CommandSyntaxException {
         int howMuchHeadTheyGot = 0;
         for (ServerPlayer target : targets) {
-            CompoundTag headData = new CompoundTag();
-            headData.putString("SkullOwner", target.getName().getString());
-            ItemStack headItem = new ItemStack(Items.PLAYER_HEAD, 1);
-            headItem.setTag(headData);
+            ItemStack headItem = EntityHelpers.getPlayerHead(target);
 
             boolean success = source.getPlayerOrException().getInventory().add(headItem);
             if (!success) {
@@ -705,7 +702,7 @@ public class AdminCommand {
         ServerPlayer headTarget = headTargets.iterator().next();
 
         for (ServerPlayer target : targets) {
-            ItemStack headItem = createHead(target);
+            ItemStack headItem = EntityHelpers.getPlayerHead(target);
 
             boolean success = headTarget.getInventory().add(headItem);
             if (!success) {
@@ -731,14 +728,6 @@ public class AdminCommand {
                     Util.NIL_UUID);
         }
         return 1;
-    }
-
-    private ItemStack createHead(ServerPlayer player) {
-        CompoundTag headData = new CompoundTag();
-        headData.putString("SkullOwner", player.getName().getString());
-        ItemStack headItem = new ItemStack(Items.PLAYER_HEAD, 1);
-        headItem.setTag(headData);
-        return headItem;
     }
 
     private int setTag(CommandSourceStack source, Collection<ServerPlayer> targets, String tag) {
