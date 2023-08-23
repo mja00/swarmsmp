@@ -755,9 +755,9 @@ public class AdminCommand {
         }
 
         if (targets.size() == 1) {
-            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.set_tag.success.single", targets.iterator().next().getDisplayName()), true);
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.set_tag.success.single", tag, targets.iterator().next().getDisplayName()), true);
         } else {
-            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.set_tag.success.multiple", targets.size()), true);
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.set_tag.success.multiple", tag, targets.size()), true);
         }
         return 1;
     }
@@ -768,9 +768,9 @@ public class AdminCommand {
         }
 
         if (targets.size() == 1) {
-            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.remove_tag.success.single", targets.iterator().next().getDisplayName()), true);
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.remove_tag.success.single", tag, targets.iterator().next().getDisplayName()), true);
         } else {
-            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.remove_tag.success.multiple", targets.size()), true);
+            source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.remove_tag.success.multiple", tag, targets.size()), true);
         }
         return 1;
     }
