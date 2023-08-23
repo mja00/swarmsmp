@@ -297,7 +297,8 @@ public class ServerPlayerEvents {
                 SwarmsmpS2.sqlite.createNewPlayerDeath(deathEventObject);
             });
             BlockPos deathPos = player.blockPosition();
-            LOGGER.info(new TranslatableComponent(translationKey + "event.death.player.log", player.getName().getString()).getString(), deathPos.getX(), deathPos.getY(), deathPos.getZ());
+            LOGGER.info(player.getName().getString() + " died at " + deathPos.getX() + ", " + deathPos.getY() + ", " + deathPos.getZ() + ".");
+            LOGGER.info(event.getSource().getLocalizedDeathMessage(player).getString());
             // Inform any players with the deathlog tag that the player has died
             if (event.getEntity().getServer() == null) {
                 return;
