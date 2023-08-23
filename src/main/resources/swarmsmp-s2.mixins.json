@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "swarmsmp-s2.refmap.json",
   "mixins": [
+    "MixinDispenseItemBehavior",
     "MixinLivingEntity",
     "MixinPig",
     "MixinSkeletonHorse",
