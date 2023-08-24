@@ -22,6 +22,7 @@
     "BaseContainerBlockEntityMixin",
     "CompoundContainerMixin",
     "MixinAbstractContainerMenu",
+    "MixinPlayerList",
     "MixinSlot"
   ],
   "injectors": {
