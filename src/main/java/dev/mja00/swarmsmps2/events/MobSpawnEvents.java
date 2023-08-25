@@ -12,6 +12,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import static dev.mja00.swarmsmps2.helpers.EntityHelpers.giveTeamAndCreateIfNeeded;
 
 @Mod.EventBusSubscriber(modid = SwarmsmpS2.MODID)
@@ -25,29 +29,30 @@ public class MobSpawnEvents {
         LivingEntity entity = event.getEntityLiving();
         EntityType<?> entityType = entity.getType();
 
-        // Switch case to set the team of the mob
-        if (EntityType.CREEPER.equals(entityType)) {
+        // Make a set for each type of mob
+        Set<EntityType<?>> undeadTypes = new HashSet<>(List.of(
+                EntityType.ZOMBIE,
+                EntityType.SKELETON,
+                EntityType.HUSK,
+                EntityType.ZOMBIE_VILLAGER,
+                EntityType.STRAY,
+                EntityType.DROWNED
+        ));
+        Set<EntityType<?>> swarmTypes = new HashSet<>(List.of(
+                EntityType.SPIDER,
+                EntityType.CAVE_SPIDER,
+                EntityType.SILVERFISH,
+                EntityType.BEE
+        ));
+        Set<EntityType<?>> constructTypes = new HashSet<>(List.of(
+                EntityType.CREEPER
+        ));
+        if (undeadTypes.contains(entityType)) {
+            giveTeamAndCreateIfNeeded(entity, "undead");
+        } else if (swarmTypes.contains(entityType)) {
+            giveTeamAndCreateIfNeeded(entity, "swarm");
+        } else if (constructTypes.contains(entityType)) {
             giveTeamAndCreateIfNeeded(entity, "construct");
-        } else if (EntityType.ZOMBIE.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "undead");
-        } else if (EntityType.SKELETON.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "undead");
-        } else if (EntityType.SPIDER.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "swarm");
-        } else if (EntityType.CAVE_SPIDER.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "swarm");
-        } else if (EntityType.HUSK.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "undead");
-        } else if (EntityType.ZOMBIE_VILLAGER.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "undead");
-        } else if (EntityType.STRAY.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "undead");
-        } else if (EntityType.DROWNED.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "undead");
-        } else if (EntityType.SILVERFISH.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "swarm");
-        } else if (EntityType.BEE.equals(entityType)) {
-            giveTeamAndCreateIfNeeded(entity, "swarm");
         }
     }
 
