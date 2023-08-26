@@ -42,6 +42,7 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.BooleanValue timerOnTop;
         public final ForgeConfigSpec.IntValue fadeOutTime;
         public final ForgeConfigSpec.IntValue fadeInTime;
+        public final ForgeConfigSpec.BooleanValue saoMode;
 
         Client(ForgeConfigSpec.Builder builder) {
             builder.comment("Startup Settings").push("startup");
@@ -57,6 +58,10 @@ public class SSMPS2Config {
             fadeInTime = builder
                     .comment("How long should the timer take to fade in? (in ticks)")
                     .defineInRange("fadeInTime", 500, 0, 10000);
+
+            saoMode = builder
+                    .comment("Linku start!")
+                    .define("saoMode", false);
         }
     }
 

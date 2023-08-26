@@ -2,6 +2,7 @@ package dev.mja00.swarmsmps2.commands;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -10,6 +11,8 @@ import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import dev.mja00.swarmsmps2.helpers.EntityHelpers;
+import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
+import dev.mja00.swarmsmps2.network.packets.SaoModePacket;
 import dev.mja00.swarmsmps2.objects.BlockEventObject;
 import dev.mja00.swarmsmps2.objects.DeathEventObject;
 import dev.mja00.swarmsmps2.objects.MobKillObject;
@@ -48,6 +51,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
+import net.minecraftforge.network.PacketDistributor;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,6 +103,8 @@ public class AdminCommand {
     public AdminCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("admin")
                 .requires((command) -> command.hasPermission(2))
+                .then(Commands.literal("sao").then(Commands.argument("state", BoolArgumentType.bool())
+                        .executes((command) -> triggerSAOMode(command.getSource(), BoolArgumentType.getBool(command, "state")))))
                 .then(Commands.literal("set_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
                         .executes((command) -> setTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))))
                 .then(Commands.literal("remove_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
@@ -959,6 +965,13 @@ public class AdminCommand {
         // Send an OnConfigChangeEvent to the event bus
         SSMPS2Config.serverSpec.afterReload();
         source.sendSuccess(new TranslatableComponent(translationKey + "commands.admin.reload_config"), true);
+        return 1;
+    }
+
+    private int triggerSAOMode(CommandSourceStack source, boolean state) {
+        SaoModePacket packet = new SaoModePacket(state);
+        SwarmSMPPacketHandler.SAO_MODE_CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
+        source.sendSuccess(new TextComponent("Link start!"), true);
         return 1;
     }
 }

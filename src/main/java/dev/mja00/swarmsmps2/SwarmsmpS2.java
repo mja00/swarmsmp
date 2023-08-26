@@ -5,6 +5,7 @@ import dev.mja00.swarmsmps2.config.HandleServerData;
 import dev.mja00.swarmsmps2.events.PlayerEvents;
 import dev.mja00.swarmsmps2.helpers.SQLiteHelper;
 import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
+import dev.mja00.swarmsmps2.sounds.ModSoundEvent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
@@ -64,6 +65,7 @@ public class SwarmsmpS2 {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> HandleServerData::saveServerData);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SSMPS2Config.clientSpec);
         eventBus.register(SSMPS2Config.class);
+        ModSoundEvent.register(eventBus);
 
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
