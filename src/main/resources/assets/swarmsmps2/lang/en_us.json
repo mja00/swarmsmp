@@ -168,5 +168,20 @@
   "swarmsmps2.commands.raid.raid_own_team": "You cannot raid your own team.",
 
   "swarmsmps2.event.death.player.log": "%1$s has died at %2$s, %3$s, %4$s",
-  "swarmsmps2.event.death.hover": "Click to teleport to the death."
+  "swarmsmps2.event.death.hover": "Click to teleport to the death.",
+
+
+  "item.swarmsmps2.sending_stone": "Sending Stone",
+  "swarmsmps2.message.item.sending_stone": "The stones glow a faint blue glint.",
+  "swarmsmps2.message.item.sending_stone.cooldown": "The stones glow a faint red glint. Slowly fading back to blue after a moment.",
+  "swarmsmps2.item.sending_stone.attuned": "Attuned Sending Stone",
+  "swarmsmps2.item.sending_stone.attuned_to": "Attuned to %1$s",
+  "swarmsmps2.item.sending_stone.unattuned": "Unattuned Sending Stone",
+  "swarmsmps2.gui.sending_stone.title": "Sending Stone",
+  "swarmsmps2.gui.sending_stone.message": "Enter your message (max %1$s characters)",
+  "swarmsmps2.message.item.sending_stone.received_preamble": "The sending stone on your person begins to glow a faint purple.",
+  "swarmsmps2.message.item.sending_stone.received": "You hear a voice in your head: %1$s",
+  "swarmsmps2.message.item.sending_stone.no_players": "The stone glows a faint gold glint. Slowly fading back to blue after a moment.",
+  "swarmsmps2.message.item.sending_stone.sent": "The stone glows a faint green color glint. Slowly fading back to blue after a moment.",
+  "swarmsmps2.item.sending_stone.cooldown_time": "Cooldown: %1$s"
 }

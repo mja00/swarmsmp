@@ -134,6 +134,11 @@ public class SSMPS2Config {
         // Mob changes
         public final ForgeConfigSpec.IntValue chickenFromEggChance;
 
+        // Item settings
+        public final ForgeConfigSpec.IntValue sendingStoneMaxMsgLength;
+        public final ForgeConfigSpec.IntValue sendingStoneCooldown;
+        public final ForgeConfigSpec.IntValue sendingStoneDurability;
+
         Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Chat Settings").push("chat");
 
@@ -362,6 +367,21 @@ public class SSMPS2Config {
             chickenFromEggChance = builder
                     .comment("The 1/X chance of a chicken spawning from an egg. 0-100")
                     .defineInRange("chickenFromEggChance", 32, 0, 100);
+
+            builder.pop();
+            builder.comment("Item Settings").push("items");
+
+            sendingStoneMaxMsgLength = builder
+                    .comment("The max length a message sent through the sending stone can be in characters.")
+                    .defineInRange("sendingStoneMaxMsgLength", 25, 1, 1000);
+
+            sendingStoneCooldown = builder
+                    .comment("The cooldown for the sending stone in milliseconds. Min 1 millisecond, max 6 hours, default 1 hour.")
+                    .defineInRange("sendingStoneCooldown", 60 * 60 * 1000, 1, 6 * 60 * 60 * 1000);
+
+            sendingStoneDurability = builder
+                    .comment("The durability of the sending stone. Min 1, max 1000, default 10.")
+                    .defineInRange("sendingStoneDurability", 15, 1, 1000);
 
             builder.pop();
         }

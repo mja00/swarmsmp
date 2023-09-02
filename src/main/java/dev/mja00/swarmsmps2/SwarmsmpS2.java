@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import dev.mja00.swarmsmps2.config.HandleServerData;
 import dev.mja00.swarmsmps2.events.PlayerEvents;
 import dev.mja00.swarmsmps2.helpers.SQLiteHelper;
+import dev.mja00.swarmsmps2.item.ModItems;
 import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
 import dev.mja00.swarmsmps2.sounds.ModSoundEvent;
 import net.minecraft.world.item.Item;
@@ -21,6 +22,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
@@ -66,13 +68,16 @@ public class SwarmsmpS2 {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SSMPS2Config.clientSpec);
         eventBus.register(SSMPS2Config.class);
         ModSoundEvent.register(eventBus);
+        ModItems.register(eventBus);
 
         // Register the setup method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+        eventBus.addListener(this::setup);
         // Register the enqueueIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
+        eventBus.addListener(this::enqueueIMC);
         // Register the processIMC method for modloading
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
+        eventBus.addListener(this::processIMC);
+
+        eventBus.addListener(this::clientSetup);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -183,6 +188,10 @@ public class SwarmsmpS2 {
             // register a new block here
             LOGGER.info("HELLO from Register Block");
         }
+    }
+
+    private void clientSetup(final FMLClientSetupEvent event) {
+        LOGGER.info("Client setup");
     }
 
 
