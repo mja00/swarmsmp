@@ -81,9 +81,9 @@ public class SendingStonePacket {
                 // Now we loop through all the players on the server and look for ones with sending stones in their inventories, we'll save these for the next step
                 for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                     // Ignore our source player
-//                    if (player == sourcePlayer) {
-//                        continue;
-//                    }
+                    if (player == sourcePlayer) {
+                        continue;
+                    }
                     // Get their inventory
                     // If their inventory is empty just skip them
                     if (player.getInventory().isEmpty()) {
