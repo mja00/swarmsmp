@@ -19,7 +19,7 @@ apply plugin: 'org.spongepowered.mixin'
 
 
 group = 'dev.mja00'
-version = '1.54'
+version = '1.55'
 
 java {
     archivesBaseName = 'swarmsmps2'
@@ -164,6 +164,9 @@ dependencies {
 
     // Examples using mod jars from ./libs
     // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
+
+    // Load up sound physics remastered in the runtime
+    runtimeOnly fg.deobf('curse.maven:sound-physics-remastered-535489:3775919')
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html

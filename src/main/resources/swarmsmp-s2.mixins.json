@@ -12,6 +12,7 @@
     "MixinThrownEgg"
   ],
   "client": [
+    "MixinChunkBorderRenderer",
     "MixinDownloadingTexture",
     "MixinGameRenderer",
     "MixinPauseScreen",
