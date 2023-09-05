@@ -1,6 +1,7 @@
 package dev.mja00.swarmsmps2;
 
 import com.google.gson.JsonObject;
+import dev.mja00.swarmsmps2.block.ModBlocks;
 import dev.mja00.swarmsmps2.config.HandleServerData;
 import dev.mja00.swarmsmps2.events.PlayerEvents;
 import dev.mja00.swarmsmps2.helpers.SQLiteHelper;
@@ -69,6 +70,7 @@ public class SwarmsmpS2 {
         eventBus.register(SSMPS2Config.class);
         ModSoundEvent.register(eventBus);
         ModItems.register(eventBus);
+        ModBlocks.register(eventBus);
 
         // Register the setup method for modloading
         eventBus.addListener(this::setup);

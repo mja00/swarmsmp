@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "swarmsmps2:packed_gravel"
+    }
+  ],
+  "result": {
+    "item": "minecraft:gravel",
+    "count": 9
+  }
+}
