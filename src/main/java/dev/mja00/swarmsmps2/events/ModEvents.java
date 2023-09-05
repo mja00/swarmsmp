@@ -4,6 +4,7 @@ import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.commands.*;
 import dev.mja00.swarmsmps2.helpers.WeightedWeatherEvent;
+import it.unimi.dsi.fastutil.longs.LongIterator;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -16,11 +17,15 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.server.command.ConfigCommand;
 import org.apache.logging.log4j.Logger;
@@ -233,34 +238,34 @@ public class ModEvents {
         SSMPS2Config.setTimeOfWeatherChange(lastWeatherChangeTime);
     }
 
-    // Event for handling custom weather cycles
-//    @SubscribeEvent
-//    public static void onWeatherTick(TickEvent.WorldTickEvent event) {
-//        if (event.phase == TickEvent.Phase.END) {
-//            // Ensure we're server side or not fallback server
-//            if (event.side.isClient() || SSMPS2Config.SERVER.fallbackServer.get()) {
-//                return;
-//            }
-//            // First thing is we want to see is if we're 10 seconds past the last weather change, if not, return
-//            long lastWeatherChange = lastWeatherChangeTime == 0 ? SSMPS2Config.getTimeOfWeatherChange() : lastWeatherChangeTime;
-//            long now = System.currentTimeMillis() / 1000L;
-//            if (now - lastWeatherChange < SSMPS2Config.SERVER.weatherCheckTime.get() + nextRandomMinute) {
-//                return;
-//            }
-//            // It's been more than 10 seconds so we'll do a weather change
-//            // Get the current weather
-//            boolean isRaining = event.world.isRaining();
-//            boolean isThundering = event.world.isThundering();
-//            ServerLevel overworld = (ServerLevel) event.world;
-//            // Make a map to hold all our chances, this'll make life less ugly
-//            Map<String, WeightedWeatherEvent<String>> chances = weatherChances == null ? getWeatherChances() : weatherChances;
-//            // We want to see if it's thundering
-//            WeightedWeatherEvent<String> selectedChance = isThundering ? chances.get("thunder") : isRaining ? chances.get("rain") : chances.get("clear");
-//            // Get the new weather
-//            String newWeather = selectedChance.getRandom();
-//            LOGGER.info("New weather is " + newWeather);
-//            // Update the weather
-//            updateWeather(overworld, newWeather);
-//        }
-//    }
+    @SubscribeEvent
+    public static void chunkLoadTick(TickEvent.WorldTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && event.side == LogicalSide.SERVER) {
+            ServerLevel level = (ServerLevel) event.world;
+            LongIterator forcedChunks = level.getForcedChunks().longIterator();
+
+            while (forcedChunks.hasNext()) {
+                long currentChunk = forcedChunks.nextLong();
+                LevelChunk chunk = level.getChunk(ChunkPos.getX(currentChunk), ChunkPos.getZ(currentChunk));
+                boolean noPlayers = level.getPlayers(p -> {
+                    if (p.isSpectator()) {
+                        // Skip all this math if they're spectator
+                        return false;
+                    }
+                    // We only care about the X & Z axis due to chunks being loaded no matter the Y'
+                    BlockPos playerPos = new BlockPos(p.getX(), 0, p.getZ());
+                    BlockPos chunkPos = chunk.getPos().getWorldPosition();
+                    double distanceToChunk = playerPos.distSqr(chunkPos);
+                    // Get the server's current simulation distance
+                    double simulationDistance = level.getServer().getPlayerList().getSimulationDistance() * 16;
+                    // If the player is in range of the chunk return true
+                    return distanceToChunk <= simulationDistance;
+                }).isEmpty();
+
+                if (noPlayers) {
+                    level.tickChunk(chunk, level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING));
+                }
+            }
+        }
+    }
 }
