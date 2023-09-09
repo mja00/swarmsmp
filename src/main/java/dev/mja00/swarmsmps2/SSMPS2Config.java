@@ -114,6 +114,7 @@ public class SSMPS2Config {
 
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
         public final ForgeConfigSpec.BooleanValue fallbackServer;
+        public final ForgeConfigSpec.BooleanValue opsBypassIdleKick;
 
         // Weather shit
         public final ForgeConfigSpec.IntValue clearToRainChance;
@@ -252,6 +253,10 @@ public class SSMPS2Config {
             logToConsole = builder
                     .comment("Should block events be logged to console?")
                     .define("logToConsole", false);
+
+            opsBypassIdleKick = builder
+                    .comment("Should ops bypass the idle kick?")
+                    .define("opsBypassIdleKick", true);
 
             builder.pop();
             builder.comment("Verification Settings").push("verification");
