@@ -160,6 +160,12 @@ public class ServerPlayerEvents {
                 return;
             }
 
+            if (commandInfo == null) {
+                LOGGER.error("Failed to get command info for player " + player.getName().getString() + " with UUID " + player.getUUID() + " with error: commandInfo is null");
+                player.connection.disconnect(new TranslatableComponent(translationKey + "connection.error"));
+                return;
+            }
+
             // Loop through the commands and execute them
             if (commandInfo.getCommands() != null) {
                 for (CommandInfo command : commandInfo.getCommands()) {

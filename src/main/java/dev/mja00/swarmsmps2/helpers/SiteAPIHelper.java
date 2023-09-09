@@ -71,6 +71,12 @@ public class SiteAPIHelper {
         CompletableFuture<HttpResponse<String>> response = client.sendAsync(apiRequest, HttpResponse.BodyHandlers.ofString());
         String responseBody;
 
+        int statusCode = response.thenApply(HttpResponse::statusCode).join();
+        if (statusCode != 200) {
+            LOGGER.error("Error while sending request to " + url + ": " + statusCode);
+            return null;
+        }
+
         try {
             responseBody = response.thenApply(HttpResponse::body).get(SSMPS2Config.SERVER.firstTimeout.get(), TimeUnit.SECONDS);
             return responseBody;
