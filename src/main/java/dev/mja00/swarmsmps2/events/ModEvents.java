@@ -268,4 +268,26 @@ public class ModEvents {
             }
         }
     }
+
+    @SubscribeEvent
+    public static void onWeatherTick(TickEvent.WorldTickEvent event) {
+        if (event.phase == TickEvent.Phase.END) {
+            if (event.side.isClient() || SSMPS2Config.SERVER.fallbackServer.get()) {
+                return;
+            }
+            long lastWeatherChange = lastWeatherChangeTime == 0 ? SSMPS2Config.getTimeOfWeatherChange() : lastWeatherChangeTime;
+            long now = System.currentTimeMillis() / 1000L;
+            if (now - lastWeatherChange < SSMPS2Config.SERVER.weatherCheckTime.get() + nextRandomMinute) {
+                return;
+            }
+            boolean isRaining = event.world.isRaining();
+            boolean isThundering = event.world.isThundering();
+            ServerLevel overworld = (ServerLevel) event.world;
+            Map<String, WeightedWeatherEvent<String>> chances = weatherChances == null ? getWeatherChances() : weatherChances;
+            WeightedWeatherEvent<String> selectedChance = isThundering ? chances.get("thunder") : isRaining ? chances.get("rain") : chances.get("clear");
+            String newWeather = selectedChance.getRandom();
+            LOGGER.info("Changing weather to " + newWeather);
+            updateWeather(overworld, newWeather);
+        }
+    }
 }
