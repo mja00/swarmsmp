@@ -192,6 +192,18 @@ public class ServerPlayerEvents {
             if (SwarmsmpS2.sqlite == null) { return; }
             SwarmsmpS2.sqlite.createPlayerEvent("join", player.getName().getString());
         });
+        if (event.getEntity().getServer() == null) {
+            return;
+        }
+        PlayerList players = event.getEntity().getServer().getPlayerList();
+        for (ServerPlayer lPlayer : players.getPlayers()) {
+            // Get their persistent storage
+            if (lPlayer.getPersistentData().contains(SwarmsmpS2.MODID + ":joinlog")) {
+                // Send them a message
+                Component message = new TextComponent("[Admin Log] " + event.getPlayer().getName().getString() + " has joined the server.").withStyle(ChatFormatting.RED);
+                lPlayer.sendMessage(message, Util.NIL_UUID);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -202,6 +214,18 @@ public class ServerPlayerEvents {
             if (SwarmsmpS2.sqlite == null) { return; }
             SwarmsmpS2.sqlite.createPlayerEvent("leave", player.getName().getString());
         });
+        if (event.getEntity().getServer() == null) {
+            return;
+        }
+        PlayerList players = event.getEntity().getServer().getPlayerList();
+        for (ServerPlayer lPlayer : players.getPlayers()) {
+            // Get their persistent storage
+            if (lPlayer.getPersistentData().contains(SwarmsmpS2.MODID + ":joinlog")) {
+                // Send them a message
+                Component message = new TextComponent("[Admin Log] " + event.getPlayer().getName().getString() + " has left the server.").withStyle(ChatFormatting.RED);
+                lPlayer.sendMessage(message, Util.NIL_UUID);
+            }
+        }
     }
 
     @SubscribeEvent
