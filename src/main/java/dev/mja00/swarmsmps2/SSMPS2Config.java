@@ -115,6 +115,7 @@ public class SSMPS2Config {
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> ignoredCommands;
         public final ForgeConfigSpec.BooleanValue fallbackServer;
         public final ForgeConfigSpec.BooleanValue opsBypassIdleKick;
+        public final ForgeConfigSpec.ConfigValue<List<? extends String>> allowMods;
 
         // Weather shit
         public final ForgeConfigSpec.IntValue clearToRainChance;
@@ -257,6 +258,10 @@ public class SSMPS2Config {
             opsBypassIdleKick = builder
                     .comment("Should ops bypass the idle kick?")
                     .define("opsBypassIdleKick", true);
+
+            allowMods = builder
+                    .comment("A list of mods that are allowed on the server")
+                    .defineList("allowMods", List.of("do_a_barrel_roll","dynamiclightsreforged","ftbessentials","advancedperipherals","additionalentityattributes","apoli","calio","origins","deleteitem","playeranimator","additionalbanners","incontrol","connectivity","serverredirect","rubidium","hourglass","darkness","ctm","cookingforblockheads","controlling","placebo","wildbackport","extendedslabs","extrapotions","bookshelf","consistency_plus","mcwdoors","balm","dynview","jeresources","cloth_config","shetiphiancore","flytre_lib","lod","taterzens","config2brigadier","ambientsounds","mcwtrpdoors","mcwfences","swarmsmps2","bendylib","reeses_sodium_options","northerncompass","patchouli","oculus","collective","betterbiomeblend","worldedit","pluto","mcwroofs","architectury","computercraft","aiimprovements","ageingspawners","observable","fastleafdecay","geckolib3","waterdripsound","fastload","ftblibrary","shieldmechanics","spiderstpo","platforms","jei","disguiselib","pehkui","caelus","mcwpaintings","fastsuite","clumps","extendedclouds","dual_riders","alternate_current","configured","decorative_blocks","myserveriscompatible","betteranimalsplus","additional_lights","farsight_view","toastcontrol","jeitweaker","blueprint","crafttweaker","gamestages","rubidium_extras","forge","mcwpaths","emotecraft","selene","supplementaries","minecraft","voicechat","sound_physics_remastered","terrablender","swingthroughgrass","mousetweaks","itemstages","firstpersonmod","another_furniture","creativecore","weaponmaster","smoothboot","astikorcarts","betterfpsdist","kotlinforforge","notenoughanimations","stonecutter_recipe_tags","cyclepaintings","fastbench","polymorph","autoreglib","quark","immersive_paintings","entityculling","canary","worldeditcuife3","fastfurnace","appleskin","ferritecore","damagetilt","swarmsmp","recipestages","plasmovoice"), o -> o instanceof String);
 
             builder.pop();
             builder.comment("Verification Settings").push("verification");

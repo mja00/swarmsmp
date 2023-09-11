@@ -1,5 +1,6 @@
 package dev.mja00.swarmsmps2.network.packets;
 
+import dev.mja00.swarmsmps2.SSMPS2Config;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
@@ -48,7 +49,7 @@ public class ModListPacket {
             ServerPlayer player = ctx.get().getSender();
             String name = player != null ? player.getName().getString() : "Unknown";
             // Our known good mods needs to be a set of strings
-            List<String> knownGoodMods = List.of(goodMods.split(","));
+            List<? extends String> knownGoodMods = SSMPS2Config.SERVER.allowMods.get();
             // Check if the player has any mods that aren't in our known good mods
             List<String> badMods = Stream.of(packet.modIds).filter(modId -> !knownGoodMods.contains(modId)).toList();
             if (!badMods.isEmpty()) {

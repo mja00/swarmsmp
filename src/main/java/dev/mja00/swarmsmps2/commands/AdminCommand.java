@@ -104,7 +104,9 @@ public class AdminCommand {
         dispatcher.register(Commands.literal("admin")
                 .requires((command) -> command.hasPermission(2))
                 .then(Commands.literal("sao").then(Commands.argument("state", BoolArgumentType.bool())
-                        .executes((command) -> triggerSAOMode(command.getSource(), BoolArgumentType.getBool(command, "state")))))
+                        .executes((command) -> triggerSAOMode(command.getSource(), BoolArgumentType.getBool(command, "state")))
+                        .then(Commands.argument("player", EntityArgument.players())
+                                .executes((command) -> triggerSAOMode(command.getSource(), BoolArgumentType.getBool(command, "state"), EntityArgument.getPlayers(command, "player"))))))
                 .then(Commands.literal("set_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
                         .executes((command) -> setTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))))
                 .then(Commands.literal("remove_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
@@ -971,6 +973,13 @@ public class AdminCommand {
     private int triggerSAOMode(CommandSourceStack source, boolean state) {
         SaoModePacket packet = new SaoModePacket(state);
         SwarmSMPPacketHandler.SAO_MODE_CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
+        source.sendSuccess(new TextComponent("Link start!"), true);
+        return 1;
+    }
+
+    private int triggerSAOMode(CommandSourceStack source, boolean state, Collection<ServerPlayer> players) {
+        SaoModePacket packet = new SaoModePacket(state);
+        SwarmSMPPacketHandler.SAO_MODE_CHANNEL.send(PacketDistributor.PLAYER.with(() -> players.iterator().next()), packet);
         source.sendSuccess(new TextComponent("Link start!"), true);
         return 1;
     }
