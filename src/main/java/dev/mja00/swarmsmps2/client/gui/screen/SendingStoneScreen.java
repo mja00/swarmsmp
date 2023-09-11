@@ -1,6 +1,7 @@
 package dev.mja00.swarmsmps2.client.gui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
 import dev.mja00.swarmsmps2.network.packets.SendingStonePacket;
@@ -28,7 +29,7 @@ public class SendingStoneScreen extends Screen {
     private ItemStack item;
     protected EditBox messageBox;
     private static final Component TITLE = new TranslatableComponent(SwarmsmpS2.translationKey + "gui.sending_stone.title");
-    private static final Component LABEL = new TranslatableComponent(SwarmsmpS2.translationKey + "gui.sending_stone.message", 25);
+    private static final Component LABEL = new TranslatableComponent(SwarmsmpS2.translationKey + "gui.sending_stone.message", SSMPS2Config.SERVER.sendingStoneMaxMsgLength.get());
     protected Button doneButton;
     protected Button cancelButton;
     protected Font font = Minecraft.getInstance().font;
@@ -50,8 +51,8 @@ public class SendingStoneScreen extends Screen {
             this.onClose();
         }));
         // Create a message box in the center of the screen
-        this.messageBox = new EditBox(this.font, this.width / 2 - 150, 50, 300, 20, new TranslatableComponent(SwarmsmpS2.translationKey + "gui.sending_stone.message", 25));
-        this.messageBox.setMaxLength(25);
+        this.messageBox = new EditBox(this.font, this.width / 2 - 150, 50, 300, 20, LABEL);
+        this.messageBox.setMaxLength(SSMPS2Config.SERVER.sendingStoneMaxMsgLength.get());
         this.messageBox.setVisible(true);
         this.addRenderableWidget(this.messageBox);
         this.setInitialFocus(this.messageBox);
