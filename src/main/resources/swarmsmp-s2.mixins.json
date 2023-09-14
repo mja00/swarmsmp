@@ -6,6 +6,7 @@
   "refmap": "swarmsmp-s2.refmap.json",
   "mixins": [
     "MixinDispenseItemBehavior",
+    "MixinFlowerBlock",
     "MixinLivingEntity",
     "MixinPig",
     "MixinServerGamePacketListenerImpl",
