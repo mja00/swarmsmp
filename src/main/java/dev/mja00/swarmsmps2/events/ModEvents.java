@@ -46,6 +46,7 @@ public class ModEvents {
 
     @SubscribeEvent
     public static void onCommandsRegister(RegisterCommandsEvent event) {
+        // Get all the classes in the commands package and register them
         new AdminCommand(event.getDispatcher());
         new BetterMeCommand(event.getDispatcher());
         new BetterMessageCommand(event.getDispatcher());
@@ -59,6 +60,7 @@ public class ModEvents {
         new ReplyCommand(event.getDispatcher());
         new WhosOnlineCommand(event.getDispatcher());
         new RaidCommand(event.getDispatcher());
+        new HungerCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
