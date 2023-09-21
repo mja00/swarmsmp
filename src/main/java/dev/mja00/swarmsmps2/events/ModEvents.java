@@ -61,6 +61,7 @@ public class ModEvents {
         new WhosOnlineCommand(event.getDispatcher());
         new RaidCommand(event.getDispatcher());
         new HungerCommand(event.getDispatcher());
+        new ModCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }

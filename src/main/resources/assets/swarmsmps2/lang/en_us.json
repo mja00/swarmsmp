@@ -186,5 +186,7 @@
   "swarmsmps2.item.sending_stone.cooldown_time": "Cooldown: %1$s",
 
   "block.swarmsmps2.packed_gravel": "Packed Gravel",
-  "block.swarmsmps2.fools_gilded_blackstone": "Fool's Gilded Blackstone"
+  "block.swarmsmps2.fools_gilded_blackstone": "Fool's Gilded Blackstone",
+
+  "swarmsmps2.commands.ssmpmod.gamemode.success": "You've set your gamemode to %1$s."
 }

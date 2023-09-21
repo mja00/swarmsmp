@@ -22,9 +22,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SSMPS2Config {
 
@@ -36,6 +34,7 @@ public class SSMPS2Config {
     public static final File ALIAS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/aliases.json");
     public static final File GENERIC_FILE = new File(DOT_MINECRAFT, "config/ssmps2/generic.json");
     public static final File RAIDS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/raids.json");
+    public static final File MODS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/mods.json");
 
     public static class Client {
         // Client config options
@@ -825,5 +824,45 @@ public class SSMPS2Config {
                 }
             }
         }
+    }
+
+    // Mod file stuff
+    // The format of the file is just an array of UUIDs for every player that is a moderator
+    public static void writeModsToFile(UUID[] mods) {
+        JsonWriter jw = getJsonWriter(MODS_FILE);
+        if (jw != null) {
+            try {
+                jw.beginObject();
+                jw.name("mods");
+                jw.beginArray();
+                for (UUID uuid : mods) {
+                    jw.value(uuid.toString());
+                }
+                jw.endArray();
+                jw.endObject();
+                jw.close();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static List<UUID> getModsFromFile() {
+        List<UUID> mods = new ArrayList<>();
+        JsonElement jp = getJsonReader(MODS_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("mods") && jo.get("mods").isJsonArray()) {
+                JsonArray ja = jo.get("mods").getAsJsonArray();
+                for (JsonElement mod : ja) {
+                    if (mod.isJsonPrimitive()) {
+                        String uuid = mod.getAsString();
+                        mods.add(UUID.fromString(uuid));
+                    }
+                }
+            }
+        }
+        return mods;
     }
 }
