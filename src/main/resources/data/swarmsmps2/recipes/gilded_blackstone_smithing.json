@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:smithing",
+  "base": {
+    "item": "minecraft:blackstone",
+    "count": 4
+  },
+  "addition": {
+    "item": "minecraft:gold_ingot"
+  },
+  "result": {
+    "item": "minecraft:gilded_blackstone",
+    "count": 4
+  }
+}

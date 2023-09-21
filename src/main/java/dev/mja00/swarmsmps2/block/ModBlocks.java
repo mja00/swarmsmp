@@ -37,4 +37,9 @@ public class ModBlocks {
             () -> new GravelBlock(Block.Properties.copy(Blocks.GRAVEL)),
             CreativeModeTab.TAB_BUILDING_BLOCKS
     );
+
+    public static final RegistryObject<Block> FOOLS_GILDED_BLACKSTONE = registerBlock("fools_gilded_blackstone",
+            () -> new Block(Block.Properties.copy(Blocks.GILDED_BLACKSTONE)),
+            CreativeModeTab.TAB_BUILDING_BLOCKS
+    );
 }

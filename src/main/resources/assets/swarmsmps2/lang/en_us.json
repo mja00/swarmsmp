@@ -185,5 +185,6 @@
   "swarmsmps2.message.item.sending_stone.sent": "The stone glows a faint green color glint. Slowly fading back to blue after a moment.",
   "swarmsmps2.item.sending_stone.cooldown_time": "Cooldown: %1$s",
 
-  "block.swarmsmps2.packed_gravel": "Packed Gravel"
+  "block.swarmsmps2.packed_gravel": "Packed Gravel",
+  "block.swarmsmps2.fools_gilded_blackstone": "Fool's Gilded Blackstone"
 }
