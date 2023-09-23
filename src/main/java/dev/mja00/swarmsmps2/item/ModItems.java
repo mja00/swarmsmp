@@ -2,6 +2,7 @@ package dev.mja00.swarmsmps2.item;
 
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
+import dev.mja00.swarmsmps2.item.custom.FaePoofItem;
 import dev.mja00.swarmsmps2.item.custom.SendingStoneItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -16,6 +17,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> SENDING_STONE = ITEMS.register("sending_stone",
             () -> new SendingStoneItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).stacksTo(1).defaultDurability(SSMPS2Config.SERVER.sendingStoneDurability.get())));
+
+    public static final RegistryObject<Item> FAE_POOF = ITEMS.register("fae_poof",
+            () -> new FaePoofItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC).stacksTo(1)));
 
 
     public static void register(IEventBus eventBus) {

@@ -2,9 +2,9 @@ package dev.mja00.swarmsmps2.item.custom;
 
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.client.gui.screen.ScreenOpener;
+import dev.mja00.swarmsmps2.helpers.EntityHelpers;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -82,7 +82,7 @@ public class SendingStoneItem extends Item {
             if (isUnderCooldown(mainhand)) {
                 pLevel.playSound((Player) null, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), SoundEvents.BASALT_HIT, SoundSource.NEUTRAL, 0.5F, 0.4F / (pLevel.getRandom().nextFloat() * 0.4F + 0.8F));
                 // Play some particle effects
-                this.addParticlesAroundSelf(ParticleTypes.ELECTRIC_SPARK, pLevel, pPlayer, 20);
+                EntityHelpers.addParticlesAroundSelf(ParticleTypes.ELECTRIC_SPARK, pLevel, pPlayer, 20);
                 pPlayer.displayClientMessage(new TranslatableComponent(SwarmsmpS2.translationKey + "message.item.sending_stone.cooldown").withStyle(ChatFormatting.LIGHT_PURPLE), true);
                 return InteractionResultHolder.pass(pPlayer.getItemInHand(pUsedHand));
             } else {
@@ -152,15 +152,6 @@ public class SendingStoneItem extends Item {
         // If it has a paired value, return true
         if (item.getTag() == null) return false;
         return item.hasTag() && item.getTag().contains(SwarmsmpS2.MODID + ":paired");
-    }
-
-    private void addParticlesAroundSelf(ParticleOptions particleOptions, Level level, Player player, int count) {
-        for (int i = 0; i < count; ++i) {
-            double d0 = level.getRandom().nextGaussian() * 0.02D;
-            double d1 = level.getRandom().nextGaussian() * 0.02D;
-            double d2 = level.getRandom().nextGaussian() * 0.02D;
-            level.addParticle(particleOptions, player.getRandomX(1), player.getY() + 2, player.getRandomZ(1), d0, d1, d2);
-        }
     }
 
     private long getCooldown(ItemStack item) {

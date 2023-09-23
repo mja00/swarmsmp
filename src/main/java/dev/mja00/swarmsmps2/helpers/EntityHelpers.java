@@ -4,12 +4,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.mja00.swarmsmps2.SSMPS2Config;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
@@ -105,5 +108,19 @@ public class EntityHelpers {
         ItemStack headItem = new ItemStack(Items.PLAYER_HEAD, 1);
         headItem.setTag(headData);
         return headItem;
+    }
+
+    public static void addParticlesAroundSelf(ParticleOptions particleOptions, Level level, Player player, int count, int verticalOffset) {
+        for (int i = 0; i < count; ++i) {
+            double d0 = level.getRandom().nextGaussian() * 0.02D;
+            double d1 = level.getRandom().nextGaussian() * 0.02D;
+            double d2 = level.getRandom().nextGaussian() * 0.02D;
+            double randomY = level.getRandom().nextInt(verticalOffset) + player.getY();
+            level.addParticle(particleOptions, player.getRandomX(1), randomY, player.getRandomZ(1), d0, d1, d2);
+        }
+    }
+
+    public static void addParticlesAroundSelf(ParticleOptions particleOptions, Level level, Player player, int count) {
+        addParticlesAroundSelf(particleOptions, level, player, count, 2);
     }
 }
