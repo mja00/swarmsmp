@@ -54,11 +54,17 @@ public class AliasCommand {
             source.sendFailure(new net.minecraft.network.chat.TranslatableComponent(SwarmsmpS2.translationKey + "commands.joincommand.error.no_commands"));
             return 0;
         }
+        // Get a console source stack
         CommandSourceStack consoleSource = source.getServer().createCommandSourceStack();
-        net.minecraft.commands.Commands commandsClass = source.getServer().getCommands();
+        Commands commandsClass = source.getServer().getCommands();
+        // For each player in the targets
         for (ServerPlayer player : targets) {
+            String playerName = player.getName().getString();
+            // Run each command
             for (String command : commands) {
-                String replacedCommand = command.replace("%player%", player.getName().getString());
+                // Replace the player's name in the command with the player's name
+                String replacedCommand = command.replace("%player%", playerName);
+                // Run the command
                 commandsClass.performCommand(consoleSource, replacedCommand);
             }
         }
