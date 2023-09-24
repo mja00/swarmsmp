@@ -35,6 +35,7 @@ public class SSMPS2Config {
     public static final File GENERIC_FILE = new File(DOT_MINECRAFT, "config/ssmps2/generic.json");
     public static final File RAIDS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/raids.json");
     public static final File MODS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/mods.json");
+    public static final File PROFICIENCIES_FILE = new File(DOT_MINECRAFT, "config/ssmps2/proficiencies.json");
 
     public static class Client {
         // Client config options
@@ -864,5 +865,22 @@ public class SSMPS2Config {
             }
         }
         return mods;
+    }
+
+    public static String[] getProficiencies() {
+        // It's just an array of strings under the "proficiencies" key
+        JsonElement jp = getJsonReader(PROFICIENCIES_FILE);
+        if (jp != null && jp.isJsonObject()) {
+            JsonObject jo = jp.getAsJsonObject();
+            if (jo.has("proficiencies") && jo.get("proficiencies").isJsonArray()) {
+                JsonArray ja = jo.get("proficiencies").getAsJsonArray();
+                String[] proficiencies = new String[ja.size()];
+                for (int i = 0; i < ja.size(); i++) {
+                    proficiencies[i] = ja.get(i).getAsString();
+                }
+                return proficiencies;
+            }
+        }
+        return new String[0];
     }
 }

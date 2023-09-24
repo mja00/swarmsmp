@@ -62,6 +62,7 @@ public class ModEvents {
         new RaidCommand(event.getDispatcher());
         new HungerCommand(event.getDispatcher());
         new ModCommand(event.getDispatcher());
+        new ProficiencyCommand(event.getDispatcher());
 
         ConfigCommand.register(event.getDispatcher());
     }
