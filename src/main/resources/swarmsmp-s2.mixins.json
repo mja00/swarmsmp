@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "refmap": "swarmsmp-s2.refmap.json",
   "mixins": [
+    "MixinClientboundUpdateMobEffectPacket",
     "MixinDispenseItemBehavior",
     "MixinFlowerBlock",
     "MixinItem",
@@ -12,6 +13,7 @@
     "MixinPig",
     "MixinServerGamePacketListenerImpl",
     "MixinSkeletonHorse",
+    "MixinStringUtil",
     "MixinThrownEgg"
   ],
   "client": [
