@@ -15,11 +15,9 @@ public class HungerCommand {
 
     private int hunger(CommandSourceStack source) throws CommandSyntaxException {
         ServerPlayer player = source.getPlayerOrException();
-        // Just take away 1 hunger chunk
-        int currentFood = player.getFoodData().getFoodLevel();
-        if (currentFood > 0) {
-            player.getFoodData().setFoodLevel(currentFood - 1);
-        }
+        float saturationLevel = player.getFoodData().getSaturationLevel();
+        float exhaustionToSet = 4 * saturationLevel;
+        player.getFoodData().setExhaustion(exhaustionToSet + (4 * 8)); // This should clear any saturation and eat into their chunks
         return 1;
     }
 }
