@@ -41,9 +41,9 @@ public class ProficiencyCommand {
         // Essentially each proficiency is an alias for origin commands
         Commands commandsClass = source.getServer().getCommands();
         String[] commands = new String[3];
-        commands[0] = "origin set %player% origins:proficiency_1 ssmp:" + proficiency1;
-        commands[1] = "origin set %player% origins:proficiency_2 ssmp:" + proficiency2;
-        commands[2] = "origin set %player% origins:proficiency_3 ssmp:" + proficiency3;
+        commands[0] = "origin set %player% origins:proficiency_1 ssmp:proficiency/" + proficiency1;
+        commands[1] = "origin set %player% origins:proficiency_2 ssmp:proficiency/" + proficiency2;
+        commands[2] = "origin set %player% origins:proficiency_3 ssmp:proficiency/" + proficiency3;
         for (ServerPlayer player: targets) {
             for (String command : commands) {
                 String replacedCommand = command.replace("%player%", player.getName().getString());

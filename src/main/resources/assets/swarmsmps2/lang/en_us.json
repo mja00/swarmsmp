@@ -190,7 +190,7 @@
 
   "swarmsmps2.commands.ssmpmod.gamemode.success": "You've set your gamemode to %1$s.",
 
-  "swarmsmps2.commands.proficiencycommand.success": "You've been given %2$s, %3$s, and %4$s as your proficiencies.",
-  "swarmsmps2.commands.proficiencycommand.success.single": "You've set %1$s's proficiencies to %2$s, %3$s, and 54$s.",
+  "swarmsmps2.commands.proficiencycommand.success": "You've been given %1$s, %2$s, and %3$s as your proficiencies.",
+  "swarmsmps2.commands.proficiencycommand.success.single": "You've set %1$s's proficiencies to %2$s, %3$s, and %4$s.",
   "swarmsmps2.commands.proficiencycommand.success.multiple": "You've set %1$s players' proficiencies to %2$s, %3$s, and %4$s."
 }
