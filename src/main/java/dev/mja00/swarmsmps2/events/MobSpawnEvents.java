@@ -1,15 +1,13 @@
 package dev.mja00.swarmsmps2.events;
 
 import dev.mja00.swarmsmps2.SwarmsmpS2;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashSet;
@@ -22,6 +20,10 @@ import static dev.mja00.swarmsmps2.helpers.EntityHelpers.giveTeamAndCreateIfNeed
 public class MobSpawnEvents {
 
     static Logger LOGGER = SwarmsmpS2.LOGGER;
+    static List<MobSpawnType> VALID_SPAWN_REASONS = List.of(
+            MobSpawnType.SPAWN_EGG,
+            MobSpawnType.COMMAND
+    );
 
     @SubscribeEvent
     public static void setTeamOnMobSpawn(LivingSpawnEvent.SpecialSpawn event) {
@@ -36,7 +38,8 @@ public class MobSpawnEvents {
                 EntityType.HUSK,
                 EntityType.ZOMBIE_VILLAGER,
                 EntityType.STRAY,
-                EntityType.DROWNED
+                EntityType.DROWNED,
+                EntityType.SKELETON_HORSE
         ));
         Set<EntityType<?>> swarmTypes = new HashSet<>(List.of(
                 EntityType.SPIDER,
@@ -60,27 +63,34 @@ public class MobSpawnEvents {
     public static void onSkeletonHorseSpawn(LivingSpawnEvent.SpecialSpawn event) {
         EntityType<?> entityType = event.getEntityLiving().getType();
         if (EntityType.SKELETON_HORSE.equals(entityType)) {
-            // Get the biome the horse spawned in
-            Biome biome = event.getWorld().getBiome(event.getEntityLiving().blockPosition()).value();
-            Biome taiga = ForgeRegistries.BIOMES.getValue(new ResourceLocation("swarmsmp:taiga"));
-            if (taiga == null) {
-                LOGGER.error("Could not find taiga biome. Will attempt to find vanilla's taiga biome.");
-
-            }
-            taiga = ForgeRegistries.BIOMES.getValue(new ResourceLocation("minecraft:taiga"));
-            if (taiga == null ) {
-                LOGGER.error("Could not find vanilla taiga biome. Will not stop spawn.");
-                return;
-            }
-            if (biome.getRegistryName() == null || taiga.getRegistryName() == null) {
-                LOGGER.error("Could not find registry name for biome. Will not stop spawn.");
-                return;
-            }
-            if (!biome.getRegistryName().toString().equals(taiga.getRegistryName().toString())) {
-                // Stop spawn
+            if (!VALID_SPAWN_REASONS.contains(event.getSpawnReason())) {
+                LOGGER.info("Skeleton horse was not spawned by a valid reason, cancelling spawn. Reason: " + event.getSpawnReason().toString());
                 event.setCanceled(true);
+            } else {
+                LOGGER.info("Skeleton horse spawned! It spawned at X:" + event.getX() + " Y:" + event.getY() + " Z:" + event.getZ() + " with reason " + event.getSpawnReason().toString());
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onLivingSpawn(LivingSpawnEvent.CheckSpawn event) {
+        if (!shouldSpawn(event)) {
+            event.setCanceled(true);
+        }
+    }
+
+    private static boolean shouldSpawn(LivingSpawnEvent.CheckSpawn event) {
+        EntityType<?> entityType = event.getEntityLiving().getType();
+        if (EntityType.SKELETON_HORSE.equals(entityType)) {
+            if (!VALID_SPAWN_REASONS.contains(event.getSpawnReason())) {
+                LOGGER.info("Skeleton horse was not spawned by a valid reason, cancelling spawn. Reason: " + event.getSpawnReason().toString());
+                return false;
+            } else {
+                LOGGER.info("Skeleton horse spawned! It spawned at X:" + event.getX() + " Y:" + event.getY() + " Z:" + event.getZ() + " with reason " + event.getSpawnReason().toString());
+                return true;
+            }
+        }
+        return true;
     }
 
     @SubscribeEvent

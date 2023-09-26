@@ -200,7 +200,7 @@ public class ServerPlayerEvents {
             // Get their persistent storage
             if (lPlayer.getPersistentData().contains(SwarmsmpS2.MODID + ":joinlog")) {
                 // Send them a message
-                Component message = new TextComponent("[Admin Log] " + event.getPlayer().getName().getString() + " has joined the server.").withStyle(ChatFormatting.RED);
+                Component message = new TextComponent("[Admin Log] " + event.getPlayer().getName().getString() + " has joined the server.").withStyle(ChatFormatting.GREEN);
                 lPlayer.sendMessage(message, Util.NIL_UUID);
             }
         }
