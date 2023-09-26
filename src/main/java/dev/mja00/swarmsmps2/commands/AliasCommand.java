@@ -42,7 +42,7 @@ public class AliasCommand {
         CommandSourceStack consoleSource = source.getServer().createCommandSourceStack();
         net.minecraft.commands.Commands commandsClass = source.getServer().getCommands();
         for (String command : commands) {
-            String replacedCommand = command.replace("%player%", source.getPlayerOrException().getName().toString());
+            String replacedCommand = command.replace("%player%", source.getPlayerOrException().getName().getString());
             commandsClass.performCommand(consoleSource, replacedCommand);
         }
         return Command.SINGLE_SUCCESS;
