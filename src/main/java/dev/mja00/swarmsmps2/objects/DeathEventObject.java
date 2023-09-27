@@ -75,15 +75,7 @@ public class DeathEventObject {
         StringBuilder sb = new StringBuilder();
         sb.append("{ \"items\": [");
         for (ItemStack item : this.items) {
-            sb.append("{ \"name\": \"");
-            sb.append(item.getItem().getRegistryName().toString());
-            sb.append("\", \"count\": ");
-            sb.append(item.getCount());
-            sb.append(", \"nbt\": \"");
-            if (item.getTag() != null)
-                // The tags need to be escaped as we're putting them into a json string
-                sb.append(item.getTag().toString().replace("\"", "\\\""));
-            sb.append("\" },");
+            PlayerObject.convertItemToJson(sb, item);
         }
         // Remove the last comma
         sb.deleteCharAt(sb.length() - 1);

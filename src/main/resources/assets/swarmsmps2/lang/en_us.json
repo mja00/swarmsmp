@@ -195,5 +195,14 @@
 
   "swarmsmps2.commands.proficiencycommand.success": "You've been given %1$s, %2$s, and %3$s as your proficiencies.",
   "swarmsmps2.commands.proficiencycommand.success.single": "You've set %1$s's proficiencies to %2$s, %3$s, and %4$s.",
-  "swarmsmps2.commands.proficiencycommand.success.multiple": "You've set %1$s players' proficiencies to %2$s, %3$s, and %4$s."
+  "swarmsmps2.commands.proficiencycommand.success.multiple": "You've set %1$s players' proficiencies to %2$s, %3$s, and %4$s.",
+  "swarmsmps2.commands.ssmpmod.flight.success": "You've toggle your flight status to %1$s.",
+
+  "swarmsmps2.commands.ssmpmod.fey.success": "You've become a fey!",
+  "swarmsmps2.commands.ssmpmod.fey.already_fey": "You're already a fey!",
+  "swarmsmps2.commands.ssmpmod.fey.not_fey": "You're not a fey!",
+  "swarmsmps2.commands.ssmpmod.fey.failed_to_write_to_file": "Failed to write to file. Error: %1$s",
+  "swarmsmps2.commands.ssmpmod.fey.failed_to_get_fey": "Failed to get fey.",
+  "swarmsmps2.commands.ssmpmod.fey.return.success": "You've returned to your mortal form.",
+  "swarmsmps2.commands.ssmpmod.fey.failed_to_remove_from_file": "Failed to remove from file. DO NOT BECOME A FEY AGAIN TILL MJA00 GIVES YOU THE CLEAR!!!!!!! Error: %1$s"
 }

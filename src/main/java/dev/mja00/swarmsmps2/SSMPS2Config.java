@@ -3,8 +3,6 @@ package dev.mja00.swarmsmps2;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import dev.mja00.swarmsmps2.commands.RaidCommand;
 import net.minecraft.server.MinecraftServer;
@@ -16,13 +14,13 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
+
+import static dev.mja00.swarmsmps2.config.ConfigHelper.getJsonReader;
+import static dev.mja00.swarmsmps2.config.ConfigHelper.getJsonWriter;
 
 public class SSMPS2Config {
 
@@ -36,6 +34,7 @@ public class SSMPS2Config {
     public static final File RAIDS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/raids.json");
     public static final File MODS_FILE = new File(DOT_MINECRAFT, "config/ssmps2/mods.json");
     public static final File PROFICIENCIES_FILE = new File(DOT_MINECRAFT, "config/ssmps2/proficiencies.json");
+    public static final File FEY_FILE  = new File(DOT_MINECRAFT, "config/ssmps2/fey.json");
 
     public static class Client {
         // Client config options
@@ -648,47 +647,6 @@ public class SSMPS2Config {
             jw.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    @Nullable
-    private static JsonElement getJsonReader(File file) {
-        // We want this jsonReader to be auto-closing
-        if (createFileAndDirs(file)) return null;
-        try (JsonReader jr = new JsonReader(new FileReader(file))) {
-            return JsonParser.parseReader(jr);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private static boolean createFileAndDirs(File file) {
-        try {
-            file.getParentFile().mkdirs();
-            if (!file.exists()) {
-                if (!file.createNewFile()) {
-                    LOGGER.error("Failed to create file: {}", file.getAbsolutePath());
-                    return true;
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return true;
-        }
-        return false;
-    }
-
-    @Nullable
-    private static JsonWriter getJsonWriter(File file) {
-        try {
-            if (createFileAndDirs(file)) return null;
-            JsonWriter jw = new JsonWriter(new FileWriter(file));
-            jw.setIndent("  ");
-            return jw;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
         }
     }
 

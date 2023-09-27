@@ -2,6 +2,7 @@ package dev.mja00.swarmsmps2;
 
 import com.google.gson.JsonObject;
 import dev.mja00.swarmsmps2.block.ModBlocks;
+import dev.mja00.swarmsmps2.config.FeyConfig;
 import dev.mja00.swarmsmps2.config.HandleServerData;
 import dev.mja00.swarmsmps2.events.PlayerEvents;
 import dev.mja00.swarmsmps2.helpers.SQLiteHelper;
@@ -37,6 +38,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Random;
@@ -72,6 +74,12 @@ public class SwarmsmpS2 {
         // We'll load our client only code for setting default servers here
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> HandleServerData::saveServerData);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SSMPS2Config.clientSpec);
+        // Ready our fey config
+        try {
+            FeyConfig.init();
+        } catch (IOException e) {
+            LOGGER.error("Failed to initialize fey config: " + e.getMessage());
+        }
         eventBus.register(SSMPS2Config.class);
         ModSoundEvent.register(eventBus);
         ModItems.register(eventBus);
