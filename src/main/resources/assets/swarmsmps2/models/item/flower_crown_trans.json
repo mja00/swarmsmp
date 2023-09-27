@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "swarmsmps2:item/flower_crown_trans"
+  }
+}

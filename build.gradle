@@ -19,7 +19,7 @@ apply plugin: 'org.spongepowered.mixin'
 
 
 group = 'dev.mja00'
-version = '1.67'
+version = '1.68'
 
 java {
     archivesBaseName = 'swarmsmps2'
@@ -167,7 +167,6 @@ dependencies {
 
     // Load up sound physics remastered in the runtime
     runtimeOnly fg.deobf('curse.maven:sound-physics-remastered-535489:3775919')
-    runtimeOnly fg.deobf('curse.maven:immersive-weathering-forge-592449:4432693')
 
     // For more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html

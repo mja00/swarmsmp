@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "swarmsmps2:item/flower_crown"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "swarmsmps2:supporter": 0.10
+      },
+      "model": "swarmsmps2:item/flower_crown_mja00"
+    },
+    {
+      "predicate": {
+        "swarmsmps2:supporter": 0.20
+      },
+      "model": "swarmsmps2:item/flower_crown_cogs"
+    },
+    {
+      "predicate": {
+        "swarmsmps2:supporter": 0.201
+      },
+      "model": "swarmsmps2:item/flower_crown_roses"
+    },
+    {
+      "predicate": {
+        "swarmsmps2:supporter": 0.202
+      },
+      "model": "swarmsmps2:item/flower_crown_trans"
+    }
+  ]
+}

@@ -6,8 +6,13 @@ import dev.mja00.swarmsmps2.config.HandleServerData;
 import dev.mja00.swarmsmps2.events.PlayerEvents;
 import dev.mja00.swarmsmps2.helpers.SQLiteHelper;
 import dev.mja00.swarmsmps2.item.ModItems;
+import dev.mja00.swarmsmps2.item.custom.FlowerCrownItem;
 import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
+import dev.mja00.swarmsmps2.particle.ModParticles;
 import dev.mja00.swarmsmps2.sounds.ModSoundEvent;
+import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
@@ -71,6 +76,7 @@ public class SwarmsmpS2 {
         ModSoundEvent.register(eventBus);
         ModItems.register(eventBus);
         ModBlocks.register(eventBus);
+        ModParticles.register(eventBus);
 
         // Register the setup method for modloading
         eventBus.addListener(this::setup);
@@ -112,6 +118,10 @@ public class SwarmsmpS2 {
                 throw new RuntimeException("error while stitching atlas for textures at " + base64);
             }
         }
+    }
+
+    public static ResourceLocation res(String name) {
+        return new ResourceLocation(MODID, name);
     }
 
     private void setup(final FMLCommonSetupEvent event) {
@@ -192,8 +202,14 @@ public class SwarmsmpS2 {
         }
     }
 
+    public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
+        ItemProperties.register(item, name, property);
+    }
+
     private void clientSetup(final FMLClientSetupEvent event) {
         LOGGER.info("Client setup");
+        registerItemProperty(ModItems.FLOWER_CROWN.get(), new ResourceLocation(MODID, "supporter"),
+                (stack, world, entity, s) -> FlowerCrownItem.getItemTextureIndex(stack));
     }
 
 
