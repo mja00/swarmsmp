@@ -27,11 +27,11 @@ jobs:
       # We only want to upload to CurseForge on a tag push
       - name: "Get Tag Name"
         id: tag
-        run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: "Check if Tag is Present"
         id: tag_present
-        run: echo ::set-output name=present::$(test -n "${{ steps.tag.outputs.tag }}")
+        run: echo "present=$(test -n "${tag}" && echo 'true' || echo 'false')" >> $GITHUB_OUTPUT
 
       - name: "Upload to CurseForge"
         uses: itsmeow/curseforge-upload@v3
