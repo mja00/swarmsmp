@@ -1,5 +1,8 @@
 name: "Build Release"
-on: push
+on:
+  push:
+    tags:
+      - '*'
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,3 +30,13 @@ jobs:
         with:
           name: "swarmsmps2-${{ env.VERSION_INFORMATION }}.jar"
           path: "build/libs/swarmsmps2-${{ env.VERSION_INFORMATION }}.jar"
+
+      - name: "Upload to CurseForge"
+        uses: itsmeow/curseforge-upload@v3
+        with:
+          file_path: "build/libs/swarmsmps2-${{ env.VERSION_INFORMATION }}.jar"
+          game_endpoint: "minecraft"
+          game_versions: "7498,9639,96389008"
+          project_id: "916645"
+          token: "${{ secrets.CF_API_KEY }}"
+        if: steps.tag_present.outputs.present == 'true'
