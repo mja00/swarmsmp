@@ -193,7 +193,7 @@ jar {
 jar.finalizedBy('reobfJar')
 
 exec {
-    commandLine "echo", '"version=${project.version}" >> $GITHUB_OUTPUT'
+    commandLine "echo", "version=${project.version} >> \$GITHUB_OUTPUT";
 }
 
 apply from: "https://moddingtutorials.org/applesilicon.gradle"
