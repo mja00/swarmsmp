@@ -4,12 +4,14 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class LeafParticle extends TextureSheetParticle {
 
     private final float rotationSpeed;
 
-    LeafParticle(ClientLevel world, SpriteSet spriteProvider, double x, double y, double z,
+    protected LeafParticle(ClientLevel world, SpriteSet spriteProvider, double x, double y, double z,
                  double velocityX, double velocityY, double velocityZ, int color) {
         super(world, x, y, z, velocityX, velocityY, velocityZ);
         this.setSize(1.0F, 1.0F);
@@ -25,6 +27,7 @@ public class LeafParticle extends TextureSheetParticle {
                 NativeImage.getR(color) / 255f);
     }
 
+    @Override
     public void tick() {
         this.xo = this.x;
         this.yo = this.y;
@@ -44,26 +47,22 @@ public class LeafParticle extends TextureSheetParticle {
         }
     }
 
+    @Override
     public ParticleRenderType getRenderType() {
         return ParticleRenderType.PARTICLE_SHEET_OPAQUE;
     }
 
-    public record ColoredLeafParticle(SpriteSet spriteProvider) implements ParticleProvider<SimpleParticleType> {
+    @OnlyIn(Dist.CLIENT)
+    public static class Provider implements ParticleProvider<SimpleParticleType> {
+        private final SpriteSet sprites;
 
-        @Override
-        public Particle createParticle(SimpleParticleType particleType, ClientLevel clientWorld, double x, double y, double z, double g, double color, double i) {
-
-            return new LeafParticle(clientWorld, this.spriteProvider, x, y, z, 0.0D, -1D, 0.0D,
-                    (int) color);
+        public Provider(SpriteSet spriteSet) {
+            this.sprites = spriteSet;
         }
-    }
 
-    public record SimpleLeafParticle(SpriteSet spriteProvider) implements ParticleProvider<SimpleParticleType> {
-
-        @Override
         public Particle createParticle(SimpleParticleType particleType, ClientLevel clientWorld, double x, double y, double z, double vel, double color, double i) {
             if (vel == 0) vel = -3;
-            return new LeafParticle(clientWorld, this.spriteProvider, x, y, z, 0.0D, vel, 0.0D,
+            return new LeafParticle(clientWorld, this.sprites, x, y, z, 0.0D, vel, 0.0D,
                     -1);
         }
     }

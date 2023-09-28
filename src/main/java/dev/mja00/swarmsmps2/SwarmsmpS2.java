@@ -7,12 +7,9 @@ import dev.mja00.swarmsmps2.config.HandleServerData;
 import dev.mja00.swarmsmps2.events.PlayerEvents;
 import dev.mja00.swarmsmps2.helpers.SQLiteHelper;
 import dev.mja00.swarmsmps2.item.ModItems;
-import dev.mja00.swarmsmps2.item.custom.FlowerCrownItem;
 import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
 import dev.mja00.swarmsmps2.particle.ModParticles;
 import dev.mja00.swarmsmps2.sounds.ModSoundEvent;
-import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -29,7 +26,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModProcessEvent;
@@ -92,8 +88,6 @@ public class SwarmsmpS2 {
         eventBus.addListener(this::enqueueIMC);
         // Register the processIMC method for modloading
         eventBus.addListener(this::processIMC);
-
-        eventBus.addListener(this::clientSetup);
 
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
@@ -208,16 +202,6 @@ public class SwarmsmpS2 {
             // register a new block here
             LOGGER.info("HELLO from Register Block");
         }
-    }
-
-    public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
-        ItemProperties.register(item, name, property);
-    }
-
-    private void clientSetup(final FMLClientSetupEvent event) {
-        LOGGER.info("Client setup");
-        registerItemProperty(ModItems.FLOWER_CROWN.get(), new ResourceLocation(MODID, "supporter"),
-                (stack, world, entity, s) -> FlowerCrownItem.getItemTextureIndex(stack));
     }
 
 
