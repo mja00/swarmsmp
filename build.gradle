@@ -192,8 +192,11 @@ jar {
 
 jar.finalizedBy('reobfJar')
 
-exec {
-    commandLine "echo", "version=${project.version} >> \$GITHUB_OUTPUT";
+tasks.register("showVersion") {
+    println("${project.version}");
 }
 
-apply from: "https://moddingtutorials.org/applesilicon.gradle"
+// Only do this apply from if we're on a mac
+if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+    apply from: "https://moddingtutorials.org/applesilicon.gradle"
+}
