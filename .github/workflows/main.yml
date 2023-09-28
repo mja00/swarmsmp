@@ -1,0 +1,22 @@
+name: "Build Release"
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with: { fetch-depth: 0 }
+      - name: "Set up JDK 17"
+        uses: actions/setup-java@v2
+        with: { distribution: "adopt", java-version: "17" }
+      - name: "Build with Gradle"
+        id: build
+        run: "chmod +x gradlew && ./gradlew build"
+      # - name: "Upload to CurseForge"
+      #   uses: itsmeow/curseforge-upload@v3
+      #   with:
+      #     file_path: "build/libs/swarmsmp-${{ steps.build.outputs.version }}.jar"
+      #     game_endpoint: "minecraft"
+      #     game_versions: "7498,9639,96389008"
+      #     project_id: "916645"
+      #     token: "${{ secrets.CF_API_KEY }}"
