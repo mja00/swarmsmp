@@ -36,6 +36,6 @@ jobs:
         with:
           file_path: "build/libs/swarmsmps2-${{ env.VERSION_INFORMATION }}.jar"
           game_endpoint: "minecraft"
-          game_versions: "7498,9639,96389008"
+          game_versions: "7498,9639,9638,9008"
           project_id: "916645"
           token: "${{ secrets.CF_API_KEY }}"
