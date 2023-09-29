@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "swarmsmps2:item/mail/open"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "swarmsmps2:mail": 0.10
+      },
+      "model": "swarmsmps2:item/mail_open"
+    },
+    {
+      "predicate": {
+        "swarmsmps2:mail": 0.20
+      },
+      "model": "swarmsmps2:item/mail_sealed"
+    },
+    {
+      "predicate": {
+        "swarmsmps2:mail": 0.30
+      },
+      "model": "swarmsmps2:item/mail_torn"
+    }
+  ]
+}

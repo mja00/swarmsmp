@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "RW",
+    "##"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:paper"
+    },
+    "R": {
+      "item": "minecraft:redstone"
+    },
+    "W": {
+      "item": "minecraft:honeycomb"
+    }
+  },
+  "result": {
+    "item": "swarmsmps2:mail",
+    "count": 4
+  }
+}
