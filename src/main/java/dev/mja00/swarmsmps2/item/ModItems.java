@@ -4,6 +4,7 @@ import dev.mja00.swarmsmps2.SSMPS2Config;
 import dev.mja00.swarmsmps2.SwarmsmpS2;
 import dev.mja00.swarmsmps2.item.custom.FaePoofItem;
 import dev.mja00.swarmsmps2.item.custom.FlowerCrownItem;
+import dev.mja00.swarmsmps2.item.custom.MailItem;
 import dev.mja00.swarmsmps2.item.custom.SendingStoneItem;
 import dev.mja00.swarmsmps2.item.materials.FlowerCrownMaterial;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -30,6 +31,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> AZALEA_FLOWER = ITEMS.register("azalea_flower",
             () -> new Item(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
+
+    public static final RegistryObject<Item> MAIL = ITEMS.register("mail",
+            () -> new MailItem(new Item.Properties().tab(CreativeModeTab.TAB_MISC)));
 
 
     public static void register(IEventBus eventBus) {
