@@ -46,7 +46,9 @@ public class MailItem extends Item {
             pPlayer.setItemInHand(oppositeHand, ItemStack.EMPTY);
             // Add the item to the player's inventory
             targetEnvelope.setCount(1);
-            pPlayer.addItem(targetEnvelope);
+            if (!pPlayer.addItem(targetEnvelope)) {
+                pPlayer.drop(targetEnvelope, true, false);
+            }
            envelope.shrink(1);
         } else if (isSealed(envelope)) {
             CompoundTag tags = envelope.getOrCreateTag();
@@ -58,7 +60,10 @@ public class MailItem extends Item {
             // Create an itemstack from the NBT
             ItemStack itemStack = ItemStack.of(item);
             // Give the item to the player
-            pPlayer.addItem(itemStack);
+            if (!pPlayer.addItem(itemStack)) {
+                pPlayer.drop(itemStack, true, false);
+            }
+
             // Clear the item from the envelope's NBT, this'll let them stack
             tags.remove("swarmsmps2.item");
             tags.remove("swarmsmps2.sender");
