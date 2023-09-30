@@ -1,9 +1,14 @@
 package dev.mja00.swarmsmps2.events;
 
 import dev.mja00.swarmsmps2.SwarmsmpS2;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -91,6 +96,28 @@ public class MobSpawnEvents {
             }
         }
         return true;
+    }
+
+    @SubscribeEvent
+    public static void frickSkeletonHorses(EntityJoinWorldEvent event) {
+        EntityType<?> entityType = event.getEntity().getType();
+        if (EntityType.SKELETON_HORSE.equals(entityType)) {
+            Entity entity = event.getEntity();
+            // Get the biome it spawned in
+            BlockPos pos = entity.blockPosition();
+            // Get the biome
+            Biome biome = entity.level.getBiome(pos).value();
+            // If it's a taiga biome or swarmsmp:fog_wastes biome, allow the spawn
+            ResourceLocation biomeName = biome.getRegistryName();
+            ResourceLocation taiga = new ResourceLocation("minecraft", "taiga");
+            ResourceLocation fogWastes = new ResourceLocation("swarmsmp", "fog_wastes");
+            if (biomeName != null && (biomeName.equals(taiga) || biomeName.equals(fogWastes))) {
+                LOGGER.info("Skeleton horse spawned in a taiga biome or fog wastes biome, allowing spawn");
+            } else {
+                LOGGER.info("Skeleton horse spawned in a non-taiga biome or fog wastes biome, cancelling spawn");
+                event.setCanceled(true);
+            }
+        }
     }
 
     @SubscribeEvent
