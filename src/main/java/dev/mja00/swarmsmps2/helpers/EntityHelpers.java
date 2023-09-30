@@ -7,6 +7,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -120,7 +121,21 @@ public class EntityHelpers {
         }
     }
 
+    public static void addParticlesAroundSelfServer(ParticleOptions particleOptions, ServerLevel level, Player player, int count, int verticalOffset) {
+        for (int i = 0; i < count; ++i) {
+            double d0 = level.getRandom().nextGaussian() * 0.02D;
+            double d1 = level.getRandom().nextGaussian() * 0.02D;
+            double d2 = level.getRandom().nextGaussian() * 0.02D;
+            double randomY = level.getRandom().nextInt(verticalOffset) + player.getY();
+            level.sendParticles(particleOptions, player.getRandomX(1), randomY, player.getRandomZ(1), 1, d0, d1, d2, 0.0D);
+        }
+    }
+
     public static void addParticlesAroundSelf(ParticleOptions particleOptions, Level level, Player player, int count) {
         addParticlesAroundSelf(particleOptions, level, player, count, 2);
+    }
+
+    public static void addParticlesAroundSelfServer(ParticleOptions particleOptions, ServerLevel level, Player player, int count) {
+        addParticlesAroundSelfServer(particleOptions, level, player, count, 2);
     }
 }
