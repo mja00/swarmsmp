@@ -22,7 +22,7 @@ public class WhosOnlineCommand {
     static final HashMap<String, ChatFormatting> FACTION_COLORS = new HashMap<String, ChatFormatting>() {{
         put("swarm", ChatFormatting.RED);
         put("construct", ChatFormatting.GOLD);
-        put("undead", ChatFormatting.GRAY);
+        put("undead", ChatFormatting.BLUE);
         put("natureborn", ChatFormatting.GREEN);
     }};
 
@@ -45,6 +45,8 @@ public class WhosOnlineCommand {
         players.getPlayers().forEach((player) -> {
             if (player.getTeam() == null) { return; }
             String team = player.getTeam().getName();
+            // If the player is in a team we don't care about just skip them
+            if (!FACTIONS.contains(team)) { return; }
             teamCounts.put(team, teamCounts.get(team) + 1);
         });
         // Loop the hashmap and print out the team name and count
