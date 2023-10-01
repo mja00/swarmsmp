@@ -20,6 +20,7 @@
     "MixinChunkBorderRenderer",
     "MixinDownloadingTexture",
     "MixinGameRenderer",
+    "MixinMinecraft",
     "MixinPauseScreen",
     "MixinPlayerRenderer",
     "MixinSkinProcessor",
