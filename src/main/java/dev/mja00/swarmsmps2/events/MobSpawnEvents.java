@@ -66,6 +66,7 @@ public class MobSpawnEvents {
 
     @SubscribeEvent
     public static void frickSkeletonHorses(EntityJoinWorldEvent event) {
+        if (event.loadedFromDisk()) return;
         EntityType<?> entityType = event.getEntity().getType();
         if (EntityType.SKELETON_HORSE.equals(entityType)) {
             Entity entity = event.getEntity();
