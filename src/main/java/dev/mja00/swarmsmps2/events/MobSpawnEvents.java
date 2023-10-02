@@ -6,7 +6,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
@@ -25,10 +24,6 @@ import static dev.mja00.swarmsmps2.helpers.EntityHelpers.giveTeamAndCreateIfNeed
 public class MobSpawnEvents {
 
     static Logger LOGGER = SwarmsmpS2.LOGGER;
-    static List<MobSpawnType> VALID_SPAWN_REASONS = List.of(
-            MobSpawnType.SPAWN_EGG,
-            MobSpawnType.COMMAND
-    );
 
     @SubscribeEvent
     public static void setTeamOnMobSpawn(LivingSpawnEvent.SpecialSpawn event) {
@@ -66,6 +61,7 @@ public class MobSpawnEvents {
 
     @SubscribeEvent
     public static void frickSkeletonHorses(EntityJoinWorldEvent event) {
+        if (event.getWorld().isClientSide()) return;
         if (event.loadedFromDisk()) return;
         EntityType<?> entityType = event.getEntity().getType();
         if (EntityType.SKELETON_HORSE.equals(entityType)) {
