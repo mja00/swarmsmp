@@ -3,6 +3,7 @@ package dev.mja00.swarmsmps2.helpers;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.mja00.swarmsmps2.SSMPS2Config;
+import dev.mja00.swarmsmps2.SwarmsmpS2;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
@@ -137,5 +138,9 @@ public class EntityHelpers {
 
     public static void addParticlesAroundSelfServer(ParticleOptions particleOptions, ServerLevel level, Player player, int count) {
         addParticlesAroundSelfServer(particleOptions, level, player, count, 2);
+    }
+
+    public static boolean playerHasTag(CompoundTag persistentData, String tag) {
+        return persistentData.contains(SwarmsmpS2.MODID + ":" + tag);
     }
 }
