@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import dev.mja00.swarmsmps2.SSMPS2Config;
@@ -101,101 +102,119 @@ public class AdminCommand {
     }
 
     public AdminCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("admin")
-                .requires((command) -> command.hasPermission(2))
-                .then(Commands.literal("sao").then(Commands.argument("state", BoolArgumentType.bool())
-                        .executes((command) -> triggerSAOMode(command.getSource(), BoolArgumentType.getBool(command, "state")))
+        LiteralArgumentBuilder<CommandSourceStack> literalArgumentBuilder = Commands.literal("admin").requires((command) -> command.hasPermission(2));
+
+        literalArgumentBuilder.then(Commands.literal("sao").then(Commands.argument("state", BoolArgumentType.bool())
+                .executes((command) -> triggerSAOMode(command.getSource(), BoolArgumentType.getBool(command, "state")))
+                .then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> triggerSAOMode(command.getSource(), BoolArgumentType.getBool(command, "state"), EntityArgument.getPlayers(command, "player"))))));
+
+        literalArgumentBuilder.then(Commands.literal("set_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
+                        .executes((command) -> setTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))));
+
+        literalArgumentBuilder.then(Commands.literal("remove_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
+                        .executes((command) -> removeTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))));
+
+        literalArgumentBuilder.then(Commands.literal("check_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
+                        .executes((command) -> checkTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))));
+
+        literalArgumentBuilder.then(Commands.literal("start_duel").then(Commands.argument("first_player", EntityArgument.players()).then(Commands.argument("second_player", EntityArgument.players())
+                        .executes((command) -> startDuel(command.getSource(), EntityArgument.getPlayers(command, "first_player"), EntityArgument.getPlayers(command, "second_player"))))));
+
+        literalArgumentBuilder.then(Commands.literal("get_head").then(Commands.argument("target", EntityArgument.players())
+                        .executes((command) -> giveHeadOfPlayer(command.getSource(), EntityArgument.getPlayers(command, "target")))));
+
+        literalArgumentBuilder.then(Commands.literal("give_head").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("head_target", EntityArgument.players())
+                .executes(command -> giveHeadOfPlayerToPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"), EntityArgument.getPlayers(command, "head_target"))))));
+
+        literalArgumentBuilder.then(Commands.literal("end_duel").then(Commands.argument("player", EntityArgument.players())
+                .executes((command) -> endDuel(command.getSource(), EntityArgument.getPlayers(command, "player")))));
+
+        literalArgumentBuilder.then(Commands.literal("deaths")
+                .then(Commands.literal("get").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> getPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                .then(Commands.literal("set").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("count", IntegerArgumentType.integer())
+                        .executes((command) -> setPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "count"))))))
+                .then(Commands.literal("reset").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> resetPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player"))))));
+
+        literalArgumentBuilder.then(Commands.literal("factions")
+                .then(Commands.literal("spawn").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
+                        .executes((command) -> teleportToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction")))
                         .then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> triggerSAOMode(command.getSource(), BoolArgumentType.getBool(command, "state"), EntityArgument.getPlayers(command, "player"))))))
-                .then(Commands.literal("set_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
-                        .executes((command) -> setTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))))
-                .then(Commands.literal("remove_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
-                        .executes((command) -> removeTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))))
-                .then(Commands.literal("check_tag").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("tag", StringArgumentType.word())
-                        .executes((command) -> checkTag(command.getSource(), EntityArgument.getPlayers(command, "target"), StringArgumentType.getString(command, "tag"))))))
-                .then(Commands.literal("start_duel").then(Commands.argument("first_player", EntityArgument.players()).then(Commands.argument("second_player", EntityArgument.players())
-                        .executes((command) -> startDuel(command.getSource(), EntityArgument.getPlayers(command, "first_player"), EntityArgument.getPlayers(command, "second_player"))))))
-                .then(Commands.literal("get_head").then(Commands.argument("target", EntityArgument.players())
-                        .executes((command) -> giveHeadOfPlayer(command.getSource(), EntityArgument.getPlayers(command, "target")))))
-                .then(Commands.literal("give_head").then(Commands.argument("target", EntityArgument.players()).then(Commands.argument("head_target", EntityArgument.players())
-                        .executes(command -> giveHeadOfPlayerToPlayer(command.getSource(), EntityArgument.getPlayers(command, "target"), EntityArgument.getPlayers(command, "head_target"))))))
-                .then(Commands.literal("end_duel").then(Commands.argument("player", EntityArgument.players())
-                        .executes((command) -> endDuel(command.getSource(), EntityArgument.getPlayers(command, "player")))))
-                .then(Commands.literal("deaths")
-                        .then(Commands.literal("get").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> getPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player")))))
-                        .then(Commands.literal("set").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("count", IntegerArgumentType.integer())
-                                .executes((command) -> setPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "count"))))))
-                        .then(Commands.literal("reset").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> resetPlayerDeathCount(command.getSource(), EntityArgument.getPlayers(command, "player"))))))
-                .then(Commands.literal("factions")
-                        .then(Commands.literal("spawn").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
-                                .executes((command) -> teleportToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction")))
-                                .then(Commands.argument("player", EntityArgument.players())
-                                    .executes((command) -> teleportPlayersToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction"), EntityArgument.getPlayers(command, "player")))))))
-                .then(Commands.literal("items")
-                        .then(Commands.literal("get_tags")
-                                .executes((command) -> getTagsForItem(command.getSource()))))
-                .then(Commands.literal("log")
-                        .then(Commands.literal("mob").then(Commands.argument("mob", EntitySummonArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
-                                .executes((command) -> logMob(command.getSource(), EntitySummonArgument.getSummonableEntity(command, "mob"), 10, 0))))
-                        .then(Commands.literal("block").then(Commands.argument("location", Vec3Argument.vec3())
-                                    .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), 0, 10, 0))
-                                .then(Commands.argument("scale", IntegerArgumentType.integer(0, 10))
-                                    .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), 10, 0))
-                                    .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                .executes((command) -> teleportPlayersToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction"), EntityArgument.getPlayers(command, "player")))))));
+
+        literalArgumentBuilder.then(Commands.literal("items")
+                .then(Commands.literal("get_tags")
+                        .executes((command) -> getTagsForItem(command.getSource()))));
+
+        literalArgumentBuilder.then(Commands.literal("log")
+                .then(Commands.literal("mob").then(Commands.argument("mob", EntitySummonArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
+                        .executes((command) -> logMob(command.getSource(), EntitySummonArgument.getSummonableEntity(command, "mob"), 10, 0))))
+                .then(Commands.literal("block").then(Commands.argument("location", Vec3Argument.vec3())
+                        .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), 0, 10, 0))
+                        .then(Commands.argument("scale", IntegerArgumentType.integer(0, 10))
+                                .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), 10, 0))
+                                .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
                                         .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), 0))
                                         .then(Commands.argument("offset", IntegerArgumentType.integer())
-                                            .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))))
-                        .then(Commands.literal("death").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
-                                .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
-                                        .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), 0))
-                                        .then(Commands.argument("offset", IntegerArgumentType.integer())
-                                                .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset")))
-                                                .then(Commands.argument("id", IntegerArgumentType.integer())
-                                                        .executes((command) -> getSingleDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "id"))))))))
-                        .then(Commands.literal("player").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
-                                .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
-                                    .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), 0))
+                                                .executes((command) -> logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))))
+                .then(Commands.literal("death").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
+                        .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), 0))
                                 .then(Commands.argument("offset", IntegerArgumentType.integer())
-                                    .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))))
-                .then(Commands.literal("self")
-                        .then(Commands.literal("coords")
-                                .executes((command) -> getCoords(command.getSource())))
-                        .then(Commands.literal("biome")
-                                .executes((command) -> getBiome(command.getSource()))))
-                .then(Commands.literal("enchant").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("enchantment", ItemEnchantmentArgument.enchantment())
-                                .executes((command) -> enchantPlayerItem(command.getSource(), EntityArgument.getPlayers(command, "player"), ItemEnchantmentArgument.getEnchantment(command, "enchantment"), 1))
-                                .then(Commands.argument("level", IntegerArgumentType.integer())
-                                        .executes((command) -> enchantPlayerItem(command.getSource(), EntityArgument.getPlayers(command, "player"), ItemEnchantmentArgument.getEnchantment(command, "enchantment"), IntegerArgumentType.getInteger(command, "level")))))))
-                .then(Commands.literal("message")
-                        .then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("message", MessageArgument.message())
-                                .executes((command) -> sendMessageToPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), MessageArgument.getMessage(command, "message"))))))
-                .then(Commands.literal("players")
-                        .then(Commands.literal("get_effects").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> getPlayerEffects(command.getSource(), EntityArgument.getPlayers(command, "player")))))
-                        .then(Commands.literal("get_team").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> getPlayerTeam(command.getSource(), EntityArgument.getPlayers(command, "player")))))
-                        .then(Commands.literal("get_health").then(Commands.argument("player", EntityArgument.players())
-                                .executes((command) -> getPlayerHealth(command.getSource(), EntityArgument.getPlayers(command, "player")))))
-                        .then(Commands.literal("set_health").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("health", IntegerArgumentType.integer())
-                                .executes((command) -> setPlayerHealth(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "health")))))))
-                .then(Commands.literal("config")
-                        .then(Commands.literal("edit")
-                                .then(Commands.literal("bypass")
-                                        .then(Commands.literal("add").then(Commands.argument("uuid", StringArgumentType.word())
-                                                .executes((command) -> addUUIDToBypass(command.getSource(), StringArgumentType.getString(command, "uuid")))))
-                                        .then(Commands.literal("remove").then(Commands.argument("uuid", StringArgumentType.word())
-                                                .executes((command) -> removeUUIDFromBypass(command.getSource(), StringArgumentType.getString(command, "uuid"))))))
-                                .then(Commands.literal("spawnpoint")
-                                        .then(Commands.literal("set").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS).then(Commands.argument("location", Vec3Argument.vec3())
-                                                .executes((command) -> setFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction"), Vec3Argument.getCoordinates(command, "location"))))))
-                                        .then(Commands.literal("get").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
-                                                .executes((command) -> getFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction")))))))
-                        .then(Commands.literal("reload")
-                                .executes((command) -> reloadConfigFile(command.getSource())))));
+                                        .executes((command) -> logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset")))
+                                        .then(Commands.argument("id", IntegerArgumentType.integer())
+                                                .executes((command) -> getSingleDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "id"))))))))
+                .then(Commands.literal("player").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
+                        .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), 0))
+                                .then(Commands.argument("offset", IntegerArgumentType.integer())
+                                        .executes((command) -> logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))));
+
+        literalArgumentBuilder.then(Commands.literal("self")
+                .then(Commands.literal("coords")
+                        .executes((command) -> getCoords(command.getSource())))
+                .then(Commands.literal("biome")
+                        .executes((command) -> getBiome(command.getSource()))));
+
+        literalArgumentBuilder.then(Commands.literal("enchant").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("enchantment", ItemEnchantmentArgument.enchantment())
+                .executes((command) -> enchantPlayerItem(command.getSource(), EntityArgument.getPlayers(command, "player"), ItemEnchantmentArgument.getEnchantment(command, "enchantment"), 1))
+                .then(Commands.argument("level", IntegerArgumentType.integer())
+                        .executes((command) -> enchantPlayerItem(command.getSource(), EntityArgument.getPlayers(command, "player"), ItemEnchantmentArgument.getEnchantment(command, "enchantment"), IntegerArgumentType.getInteger(command, "level")))))));
+
+        literalArgumentBuilder.then(Commands.literal("message")
+                .then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("message", MessageArgument.message())
+                        .executes((command) -> sendMessageToPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), MessageArgument.getMessage(command, "message"))))));
+
+        literalArgumentBuilder.then(Commands.literal("players")
+                .then(Commands.literal("get_effects").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> getPlayerEffects(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                .then(Commands.literal("get_team").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> getPlayerTeam(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                .then(Commands.literal("get_health").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> getPlayerHealth(command.getSource(), EntityArgument.getPlayers(command, "player")))))
+                .then(Commands.literal("set_health").then(Commands.argument("player", EntityArgument.players()).then(Commands.argument("health", IntegerArgumentType.integer())
+                        .executes((command) -> setPlayerHealth(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "health")))))));
+
+        literalArgumentBuilder.then(Commands.literal("config")
+                .then(Commands.literal("edit")
+                        .then(Commands.literal("bypass")
+                                .then(Commands.literal("add").then(Commands.argument("uuid", StringArgumentType.word())
+                                        .executes((command) -> addUUIDToBypass(command.getSource(), StringArgumentType.getString(command, "uuid")))))
+                                .then(Commands.literal("remove").then(Commands.argument("uuid", StringArgumentType.word())
+                                        .executes((command) -> removeUUIDFromBypass(command.getSource(), StringArgumentType.getString(command, "uuid"))))))
+                        .then(Commands.literal("spawnpoint")
+                                .then(Commands.literal("set").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS).then(Commands.argument("location", Vec3Argument.vec3())
+                                        .executes((command) -> setFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction"), Vec3Argument.getCoordinates(command, "location"))))))
+                                .then(Commands.literal("get").then(Commands.argument("faction", StringArgumentType.word()).suggests(FACTION_SUGGESTIONS)
+                                        .executes((command) -> getFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction")))))))
+                .then(Commands.literal("reload")
+                        .executes((command) -> reloadConfigFile(command.getSource()))));
+
+        dispatcher.register(literalArgumentBuilder);
     }
 
     private int enchantPlayerItem(CommandSourceStack source, Collection<ServerPlayer> targets, Enchantment pEnchantment, int level) {
