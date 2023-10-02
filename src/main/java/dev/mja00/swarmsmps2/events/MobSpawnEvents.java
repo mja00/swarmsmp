@@ -65,40 +65,6 @@ public class MobSpawnEvents {
     }
 
     @SubscribeEvent
-    public static void onSkeletonHorseSpawn(LivingSpawnEvent.SpecialSpawn event) {
-        EntityType<?> entityType = event.getEntityLiving().getType();
-        if (EntityType.SKELETON_HORSE.equals(entityType)) {
-            if (!VALID_SPAWN_REASONS.contains(event.getSpawnReason())) {
-                LOGGER.info("Skeleton horse was not spawned by a valid reason, cancelling spawn. Reason: " + event.getSpawnReason().toString());
-                event.setCanceled(true);
-            } else {
-                LOGGER.info("Skeleton horse spawned! It spawned at X:" + event.getX() + " Y:" + event.getY() + " Z:" + event.getZ() + " with reason " + event.getSpawnReason().toString());
-            }
-        }
-    }
-
-    @SubscribeEvent
-    public static void onLivingSpawn(LivingSpawnEvent.CheckSpawn event) {
-        if (!shouldSpawn(event)) {
-            event.setCanceled(true);
-        }
-    }
-
-    private static boolean shouldSpawn(LivingSpawnEvent.CheckSpawn event) {
-        EntityType<?> entityType = event.getEntityLiving().getType();
-        if (EntityType.SKELETON_HORSE.equals(entityType)) {
-            if (!VALID_SPAWN_REASONS.contains(event.getSpawnReason())) {
-                LOGGER.info("Skeleton horse was not spawned by a valid reason, cancelling spawn. Reason: " + event.getSpawnReason().toString());
-                return false;
-            } else {
-                LOGGER.info("Skeleton horse spawned! It spawned at X:" + event.getX() + " Y:" + event.getY() + " Z:" + event.getZ() + " with reason " + event.getSpawnReason().toString());
-                return true;
-            }
-        }
-        return true;
-    }
-
-    @SubscribeEvent
     public static void frickSkeletonHorses(EntityJoinWorldEvent event) {
         EntityType<?> entityType = event.getEntity().getType();
         if (EntityType.SKELETON_HORSE.equals(entityType)) {
