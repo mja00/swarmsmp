@@ -36,7 +36,7 @@ public abstract class MixinMinecraft extends ReentrantBlockableEventLoop<Runnabl
         this.options = options;
     }
 
-    @Inject(method = "handleKeybinds", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "handleKeybinds", at = @At("HEAD"))
     private void handleKeybinds(CallbackInfo ci) {
         // Setup a keybind listener for the specator highlight key
         while (this.options.keySpectatorOutlines.consumeClick()) {
@@ -45,8 +45,10 @@ public abstract class MixinMinecraft extends ReentrantBlockableEventLoop<Runnabl
         }
     }
 
-    @Inject(method = "shouldEntityAppearGlowing", at = @At("HEAD"), cancellable = true)
-private void shouldEntityAppearGlowing(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(pEntity.isCurrentlyGlowing() || this.player != null && this.player.isSpectator() && this.swarmsmp_s2$isSpectatorHighlightEnabled && pEntity.getType() == EntityType.PLAYER);
+    @Inject(method = "shouldEntityAppearGlowing", at = @At("RETURN"), cancellable = true)
+    private void shouldEntityAppearGlowing(Entity pEntity, CallbackInfoReturnable<Boolean> cir) {
+            if (!cir.getReturnValue()) {
+                cir.setReturnValue(pEntity.isCurrentlyGlowing() || this.player != null && this.player.isSpectator() && this.swarmsmp_s2$isSpectatorHighlightEnabled && pEntity.getType() == EntityType.PLAYER);
+            }
     }
 }
