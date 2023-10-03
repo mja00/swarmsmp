@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "swarmsmps2:item/mug/glass_mug_overlay",
+    "layer1": "swarmsmps2:item/mug/glass_mug"
+  }
+}

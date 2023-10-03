@@ -205,5 +205,26 @@
   "swarmsmps2.commands.ssmpmod.fey.failed_to_write_to_file": "Failed to write to file. Error: %1$s",
   "swarmsmps2.commands.ssmpmod.fey.failed_to_get_fey": "Failed to get fey.",
   "swarmsmps2.commands.ssmpmod.fey.return.success": "You've returned to your mortal form.",
-  "swarmsmps2.commands.ssmpmod.fey.failed_to_remove_from_file": "Failed to remove from file. DO NOT BECOME A FEY AGAIN TILL MJA00 GIVES YOU THE CLEAR!!!!!!! Error: %1$s"
+  "swarmsmps2.commands.ssmpmod.fey.failed_to_remove_from_file": "Failed to remove from file. DO NOT BECOME A FEY AGAIN TILL MJA00 GIVES YOU THE CLEAR!!!!!!! Error: %1$s",
+
+  "item.swarmsmps2.mug.effect.absorption": "Mug of Absorption",
+  "item.swarmsmps2.mug.effect.water": "Mug of Water",
+  "item.swarmsmps2.mug.effect.mundane": "Mundane Beer",
+  "item.swarmsmps2.mug.effect.thick": "Thick Beer",
+  "item.swarmsmps2.mug.effect.awkward": "Awkward Beer",
+  "item.swarmsmps2.mug.effect.night_vision": "Mug of Night Vision",
+  "item.swarmsmps2.mug.effect.invisibility": "Mug of Invisibility",
+  "item.swarmsmps2.mug.effect.jump_boost": "Mug of Jump Boost",
+  "item.swarmsmps2.mug.effect.fire_resistance": "Mug of Fireball",
+  "item.swarmsmps2.mug.effect.speed": "Mug of Speed",
+  "item.swarmsmps2.mug.effect.slowness": "Mug of Slowness",
+  "item.swarmsmps2.mug.effect.water_breathing": "Mug of Water Breathing",
+  "item.swarmsmps2.mug.effect.instant_health": "Mug of Instant Health",
+  "item.swarmsmps2.mug.effect.instant_damage": "Mug of Instant Damage",
+  "item.swarmsmps2.mug.effect.poison": "Mug of Poison",
+  "item.swarmsmps2.mug.effect.regeneration": "Mug of Regeneration",
+  "item.swarmsmps2.mug.effect.strength": "Mug of Strength",
+  "item.swarmsmps2.mug.effect.weakness": "Mug of Weakness",
+  "item.swarmsmps2.mug.effect.luck": "Mug of Luck",
+  "item.swarmsmps2.mug.effect.slow_falling": "Mug of Slow Falling"
 }

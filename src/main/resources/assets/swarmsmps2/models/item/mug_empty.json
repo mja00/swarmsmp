@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "swarmsmps2:item/mug/empty_glass_mug"
+  }
+}

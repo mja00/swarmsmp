@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,6 +33,11 @@ public class ModEventClientBusEvents {
 
         ItemProperties.register(ModItems.MAIL.get(), new ResourceLocation(SwarmsmpS2.MODID, "mail"),
                 (stack, world, entity, s) -> MailItem.getItemTextureIndex(stack));
+
+        // Register our custom item color handler
+        Minecraft.getInstance().getItemColors().register((stack, tintIndex) -> {
+            return tintIndex > 0 ? -1 : PotionUtils.getColor(stack);
+        }, ModItems.MUG.get());
     }
 
     public static void registerItemProperty(Item item, ResourceLocation name, ClampedItemPropertyFunction property) {
