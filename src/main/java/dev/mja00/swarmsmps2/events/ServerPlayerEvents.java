@@ -26,6 +26,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.entity.player.PlayerSetSpawnEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -306,5 +307,10 @@ public class ServerPlayerEvents {
         if (blockName.equals("minecraft:moss_block")) {
             event.setCanceled(true);
         }
+    }
+
+    @SubscribeEvent
+    public static void playerSpawnSetEvent(PlayerSetSpawnEvent event) {
+        event.setCanceled(true);
     }
 }
