@@ -14,7 +14,8 @@
     "MixinServerGamePacketListenerImpl",
     "MixinSkeletonHorse",
     "MixinStringUtil",
-    "MixinThrownEgg"
+    "MixinThrownEgg",
+    "MixinZombieHorse"
   ],
   "client": [
     "MixinChunkBorderRenderer",
