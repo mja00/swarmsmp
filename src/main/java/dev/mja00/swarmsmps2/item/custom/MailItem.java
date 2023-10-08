@@ -73,9 +73,10 @@ public class MailItem extends Item {
                     EntityHelpers.addParticlesAroundSelfInCuboidServer(particleOptions, serverLevel, pPlayer, 10000, 3, 5);
                 }
                 pLevel.playSound(pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), ModSoundEvent.PARTY_HORN.get(), SoundSource.PLAYERS, 1.0F, 0.4F / (pLevel.getRandom().nextFloat() * 0.4F + 0.8F));
+            } else {
+                // Give the item to the player
+                ItemHandlerHelper.giveItemToPlayer(pPlayer, itemStack);
             }
-            // Give the item to the player
-            ItemHandlerHelper.giveItemToPlayer(pPlayer, itemStack);
             // Clear the item from the envelope's NBT, this'll let them stack
             tags.remove("swarmsmps2.item");
             tags.remove("swarmsmps2.sender");
