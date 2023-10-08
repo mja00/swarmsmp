@@ -14,7 +14,6 @@ import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import dev.mja00.swarmsmps2.helpers.EntityHelpers;
 import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
 import dev.mja00.swarmsmps2.network.packets.SaoModePacket;
-import dev.mja00.swarmsmps2.network.packets.ToastPacket;
 import dev.mja00.swarmsmps2.objects.BlockEventObject;
 import dev.mja00.swarmsmps2.objects.DeathEventObject;
 import dev.mja00.swarmsmps2.objects.MobKillObject;
@@ -215,10 +214,6 @@ public class AdminCommand {
                 .then(Commands.literal("reload")
                         .executes((command) -> reloadConfigFile(command.getSource()))));
 
-        literalArgumentBuilder.then(Commands.literal("toast")
-                .then(Commands.argument("title", StringArgumentType.word()).then(Commands.argument("message", MessageArgument.message())
-                        .executes((command) -> sendToast(command.getSource(), StringArgumentType.getString(command, "title"), MessageArgument.getMessage(command, "message"))))));
-
         dispatcher.register(literalArgumentBuilder);
     }
 
@@ -235,7 +230,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int logPlayer(CommandSourceStack source, Collection<ServerPlayer> targets, int limit, int offset) {
+    public static int logPlayer(CommandSourceStack source, Collection<ServerPlayer> targets, int limit, int offset) {
         if (offset < 0) {
             offset = 0;
         }
@@ -289,7 +284,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int logMob(CommandSourceStack source, ResourceLocation mob, int limit, int offset) {
+    public static int logMob(CommandSourceStack source, ResourceLocation mob, int limit, int offset) {
         if (offset < 0) {
             offset = 0;
         }
@@ -331,7 +326,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int logBlock(CommandSourceStack source, Coordinates pPosition, int scale, int limit, int offset) {
+    public static int logBlock(CommandSourceStack source, Coordinates pPosition, int scale, int limit, int offset) {
         // We want to do a scan around the position given to us, our easiest is if we have no scale, then it's just the position
         // If we have a scale, we'll want to scan around the position
         Vec3 vec3 = pPosition.getPosition(source);
@@ -386,7 +381,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int logDeath(CommandSourceStack source, Collection<ServerPlayer> targets, int limit, int offset) {
+    public static int logDeath(CommandSourceStack source, Collection<ServerPlayer> targets, int limit, int offset) {
         if (offset < 0) {
             offset = 0;
         }
@@ -451,7 +446,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int getSingleDeath(CommandSourceStack source, Collection<ServerPlayer> targets, int deathId) throws CommandSyntaxException {
+    public static int getSingleDeath(CommandSourceStack source, Collection<ServerPlayer> targets, int deathId) throws CommandSyntaxException {
         // We basically wanna open a gui for the player to see the items for this death
         if (targets.size() != 1) {
             source.sendFailure(new TranslatableComponent(translationKey + "commands.players.too_many"));
@@ -483,7 +478,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private BlockPos[] getBlockPositionsAround(BlockPos bPos, int scale) {
+    private static BlockPos[] getBlockPositionsAround(BlockPos bPos, int scale) {
         // We need to get blocks around the position given to us, the scale is the radius of the cube we want to get
         // bPos is the center of our cube, so we need to get the blocks around it
         // We'll start with the bottom left corner, then go to the top right corner
@@ -950,7 +945,7 @@ public class AdminCommand {
         return 1;
     }
 
-    private int teleportToFactionSpawn(CommandSourceStack source, String faction) throws CommandSyntaxException {
+    public static int teleportToFactionSpawn(CommandSourceStack source, String faction) throws CommandSyntaxException {
         // Check if the faction is in the valid list
         if (!FACTIONS.contains(faction)) {
             source.sendFailure(new TranslatableComponent(translationKey + "commands.admin.teleport_to_spawn.error.invalid_faction", faction));
@@ -1005,13 +1000,6 @@ public class AdminCommand {
         SaoModePacket packet = new SaoModePacket(state);
         SwarmSMPPacketHandler.SAO_MODE_CHANNEL.send(PacketDistributor.PLAYER.with(() -> players.iterator().next()), packet);
         source.sendSuccess(new TextComponent("Link start!"), true);
-        return 1;
-    }
-
-    private int sendToast(CommandSourceStack source, String title, Component message) {
-        ToastPacket packet = new ToastPacket(message, title);
-        SwarmSMPPacketHandler.TOAST_CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
-        source.sendSuccess(new TextComponent("Toast sent!"), true);
         return 1;
     }
 }

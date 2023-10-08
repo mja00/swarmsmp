@@ -1,6 +1,8 @@
 package dev.mja00.swarmsmps2.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -13,6 +15,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.EntitySummonArgument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -48,7 +53,7 @@ public class ModCommand {
             if (gametype.isCreative()) {
                 continue;
             }
-            literalArgumentBuilder.then(Commands.literal(gametype.getName()).executes((command) -> changeGamemode(command.getSource(), gametype)));
+            literalArgumentBuilder.then(Commands.literal("gamemode").then(Commands.literal(gametype.getName()).executes((command) -> changeGamemode(command.getSource(), gametype))));
         }
 
         literalArgumentBuilder.then(Commands.literal("tp").then(Commands.argument("player", EntityArgument.player())
@@ -58,6 +63,36 @@ public class ModCommand {
 
         literalArgumentBuilder.then(Commands.literal("fey").then(Commands.literal("on").executes((command) -> becomeFey(command.getSource())))
                 .then(Commands.literal("off").executes((command) -> leaveFey(command.getSource()))));
+
+        literalArgumentBuilder.then(Commands.literal("factions")
+                .then(Commands.literal("spawn").then(Commands.argument("faction", StringArgumentType.word()).suggests(AdminCommand.FACTION_SUGGESTIONS)
+                        .executes((command) -> AdminCommand.teleportToFactionSpawn(command.getSource(), StringArgumentType.getString(command, "faction"))))));
+
+        literalArgumentBuilder.then(Commands.literal("log")
+                .then(Commands.literal("mob").then(Commands.argument("mob", EntitySummonArgument.id()).suggests(SuggestionProviders.SUMMONABLE_ENTITIES)
+                        .executes((command) -> AdminCommand.logMob(command.getSource(), EntitySummonArgument.getSummonableEntity(command, "mob"), 10, 0))))
+                .then(Commands.literal("block").then(Commands.argument("location", Vec3Argument.vec3())
+                        .executes((command) -> AdminCommand.logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), 0, 10, 0))
+                        .then(Commands.argument("scale", IntegerArgumentType.integer(0, 10))
+                                .executes((command) -> AdminCommand.logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), 10, 0))
+                                .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                        .executes((command) -> AdminCommand.logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), 0))
+                                        .then(Commands.argument("offset", IntegerArgumentType.integer())
+                                                .executes((command) -> AdminCommand.logBlock(command.getSource(), Vec3Argument.getCoordinates(command, "location"), IntegerArgumentType.getInteger(command, "scale"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))))
+                .then(Commands.literal("death").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> AdminCommand.logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
+                        .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                .executes((command) -> AdminCommand.logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), 0))
+                                .then(Commands.argument("offset", IntegerArgumentType.integer())
+                                        .executes((command) -> AdminCommand.logDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset")))
+                                        .then(Commands.argument("id", IntegerArgumentType.integer())
+                                                .executes((command) -> AdminCommand.getSingleDeath(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "id"))))))))
+                .then(Commands.literal("player").then(Commands.argument("player", EntityArgument.players())
+                        .executes((command) -> AdminCommand.logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), 10, 0))
+                        .then(Commands.argument("limit", IntegerArgumentType.integer(1, 20))
+                                .executes((command) -> AdminCommand.logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), 0))
+                                .then(Commands.argument("offset", IntegerArgumentType.integer())
+                                        .executes((command) -> AdminCommand.logPlayer(command.getSource(), EntityArgument.getPlayers(command, "player"), IntegerArgumentType.getInteger(command, "limit"), IntegerArgumentType.getInteger(command, "offset"))))))));
 
         dispatcher.register(literalArgumentBuilder);
     }
