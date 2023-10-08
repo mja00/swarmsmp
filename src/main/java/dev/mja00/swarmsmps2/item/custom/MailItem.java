@@ -1,7 +1,14 @@
 package dev.mja00.swarmsmps2.item.custom;
 
+import com.mojang.math.Vector3f;
+import dev.mja00.swarmsmps2.helpers.EntityHelpers;
+import dev.mja00.swarmsmps2.item.ModItems;
+import dev.mja00.swarmsmps2.sounds.ModSoundEvent;
+import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -58,6 +65,15 @@ public class MailItem extends Item {
             CompoundTag item = tags.getCompound("swarmsmps2.item");
             // Create an itemstack from the NBT
             ItemStack itemStack = ItemStack.of(item);
+            if (itemStack.getItem().equals(ModItems.GLITTER.get())) {
+                // We'll run our glitter bomb code here
+                if (!pLevel.isClientSide()) {
+                    ServerLevel serverLevel = (ServerLevel) pLevel;
+                    DustParticleOptions particleOptions = new DustParticleOptions(new Vector3f(255, 0, 255), 1f);
+                    EntityHelpers.addParticlesAroundSelfInCuboidServer(particleOptions, serverLevel, pPlayer, 10000, 3, 5);
+                }
+                pLevel.playSound(pPlayer, pPlayer.getX(), pPlayer.getY(), pPlayer.getZ(), ModSoundEvent.PARTY_HORN.get(), SoundSource.PLAYERS, 1.0F, 0.4F / (pLevel.getRandom().nextFloat() * 0.4F + 0.8F));
+            }
             // Give the item to the player
             ItemHandlerHelper.giveItemToPlayer(pPlayer, itemStack);
             // Clear the item from the envelope's NBT, this'll let them stack

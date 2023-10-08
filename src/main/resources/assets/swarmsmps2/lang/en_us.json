@@ -175,6 +175,8 @@
   "item.swarmsmps2.flower_crown": "Flower Crown",
   "item.swarmsmps2.azalea_flower": "Azalea Flower",
   "item.swarmsmps2.mail": "Envelope",
+  "item.swarmsmps2.glitter": "Glitter",
+  "item.swarmsmps2.fae_poof": "Fey",
 
   "swarmsmps2.message.item.sending_stone": "The stones glow a faint blue glint.",
   "swarmsmps2.message.item.sending_stone.cooldown": "The stones glow a faint red glint. Slowly fading back to blue after a moment.",

@@ -1,5 +1,8 @@
 {
   "link_start": {
     "sounds": [ "swarmsmps2:link_start" ]
+  },
+  "party_horn": {
+    "sounds": [ "swarmsmps2:party_horn" ]
   }
 }

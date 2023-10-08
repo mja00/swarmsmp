@@ -143,4 +143,14 @@ public class EntityHelpers {
     public static boolean playerHasTag(CompoundTag persistentData, String tag) {
         return persistentData.contains(SwarmsmpS2.MODID + ":" + tag);
     }
+
+    public static void addParticlesAroundSelfInCuboidServer(ParticleOptions particleOptions, ServerLevel level, Player player, int count, int verticalOffset, int horizontalOffset) {
+        for (int i = 0; i < count; ++i) {
+            double d0 = level.getRandom().nextGaussian() * 1.2D;
+            double d1 = level.getRandom().nextGaussian() * 1.2D;
+            double d2 = level.getRandom().nextGaussian() * 1.2D;
+            double randomY = level.getRandom().nextInt(verticalOffset) + player.getY();
+            level.sendParticles(particleOptions, player.getRandomX(1), randomY, player.getRandomZ(1), 1, d0, d1, d2, 0.0D);
+        }
+    }
 }

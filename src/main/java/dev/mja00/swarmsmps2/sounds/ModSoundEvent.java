@@ -16,6 +16,9 @@ public class ModSoundEvent {
     public static final RegistryObject<SoundEvent> LINK_START =
             registerSoundEvent("link_start");
 
+    public static final RegistryObject<SoundEvent> PARTY_HORN =
+            registerSoundEvent("party_horn");
+
     private static RegistryObject<SoundEvent> registerSoundEvent(String name) {
         return SOUND_EVENTS.register(name, () -> new SoundEvent(new ResourceLocation(SwarmsmpS2.MODID, name)));
     }
