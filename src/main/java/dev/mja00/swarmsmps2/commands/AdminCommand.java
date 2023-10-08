@@ -14,6 +14,7 @@ import dev.mja00.swarmsmps2.helpers.DuelHelper;
 import dev.mja00.swarmsmps2.helpers.EntityHelpers;
 import dev.mja00.swarmsmps2.network.SwarmSMPPacketHandler;
 import dev.mja00.swarmsmps2.network.packets.SaoModePacket;
+import dev.mja00.swarmsmps2.network.packets.ToastPacket;
 import dev.mja00.swarmsmps2.objects.BlockEventObject;
 import dev.mja00.swarmsmps2.objects.DeathEventObject;
 import dev.mja00.swarmsmps2.objects.MobKillObject;
@@ -213,6 +214,10 @@ public class AdminCommand {
                                         .executes((command) -> getFactionSpawnpoint(command.getSource(), StringArgumentType.getString(command, "faction")))))))
                 .then(Commands.literal("reload")
                         .executes((command) -> reloadConfigFile(command.getSource()))));
+
+        literalArgumentBuilder.then(Commands.literal("toast")
+                .then(Commands.argument("title", StringArgumentType.word()).then(Commands.argument("message", MessageArgument.message())
+                        .executes((command) -> sendToast(command.getSource(), StringArgumentType.getString(command, "title"), MessageArgument.getMessage(command, "message"))))));
 
         dispatcher.register(literalArgumentBuilder);
     }
@@ -1000,6 +1005,13 @@ public class AdminCommand {
         SaoModePacket packet = new SaoModePacket(state);
         SwarmSMPPacketHandler.SAO_MODE_CHANNEL.send(PacketDistributor.PLAYER.with(() -> players.iterator().next()), packet);
         source.sendSuccess(new TextComponent("Link start!"), true);
+        return 1;
+    }
+
+    private int sendToast(CommandSourceStack source, String title, Component message) {
+        ToastPacket packet = new ToastPacket(message, title);
+        SwarmSMPPacketHandler.TOAST_CHANNEL.send(PacketDistributor.ALL.noArg(), packet);
+        source.sendSuccess(new TextComponent("Toast sent!"), true);
         return 1;
     }
 }
